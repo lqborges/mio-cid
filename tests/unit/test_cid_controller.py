@@ -62,6 +62,15 @@ class TestCidController(unittest.TestCase):
         self.assertNotIn("i-frame", source.lower())
         self.assertNotIn("estus", source.lower())
 
+    def test_click_move_raycast_is_deferred_to_physics(self) -> None:
+        source = _read("game/actors/player/cid_controller.gd")
+        start = source.index("func _unhandled_input")
+        end = source.index("\nfunc ", start + 1)
+        unhandled = source[start:end]
+        self.assertIn("_queued_click_pos", unhandled)
+        self.assertNotIn("_ground_point_from_mouse", unhandled)
+        self.assertIn("func _resolve_queued_click", source)
+
     def test_combat_stub_has_kit_slots(self) -> None:
         source = _read("game/actors/player/cid_combat.gd")
         self.assertRegex(source, re.compile(r"^class_name CidCombat", re.MULTILINE))

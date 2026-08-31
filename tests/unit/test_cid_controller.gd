@@ -2,12 +2,15 @@ extends SceneTree
 ## Headless isometric controller smoke test (gdUnit4 is still a placeholder).
 ## Run: godot --headless --path . -s res://tests/unit/test_cid_controller.gd
 
+var _failures: PackedStringArray = []
+var _leap_cid: CharacterBody3D = null
+var _leap_queued: bool = false
+
 
 func _initialize() -> void:
-	var failures: PackedStringArray = []
-	failures.append_array(_check_cid_scene())
-	failures.append_array(_check_arena_scene())
-	_finish(failures)
+	_failures.append_array(_check_cid_scene())
+	_failures.append_array(_check_arena_scene())
+	call_deferred("_begin_leap_tick")
 
 
 func _check_cid_scene() -> PackedStringArray:
@@ -64,6 +67,57 @@ func _check_arena_scene() -> PackedStringArray:
 	if boxes.size() < 4:
 		failures.append("arena greybox missing floor/boxes")
 	arena.free()
+	return failures
+
+
+func _begin_leap_tick() -> void:
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		_failures.append("leap tick: cid.tscn failed to load")
+		_finish(_failures)
+		return
+	_leap_cid = (packed as PackedScene).instantiate() as CharacterBody3D
+	if _leap_cid == null:
+		_failures.append("leap tick: Cid root is not CharacterBody3D")
+		_finish(_failures)
+		return
+	get_root().add_child(_leap_cid)
+	physics_frame.connect(_on_leap_physics_frame)
+
+
+func _on_leap_physics_frame() -> void:
+	if _leap_cid == null or not _leap_cid.is_inside_tree():
+		return
+	if not _leap_queued:
+		# Zero stick: do not press move. Leap XZ must follow facing for this tick.
+		_leap_cid.set("_queued_leap", true)
+		_leap_queued = true
+		return
+	physics_frame.disconnect(_on_leap_physics_frame)
+	_failures.append_array(_assert_leap_xz(_leap_cid))
+	_leap_cid.free()
+	_leap_cid = null
+	_finish(_failures)
+
+
+func _assert_leap_xz(cid: CharacterBody3D) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var facing: Vector3 = cid.call("facing_dir")
+	facing.y = 0.0
+	var combat: Node = cid.get_node_or_null("CidCombat")
+	var leap_speed: float = 8.0
+	if combat != null:
+		leap_speed = float(combat.get("leap_speed"))
+	if facing.length_squared() < 0.0001:
+		failures.append("leap tick: facing xz is zero")
+	else:
+		facing = facing.normalized()
+		var expected := Vector3(facing.x, 0.0, facing.z) * leap_speed
+		var got := Vector3(cid.velocity.x, 0.0, cid.velocity.z)
+		if got.distance_to(expected) > 0.05:
+			failures.append("leap tick: velocity.xz %s != facing * leap_speed %s" % [got, expected])
+	if cid.velocity.y <= 0.1:
+		failures.append("leap tick: expected hop Y, got %s" % cid.velocity.y)
 	return failures
 
 

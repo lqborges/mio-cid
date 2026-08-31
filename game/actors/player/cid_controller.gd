@@ -27,6 +27,7 @@ const CidCombatScript := preload("res://game/actors/player/cid_combat.gd")
 
 var _facing: Vector3 = Vector3(0.0, 0.0, -1.0)
 var _click_target: Variant = null
+var _queued_click_pos: Variant = null
 var _dodge_dir: Vector3 = Vector3.ZERO
 var _dodge_left: float = 0.0
 var _dodge_cd: float = 0.0
@@ -39,6 +40,7 @@ var _queued_leap: bool = false
 var _queued_shout: bool = false
 var _queued_swap: bool = false
 var _queued_interact: bool = false
+var _leap_airborne: bool = false
 
 
 func _ready() -> void:
@@ -78,7 +80,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_queued_interact = true
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("click_move"):
-		_click_target = _ground_point_from_mouse()
+		_queued_click_pos = get_viewport().get_mouse_position()
 		get_viewport().set_input_as_handled()
 
 
@@ -87,32 +89,46 @@ func _physics_process(delta: float) -> void:
 	rotation = Vector3.ZERO
 	_tick_cooldowns(delta)
 	_apply_gravity(delta)
+	_resolve_queued_click()
 	var wish := _movement_wish()
 	_update_facing(wish)
 	if _dodge_left > 0.0:
-		_dodge_left = maxf(_dodge_left - delta, 0.0)
-		velocity.x = _dodge_dir.x * dodge_speed
-		velocity.z = _dodge_dir.z * dodge_speed
+		_apply_dodge_xz(delta)
 		_queued_dodge = false
 		_queued_slam = false
 		_queued_leap = false
 	else:
 		_consume_queues(wish)
-		var speed := run_speed if Input.is_action_pressed("run") else walk_speed
-		if wish.length_squared() > 0.0001:
-			velocity.x = wish.x * speed
-			velocity.z = wish.z * speed
-		else:
+		# Dodge/leap/slam own XZ this step — walk/run would clobber them.
+		if _dodge_left > 0.0:
+			_apply_dodge_xz(delta)
+		elif _leap_airborne:
+			pass
+		elif _slam_cd > 0.0:
 			velocity.x = 0.0
 			velocity.z = 0.0
+		else:
+			var speed := run_speed if Input.is_action_pressed("run") else walk_speed
+			if wish.length_squared() > 0.0001:
+				velocity.x = wish.x * speed
+				velocity.z = wish.z * speed
+			else:
+				velocity.x = 0.0
+				velocity.z = 0.0
 	_orient_visual()
 	move_and_slide()
+	if _leap_airborne and is_on_floor() and velocity.y <= 0.0:
+		_leap_airborne = false
 
 
 func _consume_queues(wish: Vector3) -> void:
 	if _queued_dodge and _dodge_cd <= 0.0:
 		_start_dodge(wish)
 	_queued_dodge = false
+	# Dodge owns the step it starts on; slam/leap must not mutate velocity too.
+	if _dodge_left > 0.0:
+		_queued_slam = false
+		_queued_leap = false
 	if combat == null:
 		_queued_slam = false
 		_queued_leap = false
@@ -122,9 +138,11 @@ func _consume_queues(wish: Vector3) -> void:
 		if _queued_slam and _slam_cd <= 0.0:
 			combat.slam()
 			_slam_cd = slam_cooldown
+			_leap_airborne = false
 		if _queued_leap and _leap_cd <= 0.0:
 			combat.leap()
 			_leap_cd = leap_cooldown
+			_leap_airborne = true
 		if _queued_shout and _shout_cd <= 0.0:
 			combat.shout()
 			_shout_cd = shout_cooldown
@@ -151,7 +169,21 @@ func _start_dodge(wish: Vector3) -> void:
 	_dodge_left = dodge_duration
 	_dodge_cd = dodge_cooldown
 	_click_target = null
+	_leap_airborne = false
 	_facing = _dodge_dir
+
+
+func _apply_dodge_xz(delta: float) -> void:
+	_dodge_left = maxf(_dodge_left - delta, 0.0)
+	velocity.x = _dodge_dir.x * dodge_speed
+	velocity.z = _dodge_dir.z * dodge_speed
+
+
+func _resolve_queued_click() -> void:
+	if _queued_click_pos == null:
+		return
+	_click_target = _ground_point_from_mouse(_queued_click_pos)
+	_queued_click_pos = null
 
 
 func _movement_wish() -> Vector3:
@@ -223,11 +255,11 @@ func _camera_aligned(stick: Vector2) -> Vector3:
 	return wish.normalized()
 
 
-func _ground_point_from_mouse() -> Vector3:
+func _ground_point_from_mouse(screen_pos: Variant = null) -> Vector3:
 	var fallback := global_position + _facing
 	if camera == null:
 		return fallback
-	var mouse := get_viewport().get_mouse_position()
+	var mouse: Vector2 = screen_pos if screen_pos is Vector2 else get_viewport().get_mouse_position()
 	var origin := camera.project_ray_origin(mouse)
 	var dir := camera.project_ray_normal(mouse)
 	var space := get_world_3d().direct_space_state
