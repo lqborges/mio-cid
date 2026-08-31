@@ -1,0 +1,18 @@
+{
+  "id": "diego_gonzalez",
+  "display_name_key": "char.diego_gonzalez",
+  "role": "infante",
+  "combat": 20,
+  "birth": 92,
+  "diplomacy": 25,
+  "mesura_max": 0,
+  "loyalty_0": 0.2,
+  "gift_bias": "gold",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a2_bodas",
+  "vo_id": "diego_gonzalez"
+}

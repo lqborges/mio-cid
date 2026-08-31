@@ -77,6 +77,12 @@ jobs:
       - name: Run Python honor-meter tests
         run: python3 tests/unit/test_honor_state.py
 
+      - name: Import character JSON
+        run: python3 tools/import_characters.py
+
+      - name: Run Python loyalty tests
+        run: python3 tests/unit/test_loyalty.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -91,6 +97,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_honor_state.gd
+
+      - name: Run loyalty headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_loyalty.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
@@ -116,4 +127,4 @@ jobs:
 
       - name: Skip notice
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus headless test, and gdUnit4 skipped."
+        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty headless tests, and gdUnit4 skipped."

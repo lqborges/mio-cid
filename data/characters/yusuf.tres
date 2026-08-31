@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"yusuf"
+display_name_key = &"char.yusuf"
+poem_formula_key = &""
+role = &"taifa_king"
+combat = 70.0
+birth = 95.0
+diplomacy = 50.0
+mesura_max = 40.0
+loyalty = 0.0
+gift_bias = &"horses"
+alive = true
+essential = false
+desertion_capable = false
+unkillable = false
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a2_yusuf"
+must_survive_until = &""
+vo_id = &"yusuf"
+will_swear_riepto = true

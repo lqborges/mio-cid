@@ -23,6 +23,10 @@ data_*/
 mono_crash.*.json
 ~*.dll
 
+# Python tools
+__pycache__/
+*.py[cod]
+
 # OS / editor
 .DS_Store
 *~

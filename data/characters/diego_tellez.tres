@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"diego_tellez"
+display_name_key = &"char.diego_tellez"
+poem_formula_key = &""
+role = &"ally"
+combat = 40.0
+birth = 30.0
+diplomacy = 40.0
+mesura_max = 40.0
+loyalty = 0.5
+gift_bias = &"horses"
+alive = true
+essential = false
+desertion_capable = false
+unkillable = false
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a3_corpes"
+must_survive_until = &""
+vo_id = &"diego_tellez"
+will_swear_riepto = true

@@ -1,0 +1,18 @@
+{
+  "id": "galve",
+  "display_name_key": "char.galve",
+  "role": "taifa_captain",
+  "combat": 62,
+  "birth": 60,
+  "diplomacy": 40,
+  "mesura_max": 30,
+  "loyalty_0": 0.0,
+  "gift_bias": "arms",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_alcocer",
+  "vo_id": "galve"
+}

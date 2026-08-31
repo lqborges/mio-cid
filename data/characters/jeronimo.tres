@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"jeronimo"
+display_name_key = &"char.jeronimo"
+poem_formula_key = &""
+role = &"bishop"
+combat = 60.0
+birth = 40.0
+diplomacy = 50.0
+mesura_max = 40.0
+loyalty = 0.6
+gift_bias = &"chapel"
+alive = true
+essential = false
+desertion_capable = false
+unkillable = false
+list_eligible = true
+list_index = -1
+recruitable_beat = &"a2_jeronimo"
+must_survive_until = &""
+vo_id = &"jeronimo"
+will_swear_riepto = true

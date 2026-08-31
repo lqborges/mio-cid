@@ -1,0 +1,18 @@
+{
+  "id": "sol",
+  "display_name_key": "char.sol",
+  "role": "family",
+  "combat": 0,
+  "birth": 70,
+  "diplomacy": 40,
+  "mesura_max": 40,
+  "loyalty_0": 0.9,
+  "gift_bias": "gold",
+  "essential": true,
+  "desertion_capable": false,
+  "unkillable": true,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_cardena",
+  "vo_id": "sol"
+}

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"martin_antolinez"
+display_name_key = &"char.martin_antolinez"
+poem_formula_key = &""
+role = &"captain"
+combat = 70.0
+birth = 35.0
+diplomacy = 55.0
+mesura_max = 50.0
+loyalty = 0.55
+gift_bias = &"gold"
+alive = true
+essential = false
+desertion_capable = true
+unkillable = false
+list_eligible = true
+list_index = 2
+recruitable_beat = &"a1_vivar"
+must_survive_until = &""
+vo_id = &"martin_antolinez"
+will_swear_riepto = true

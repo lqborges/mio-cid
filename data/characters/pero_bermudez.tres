@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pero_bermudez"
+display_name_key = &"char.pero_bermudez"
+poem_formula_key = &""
+role = &"captain"
+combat = 74.0
+birth = 30.0
+diplomacy = 40.0
+mesura_max = 55.0
+loyalty = 0.8
+gift_bias = &"arms"
+alive = true
+essential = false
+desertion_capable = true
+unkillable = false
+list_eligible = true
+list_index = 1
+recruitable_beat = &"a1_vivar"
+must_survive_until = &""
+vo_id = &"pero_bermudez"
+will_swear_riepto = true

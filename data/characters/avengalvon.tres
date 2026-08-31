@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"avengalvon"
+display_name_key = &"char.avengalvon"
+poem_formula_key = &""
+role = &"ally_taifa"
+combat = 66.0
+birth = 55.0
+diplomacy = 75.0
+mesura_max = 60.0
+loyalty = 0.7
+gift_bias = &"horses"
+alive = true
+essential = true
+desertion_capable = false
+unkillable = false
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a2_embassy2"
+must_survive_until = &"a3_despedida"
+vo_id = &"avengalvon"
+will_swear_riepto = true

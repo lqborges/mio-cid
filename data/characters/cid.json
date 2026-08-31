@@ -1,0 +1,18 @@
+{
+  "id": "cid",
+  "display_name_key": "char.cid",
+  "role": "player",
+  "combat": 78,
+  "birth": 45,
+  "diplomacy": 80,
+  "mesura_max": 100,
+  "loyalty_0": 1.0,
+  "gift_bias": "horses",
+  "essential": true,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "cid"
+}
