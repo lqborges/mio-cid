@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://beu2mn4lf6mw6"
+path="res://.godot/imported/murviedro.dialogue-a798af85399f78342d8dc909689294bf.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_murviedro/murviedro.dialogue"
+dest_files=["res://.godot/imported/murviedro.dialogue-a798af85399f78342d8dc909689294bf.tres"]
+
+[params]
+
+defaults=true

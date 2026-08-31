@@ -103,3 +103,22 @@ a1_tevar.table_ask,"Comed, conde. En esta mesa se come.","Eat, count. At this ta
 a1_tevar.choice_eat,Hacedle comer,Make him eat
 a1_tevar.eat_done,"Como, pues me forzáis.","I eat, since you force me."
 a1_tevar.colada_kept,"Colada queda en mi mano.","Colada stays in my hand."
+location.murviedro,Murviedro,Murviedro
+location.valencia,Valencia,Valencia
+a2_murviedro.roads,Cortamos los caminos de Valencia.,We cut the roads to Valencia.
+a2_murviedro.field,En el campo tomamos Murviedro. No hay escala.,In the field we take Murviedro. There is no climb.
+a2_murviedro.take_done,Murviedro es nuestro. Valencia queda sola.,Murviedro is ours. Valencia stands alone.
+a2_siege.camp,"El real mira los muros. Nueve meses de hambre, no de escala.","The camp watches the walls. Nine months of hunger, not a climb."
+a2_siege.storm_prompt,¿Escalar el muro?,Storm the wall?
+a2_siege.choice_storm,Escalar el muro,Storm the wall
+a2_siege.choice_wait,Esperar el hambre,Wait for hunger
+a2_siege.storm_refused,Álvar: este cantar no es de escala. Valencia se rinde de hambre.,Álvar: this cantar is not a climb. Valencia yields to hunger.
+a2_siege.rest_skip,Avanzar el cerco,Advance the siege
+a2_siege.parley_1,Parlamos. La ciudad no abre.,We parley. The city does not open.
+a2_siege.sally_1,Sale una salida al campo. No al muro.,A sally comes to the field. Not the wall.
+a2_siege.hunger_1,El mercado está vacío. Valencia adelgaza.,The market is empty. Valencia thins.
+a2_siege.deserter,Salen por la puerta los que ya no pueden.,Those who cannot stay leave by the gate.
+a2_siege.parias,Ofrecen parias. El cerco sigue.,They offer parias. The siege holds.
+a2_siege.sally_2,Otra salida a la huerta. El muro no se escala.,Another sally to the huerta. The wall is not climbed.
+a2_siege.sermon,Se reza en el real. El cerco es de espera.,We pray in camp. The siege is a wait.
+a2_siege.city_opens,Valencia abre. Es ciudad para vivir.,Valencia opens. It is a city to live in.

@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://ctlsv5llp0vjb"
+path="res://.godot/imported/siege.dialogue-db2cb10e8e1353aadcad33c829848056.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_siege/siege.dialogue"
+dest_files=["res://.godot/imported/siege.dialogue-db2cb10e8e1353aadcad33c829848056.tres"]
+
+[params]
+
+defaults=true

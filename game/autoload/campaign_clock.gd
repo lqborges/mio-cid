@@ -22,6 +22,10 @@ func feeds_tonight() -> bool:
 	return segment == Segment.CAMP_NIGHT or segment == Segment.REFUSE_48H
 
 
+func set_segment_name(name: String) -> void:
+	segment = _parse_segment(name.to_lower())
+
+
 func segment_id() -> String:
 	match segment:
 		Segment.CAMP_NIGHT:

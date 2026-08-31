@@ -1,0 +1,16 @@
+# Spoken lines are CSV keys. Coastal field take; no wall climb.
+
+~ start
+=> roads
+
+~ roads
+Cid: a2_murviedro.roads
+=> END
+
+~ field
+Cid: a2_murviedro.field
+=> END
+
+~ take
+Cid: a2_murviedro.take_done
+=> END

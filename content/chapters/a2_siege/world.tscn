@@ -1,0 +1,323 @@
+[gd_scene load_steps=26 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a2_siege/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="PackedScene" path="res://game/ui/mesura_hud.tscn" id="6_mesura"]
+[ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="7_dummy"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="8_captain"]
+[ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="9_horse"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="10_ai"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="11_bridge"]
+[ext_resource type="PackedScene" path="res://content/chapters/a2_siege/storm_prompt.tscn" id="12_storm"]
+
+[sub_resource type="Environment" id="Environment_siege"]
+background_mode = 1
+background_color = Color(0.48, 0.46, 0.40, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.54, 0.50, 0.42, 1)
+ambient_light_energy = 0.38
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.44, 0.40, 0.32, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.42, 0.40, 0.36, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_gate"]
+albedo_color = Color(0.30, 0.24, 0.18, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_tent"]
+albedo_color = Color(0.40, 0.32, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_market"]
+albedo_color = Color(0.38, 0.34, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_extra"]
+albedo_color = Color(0.50, 0.46, 0.40, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_path"]
+albedo_color = Color(0.40, 0.34, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_banner"]
+albedo_color = Color(0.52, 0.22, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="Box_storm"]
+size = Vector3(8, 2.4, 3)
+
+[sub_resource type="BoxShape3D" id="Box_rest"]
+size = Vector3(4, 2.4, 4)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_siege"]
+vertices = PackedVector3Array(-22, 0.05, -22, 22, 0.05, -22, 22, 0.05, 22, -22, 0.05, 22)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[node name="ValenciaSiege" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_siege")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1, 0.94, 0.80, 1)
+light_energy = 0.88
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(48, 1, 48)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 4.0, -12)
+size = Vector3(2.2, 8.0, 18)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallEast" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 4.0, -12)
+size = Vector3(2.2, 8.0, 18)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, -20)
+size = Vector3(22, 8.0, 2.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallSouthL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 4.0, -4)
+size = Vector3(9.2, 8.0, 2.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallSouthR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 4.0, -4)
+size = Vector3(9.2, 8.0, 2.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Gate" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, -4)
+size = Vector3(3.6, 4.4, 0.6)
+material = SubResource("Mat_gate")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Path" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 6)
+size = Vector3(3.4, 0.08, 18)
+material = SubResource("Mat_path")
+
+[node name="TentA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 0.7, 8.4)
+size = Vector3(2.4, 1.4, 2.2)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 0.7, 8.4)
+size = Vector3(2.4, 1.4, 2.2)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="MarketStall" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.2, 0.55, -8.6)
+size = Vector3(2.0, 1.1, 1.4)
+material = SubResource("Mat_market")
+
+[node name="MarketEmpty" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0, 0.22, -8.4)
+size = Vector3(1.6, 0.44, 1.2)
+material = SubResource("Mat_market")
+
+[node name="ExtraA" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.4, 0.7, -10.2)
+radius = 0.12
+height = 1.4
+sides = 6
+material = SubResource("Mat_extra")
+
+[node name="ExtraB" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.6, 0.65, -10.6)
+radius = 0.11
+height = 1.3
+sides = 6
+material = SubResource("Mat_extra")
+
+[node name="NameStone" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.4, 1.0, 10.0)
+size = Vector3(0.5, 2.0, 0.4)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="PlaceName" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.4, 2.4, 10.0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_siege")
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 16)
+
+[node name="Horse" parent="." instance=ExtResource("9_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, 16.6)
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("10_ai")
+leader_path = NodePath("../Cid")
+spawn_lanza_bodies = true
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="AlvarFanez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 18.2)
+member_id = &"alvar_fanez"
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 18.2)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.05, 19.2)
+member_id = &"pero_bermudez"
+
+[node name="MunoGustioz" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.05, 19.2)
+member_id = &"muno_gustioz"
+
+[node name="Host" type="Node3D" parent="."]
+visible = false
+
+[node name="Dummy1" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 2.0)
+
+[node name="Dummy2" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.05, 1.2)
+
+[node name="Dummy3" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.05, 1.2)
+
+[node name="Dummy4" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -0.4)
+
+[node name="StormZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -2.2)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StormZone"]
+shape = SubResource("Box_storm")
+
+[node name="RestZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 8)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RestZone"]
+shape = SubResource("Box_rest")
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("11_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="MesuraHud" parent="HUD" instance=ExtResource("6_mesura")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
+
+[node name="StormPrompt" parent="HUD" instance=ExtResource("12_storm")]
+visible = false
+
+[node name="RestSkip" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 0.82
+anchor_right = 1.0
+anchor_bottom = 0.92
+offset_left = 48.0
+offset_right = -48.0
+grow_horizontal = 2
+mouse_filter = 2
+
+[node name="Line" type="Label" parent="HUD/RestSkip"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.91, 0.85, 0.72, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""

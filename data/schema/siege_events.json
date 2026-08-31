@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/siege_events",
+  "title": "ValenciaSiegeEvents",
+  "type": "object",
+  "required": [
+    "siege_days",
+    "rest_skip_min_days",
+    "rest_skip_max_days",
+    "wall_storm_enabled",
+    "events"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "siege_days": { "type": "integer", "minimum": 1, "maximum": 270 },
+    "rest_skip_min_days": { "type": "integer", "minimum": 14, "maximum": 28 },
+    "rest_skip_max_days": { "type": "integer", "minimum": 14, "maximum": 28 },
+    "wall_storm_enabled": { "type": "boolean" },
+    "events": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "day", "type", "scene", "honor_event"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "day": { "type": "integer", "minimum": 0, "maximum": 270 },
+          "type": {
+            "type": "string",
+            "enum": ["sally", "hunger", "deserter", "sermon", "parley", "parias"]
+          },
+          "scene": { "type": "string", "minLength": 1 },
+          "honor_event": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

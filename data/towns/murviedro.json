@@ -1,0 +1,16 @@
+{
+  "id": "murviedro",
+  "display_name_key": "location.murviedro",
+  "beat": "a2_murviedro",
+  "alfonso_protectorate": false,
+  "keep_or_sell": false,
+  "keep_past_deadline_fail": false,
+  "sell_deadline_days": 0,
+  "booty": {
+    "marks": 0,
+    "horses": 0,
+    "cloth": 0,
+    "arms": 0
+  },
+  "take_event_id": "murviedro_take"
+}

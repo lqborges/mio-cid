@@ -1,0 +1,28 @@
+{
+  "id": "a2_murviedro",
+  "steps": [
+    {
+      "id": "roads",
+      "type": "blocking"
+    },
+    {
+      "id": "field",
+      "type": "blocking"
+    },
+    {
+      "id": "take",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_murviedro/murviedro.dialogue",
+      "start": "take"
+    },
+    {
+      "id": "murviedro_take",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_siege"
+    }
+  ]
+}

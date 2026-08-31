@@ -120,7 +120,7 @@ class TestA1TevarTableColada(unittest.TestCase):
             "content/art/characters/dummy/dummy.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_murviedro/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a2_murviedro/world.tscn").is_file())
 
     def test_scene_is_cheap_greybox_pinewood(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")

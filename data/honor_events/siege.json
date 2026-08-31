@@ -1,0 +1,68 @@
+{
+  "events": [
+    {
+      "id": "murviedro_take",
+      "deltas": { "onores": 16 },
+      "tags": ["city"],
+      "beat": "a2_murviedro",
+      "once": true,
+      "ui_whisper_key": "a2_murviedro.take_done"
+    },
+    {
+      "id": "siege_parley_1",
+      "deltas": { "honor": 2 },
+      "tags": ["parley"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.parley_1"
+    },
+    {
+      "id": "siege_sally_1",
+      "deltas": { "onores": 6 },
+      "tags": ["battle", "sally"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.sally_1"
+    },
+    {
+      "id": "siege_hunger_1",
+      "deltas": { "honra": 2 },
+      "tags": ["mesura"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.hunger_1"
+    },
+    {
+      "id": "siege_deserter",
+      "deltas": { "honor": 2 },
+      "tags": ["city"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.deserter"
+    },
+    {
+      "id": "siege_parias",
+      "deltas": { "honor": 4 },
+      "tags": ["parias"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.parias"
+    },
+    {
+      "id": "siege_sally_2",
+      "deltas": { "onores": 6 },
+      "tags": ["battle", "sally"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.sally_2"
+    },
+    {
+      "id": "siege_sermon",
+      "deltas": { "honra": 2 },
+      "tags": ["mesura"],
+      "beat": "a2_siege",
+      "once": true,
+      "ui_whisper_key": "a2_siege.sermon"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Spoken lines are CSV keys. Nine-month calendar; wall-storm refused.
+
+~ start
+=> camp
+
+~ camp
+Cid: a2_siege.camp
+=> END
+
+~ storm
+Alvar: a2_siege.storm_refused
+=> END
+
+~ city_opens
+Cid: a2_siege.city_opens
+=> END

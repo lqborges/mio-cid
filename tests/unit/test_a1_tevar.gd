@@ -106,8 +106,8 @@ func _check_scene_loads() -> PackedStringArray:
 	var plazo: Node = _world.find_child("PlazoBar", true, false)
 	if plazo and bool(plazo.visible):
 		failures.append("plazo bar must stay hidden after Navapalos")
-	if ResourceLoader.exists(MURVIEDRO):
-		failures.append("a2_murviedro must not ship in this PR")
+	if not ResourceLoader.exists(MURVIEDRO):
+		failures.append("a2_murviedro world must exist after Tévar")
 	return failures
 
 
@@ -404,8 +404,6 @@ func _check_eat_keeps_colada_in_hand() -> PackedStringArray:
 		if _runner.has_method("can_travel"):
 			if bool(_runner.can_travel(&"a1_tevar", &"a1_cardena", flags)):
 				failures.append("hub_lock_cardena still blocks cardena")
-	if ResourceLoader.exists(MURVIEDRO):
-		failures.append("goto must no-op because a2_murviedro is missing")
 	world.free()
 	return failures
 

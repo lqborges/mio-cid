@@ -1,0 +1,64 @@
+{
+  "siege_days": 270,
+  "rest_skip_min_days": 14,
+  "rest_skip_max_days": 28,
+  "wall_storm_enabled": false,
+  "events": [
+    {
+      "id": "siege_parley_1",
+      "day": 14,
+      "type": "parley",
+      "scene": "parley_1",
+      "honor_event": "siege_parley_1"
+    },
+    {
+      "id": "siege_sally_1",
+      "day": 42,
+      "type": "sally",
+      "scene": "sally_1",
+      "honor_event": "siege_sally_1"
+    },
+    {
+      "id": "siege_hunger_1",
+      "day": 70,
+      "type": "hunger",
+      "scene": "hunger_1",
+      "honor_event": "siege_hunger_1"
+    },
+    {
+      "id": "siege_deserter",
+      "day": 98,
+      "type": "deserter",
+      "scene": "deserter",
+      "honor_event": "siege_deserter"
+    },
+    {
+      "id": "siege_parias",
+      "day": 140,
+      "type": "parias",
+      "scene": "parias",
+      "honor_event": "siege_parias"
+    },
+    {
+      "id": "siege_sally_2",
+      "day": 182,
+      "type": "sally",
+      "scene": "sally_2",
+      "honor_event": "siege_sally_2"
+    },
+    {
+      "id": "siege_sermon",
+      "day": 224,
+      "type": "sermon",
+      "scene": "sermon",
+      "honor_event": "siege_sermon"
+    },
+    {
+      "id": "siege_city_opens",
+      "day": 270,
+      "type": "hunger",
+      "scene": "city_opens",
+      "honor_event": "valencia_held"
+    }
+  ]
+}

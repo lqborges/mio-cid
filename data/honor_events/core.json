@@ -122,7 +122,10 @@
       "id": "valencia_held",
       "deltas": { "honor": 25 },
       "tags": ["city"],
-      "beat": "a2_siege"
+      "beat": "a2_siege",
+      "once": true,
+      "flags_set": ["valencia_held"],
+      "ui_whisper_key": "a2_siege.city_opens"
     },
     {
       "id": "yusuf_win",

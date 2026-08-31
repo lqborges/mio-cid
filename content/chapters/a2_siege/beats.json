@@ -1,0 +1,27 @@
+{
+  "id": "a2_siege",
+  "steps": [
+    {
+      "id": "clock",
+      "type": "clock_segment",
+      "segment": "siege"
+    },
+    {
+      "id": "calendar",
+      "type": "siege_event"
+    },
+    {
+      "id": "storm",
+      "type": "choice"
+    },
+    {
+      "id": "valencia_held",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_jeronimo"
+    }
+  ]
+}
