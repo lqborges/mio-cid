@@ -49,6 +49,8 @@ func _run() -> void:
 		_world = null
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_murviedro_take_travels_to_siege())
+	failures.append_array(await _check_road_walk_does_not_rest_skip())
+	failures.append_array(_check_second_sally_respawns_host())
 	failures.append_array(_check_calendar_eight_events_then_jeronimo())
 	failures.append_array(_check_graph_spine())
 	_finish(failures)
@@ -290,6 +292,103 @@ func _check_thinner_refuse_wedge() -> PackedStringArray:
 		n = (bodies as Array).size()
 	if n != 6:
 		failures.append("refuse lanzas want 6 bodies, got %s" % n)
+	world.free()
+	return failures
+
+
+func _check_road_walk_does_not_rest_skip() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign(&"a2_siege")
+	if _clock and _clock.has_method("reset"):
+		_clock.reset()
+	var packed: Resource = load(SIEGE_WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("road walk: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	var cid: Node3D = world.get_node_or_null("Cid") as Node3D
+	var storm: Node3D = world.get_node_or_null("StormZone") as Node3D
+	if cid == null or storm == null:
+		failures.append("road walk needs Cid and StormZone")
+		world.free()
+		return failures
+	var days_before := 0
+	if _clock:
+		days_before = int(_clock.days_elapsed)
+	var from := cid.global_position
+	var to := Vector3(0.0, from.y, storm.global_position.z)
+	var steps := 6
+	for i in range(1, steps + 1):
+		var t := float(i) / float(steps)
+		cid.global_position = from.lerp(to, t)
+		await physics_frame
+		await physics_frame
+	if _clock and int(_clock.days_elapsed) != days_before:
+		failures.append("walking spawn to StormZone must not rest-skip, days %s -> %s" % [days_before, _clock.days_elapsed])
+	world.free()
+	return failures
+
+
+func _check_second_sally_respawns_host() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign(&"a2_siege")
+	if _clock and _clock.has_method("reset"):
+		_clock.reset()
+	var packed: Resource = load(SIEGE_WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("second sally: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	var cal: SiegeCalendar = world.get("calendar")
+	if cal == null:
+		failures.append("second sally: calendar missing")
+		world.free()
+		return failures
+	var skip := cal.rest_skip_days(0, PackedStringArray())
+	if skip < cal.rest_skip_min_days or skip > cal.rest_skip_max_days:
+		failures.append("rest_skip_days must stay in JSON [min, max], got %s" % skip)
+	var sally_days: Array = []
+	for raw in cal.events:
+		if raw is Dictionary and str((raw as Dictionary).get("type", "")) == "sally":
+			sally_days.append(int((raw as Dictionary).get("day", 0)))
+	if sally_days.size() < 2:
+		failures.append("calendar must author two sallies")
+		world.free()
+		return failures
+	var guard := 0
+	var max_skips := cal.event_count() + cal.event_count()
+	if cal.rest_skip_min_days > 0:
+		max_skips = cal.siege_days / cal.rest_skip_min_days + cal.event_count()
+	while not bool(world.get("_sally_open")) and guard < max_skips:
+		world.rest_skip()
+		guard += 1
+	if not bool(world.get("_sally_open")):
+		failures.append("first sally never opened")
+		world.free()
+		return failures
+	if int(world.get("_host_left")) <= 0:
+		failures.append("first sally Host must be living")
+	world.complete_sally()
+	if bool(world.get("_sally_open")):
+		failures.append("complete_sally must close the first sally")
+	var second_day: int = int(sally_days[1])
+	guard = 0
+	while int(world.siege_day()) < second_day and not bool(world.get("_sally_open")) and guard < max_skips:
+		world.rest_skip()
+		guard += 1
+	if int(world.siege_day()) < second_day and not bool(world.get("_sally_open")):
+		failures.append("rest-skip never reached second sally day %s, day %s" % [second_day, world.siege_day()])
+	if not bool(world.get("_sally_open")):
+		failures.append("second sally must open after rest-skip to day %s" % second_day)
+	elif int(world.get("_host_left")) <= 0:
+		failures.append("second sally must reset Host, _host_left got %s" % world.get("_host_left"))
+	var dummy: Node = world.get_node_or_null("Host/Dummy1")
+	if dummy:
+		var hurt: Node = dummy.get_node_or_null("HurtBox")
+		if hurt and "hp" in hurt and float(hurt.hp) <= 0.0:
+			failures.append("second sally Dummy1 HP must be restored")
 	world.free()
 	return failures
 

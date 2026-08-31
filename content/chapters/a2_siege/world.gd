@@ -69,6 +69,8 @@ func can_storm_wall() -> bool:
 
 func try_storm_wall() -> void:
 	# Offered, then refused. Álvar: this cantar is not a climb.
+	if _sally_open or _left:
+		return
 	_storm_refused = true
 	_whisper(STORM_KEY)
 	_show_storm_prompt()
@@ -92,7 +94,7 @@ func rest_skip() -> void:
 	var clock := _clock()
 	if clock == null or calendar == null:
 		return
-	var days := calendar.rest_skip_days()
+	var days := calendar.rest_skip_days(siege_day(), _fired)
 	if days <= 0:
 		return
 	if clock.has_method("advance_calendar"):
@@ -127,9 +129,9 @@ func complete_sally() -> void:
 	if not _sally_open:
 		return
 	_sally_open = false
-	_host_left = 0
 	_set_host_active(false)
-	_fire_due()
+	# Apply the open sally without starting the next fight on the same tick.
+	_fire_due(false)
 	if calendar and _fired.size() >= calendar.event_count():
 		_leave_for_jeronimo()
 
@@ -151,7 +153,7 @@ func _load_calendar() -> void:
 	calendar = SiegeCalendar.from_file(EVENTS_PATH)
 
 
-func _fire_due() -> void:
+func _fire_due(start_sallies: bool = true) -> void:
 	_load_calendar()
 	if calendar == null:
 		return
@@ -160,7 +162,7 @@ func _fire_due() -> void:
 		if not raw is Dictionary:
 			continue
 		var row: Dictionary = raw
-		if str(row.get("type", "")) == "sally":
+		if start_sallies and str(row.get("type", "")) == "sally":
 			if not _sally_open:
 				_start_sally(row)
 				if _sally_open:
@@ -171,13 +173,45 @@ func _fire_due() -> void:
 
 
 func _start_sally(row: Dictionary) -> void:
+	_hide_storm_prompt()
 	_whisper(_event_key(row))
+	var host: Node = get_node_or_null("Host")
+	if host == null:
+		# Headless / missing Host: honor-tick the sally without a fight.
+		return
+	_reset_host_dummies()
 	_set_host_active(true)
 	_form_wedge()
 	if _host_left <= 0:
 		_set_host_active(false)
 		return
 	_sally_open = true
+
+
+func _reset_host_dummies() -> void:
+	var host: Node = get_node_or_null("Host")
+	_host_left = 0
+	if host == null:
+		return
+	for child in host.get_children():
+		if child.has_method("revive"):
+			child.call("revive")
+		if child.has_meta("host_layer"):
+			child.remove_meta("host_layer")
+		_clear_host_layer_meta(child)
+		var hurt: Node = child.get_node_or_null("HurtBox")
+		if hurt == null or not hurt.has_signal("died"):
+			continue
+		_host_left += 1
+		if not hurt.died.is_connected(_on_host_died):
+			hurt.died.connect(_on_host_died)
+
+
+func _clear_host_layer_meta(node: Node) -> void:
+	if node.has_meta("host_layer"):
+		node.remove_meta("host_layer")
+	for child in node.get_children():
+		_clear_host_layer_meta(child)
 
 
 func _apply_event(row: Dictionary) -> void:
