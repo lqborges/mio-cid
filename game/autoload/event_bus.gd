@@ -1,6 +1,6 @@
 extends Node
 
-signal honor_logged(event: Variant)
+signal honor_logged(event: HonorEvent)
 signal soft_warn(reason: StringName)
 signal hard_fail(reason: StringName)
 signal beat_started(id: StringName)

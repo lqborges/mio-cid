@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/honor_event",
+  "title": "HonorEvent",
+  "type": "object",
+  "required": ["id", "deltas", "tags"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "deltas": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "onores": { "type": "number" },
+        "honor": { "type": "number" },
+        "honra": { "type": "number" }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "stain_id": { "type": ["string", "null"] },
+    "clear_stain": { "type": ["string", "null"] },
+    "flags_set": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hard_fail": { "type": "boolean", "default": false },
+    "hard_fail_reason": { "type": ["string", "null"] },
+    "beat": { "type": "string" },
+    "once": { "type": "boolean" },
+    "ui_whisper_key": { "type": "string" }
+  }
+}

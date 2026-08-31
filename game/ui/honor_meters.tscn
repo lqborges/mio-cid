@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/ui/honor_meters.gd" id="1_meters"]
+
+[node name="HonorMeters" type="Control"]
+custom_minimum_size = Vector2(176, 228)
+layout_mode = 3
+anchors_preset = 0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 192.0
+offset_bottom = 244.0
+mouse_filter = 2
+script = ExtResource("1_meters")

@@ -74,6 +74,9 @@ jobs:
       - name: Run Python autoload tests
         run: python3 tests/unit/test_event_bus.py
 
+      - name: Run Python honor-meter tests
+        run: python3 tests/unit/test_honor_state.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -83,6 +86,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_event_bus.gd
+
+      - name: Run HonorState headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_honor_state.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
