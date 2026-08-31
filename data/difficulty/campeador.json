@@ -1,0 +1,9 @@
+{
+  "id": "campeador",
+  "hp_regen_camp_night": 5,
+  "hp_regen_beat_start": 0,
+  "stamina_regen": 0.85,
+  "incoming": 1.25,
+  "parry_window_ms": -40,
+  "meter_sinks": 1.2
+}

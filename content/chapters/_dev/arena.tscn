@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="1_cid"]
+[ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="2_dummy"]
 
 [sub_resource type="Environment" id="Environment_arena"]
 background_mode = 1
@@ -78,3 +79,29 @@ collision_mask = 0
 
 [node name="Cid" parent="." instance=ExtResource("1_cid")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="Dummies" type="Node3D" parent="."]
+
+[node name="Dummy1" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.05, 0)
+
+[node name="Dummy2" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.243, 0.05, 4.243)
+
+[node name="Dummy3" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 6)
+
+[node name="Dummy4" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.243, 0.05, 4.243)
+
+[node name="Dummy5" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0.05, 0)
+
+[node name="Dummy6" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.243, 0.05, -4.243)
+
+[node name="Dummy7" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -6)
+
+[node name="Dummy8" parent="Dummies" instance=ExtResource("2_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.243, 0.05, -4.243)

@@ -1,7 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://game/actors/player/cid_controller.gd" id="1_controller"]
 [ext_resource type="Script" path="res://game/actors/player/cid_combat.gd" id="2_combat"]
+[ext_resource type="Script" path="res://game/combat/hit_box.gd" id="3_hit"]
+[ext_resource type="Script" path="res://game/combat/hurt_box.gd" id="4_hurt"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_cid"]
 albedo_color = Color(0.22, 0.2, 0.18, 1)
@@ -26,9 +28,23 @@ roughness = 1.0
 size = Vector3(0.22, 0.18, 0.42)
 material = SubResource("Mat_facing")
 
+[sub_resource type="StandardMaterial3D" id="Mat_sword"]
+albedo_color = Color(0.55, 0.55, 0.58, 1)
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_sword"]
+size = Vector3(0.07, 0.12, 0.85)
+material = SubResource("Mat_sword")
+
+[sub_resource type="BoxShape3D" id="BoxShape_hit"]
+size = Vector3(0.55, 0.9, 0.85)
+
+[sub_resource type="SphereShape3D" id="SphereShape_shout"]
+radius = 1.0
+
 [node name="Cid" type="CharacterBody3D"]
 collision_layer = 2
-collision_mask = 1
+collision_mask = 5
 floor_snap_length = 0.25
 script = ExtResource("1_controller")
 
@@ -46,10 +62,48 @@ mesh = SubResource("CapsuleMesh_cid")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -0.38)
 mesh = SubResource("BoxMesh_facing")
 
+[node name="Sword" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 1.0, -0.55)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_sword")
+
+[node name="HitBox" type="Area3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -0.85)
+collision_layer = 16
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("3_hit")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Visual/HitBox"]
+shape = SubResource("BoxShape_hit")
+
 [node name="InteractRay" type="RayCast3D" parent="Visual"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 target_position = Vector3(0, 0, -2.2)
 collision_mask = 1
+
+[node name="HurtBox" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 0
+monitoring = false
+monitorable = true
+script = ExtResource("4_hurt")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HurtBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_cid")
+
+[node name="ShoutRing" type="Area3D" parent="."]
+collision_layer = 16
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("3_hit")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShoutRing"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("SphereShape_shout")
 
 [node name="CidCombat" type="Node" parent="."]
 script = ExtResource("2_combat")

@@ -96,10 +96,20 @@ func _physics_process(delta: float) -> void:
 		_queued_dodge = false
 		_queued_slam = false
 		_queued_leap = false
+	elif combat != null and combat.has_method("is_staggered") and combat.is_staggered():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_queued_dodge = false
+		_queued_slam = false
+		_queued_leap = false
+		_queued_shout = false
+		_queued_swap = false
 	else:
 		_consume_queues(wish)
-		var speed := run_speed if Input.is_action_pressed("run") else walk_speed
+		var speed := walk_speed
 		if wish.length_squared() > 0.0001:
+			if Input.is_action_pressed("run") and _can_sprint(delta):
+				speed = run_speed
 			velocity.x = wish.x * speed
 			velocity.z = wish.z * speed
 		else:
@@ -137,6 +147,12 @@ func _consume_queues(wish: Vector3) -> void:
 	if _queued_interact:
 		_try_interact()
 	_queued_interact = false
+
+
+func _can_sprint(delta: float) -> bool:
+	if combat != null and combat.has_method("try_sprint"):
+		return combat.try_sprint(delta)
+	return true
 
 
 func _start_dodge(wish: Vector3) -> void:

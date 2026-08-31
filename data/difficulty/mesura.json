@@ -1,0 +1,9 @@
+{
+  "id": "mesura",
+  "hp_regen_camp_night": 5,
+  "hp_regen_beat_start": 10,
+  "stamina_regen": 1.0,
+  "incoming": 1.0,
+  "parry_window_ms": 0,
+  "meter_sinks": 1.0
+}
