@@ -230,7 +230,7 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         self.assertLess(abs(stairs[11] - 5.2 - walk[2]), 8.0)
         exit_o = _origin(scene, "EmbassyExit")
         self.assertLess(exit_o[2], cage_south)
-        self.assertIn('[node name="Name" type="Label3D" parent="EmbassyExit"]', scene)
+        self.assertIn('[node name="ToEmbassy" type="Label3D" parent="."]', scene)
         verts = scene[scene.find("vertices = PackedVector3Array(") : scene.find("polygons =")]
         numbers = [float(part.strip()) for part in verts.split("(")[-1].split(")")[0].split(",")]
         self.assertGreaterEqual(len(numbers) // 3, 8)
