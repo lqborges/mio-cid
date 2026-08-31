@@ -173,27 +173,27 @@ func _free_balloon() -> void:
 
 
 func _finish_beat() -> void:
-	if EventBus and EventBus.has_signal("beat_completed"):
-		EventBus.beat_completed.emit(BEAT_ID)
 	_travel_to_cardena()
 
 
 func _travel_to_cardena() -> void:
 	if not _resolved:
 		return
-	var tree := get_tree()
-	if tree == null or tree.current_scene != self:
-		return
-	if ChapterRunner == null:
-		return
 	var dest := &"a1_cardena"
-	if ChapterRunner.has_method("can_travel"):
+	if ChapterRunner and ChapterRunner.has_method("can_travel"):
 		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
 		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
 			return
-	if ChapterRunner.has_method("travel"):
-		ChapterRunner.travel(dest)
-	if ChapterRunner.has_method("goto"):
+	var travelled := false
+	if ChapterRunner and ChapterRunner.has_method("travel"):
+		travelled = bool(ChapterRunner.travel(dest))
+	if not travelled:
+		if EventBus and EventBus.has_signal("beat_completed"):
+			EventBus.beat_completed.emit(BEAT_ID)
+	var tree := get_tree()
+	if tree == null or tree.current_scene != self:
+		return
+	if ChapterRunner and ChapterRunner.has_method("goto"):
 		ChapterRunner.goto(dest)
 
 
