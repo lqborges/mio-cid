@@ -1,5 +1,6 @@
 extends Node
 
+const STRINGS_PATH := "res://content/locales/strings.csv"
 const POEM_FORMULAS_PATH := "res://content/locales/poem_formulas.csv"
 const DEFAULT_LOCALE := "es"
 
@@ -35,16 +36,21 @@ func montaner_verse(key: String) -> String:
 
 func _load_poem_formulas() -> void:
 	_table.clear()
-	if not FileAccess.file_exists(POEM_FORMULAS_PATH):
-		push_warning("Loc: missing %s" % POEM_FORMULAS_PATH)
+	_load_csv(STRINGS_PATH)
+	_load_csv(POEM_FORMULAS_PATH)
+
+
+func _load_csv(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		push_warning("Loc: missing %s" % path)
 		return
-	var file := FileAccess.open(POEM_FORMULAS_PATH, FileAccess.READ)
+	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		push_warning("Loc: cannot open %s" % POEM_FORMULAS_PATH)
+		push_warning("Loc: cannot open %s" % path)
 		return
 	var header: PackedStringArray = file.get_csv_line()
 	if header.is_empty() or header[0] != "key":
-		push_warning("Loc: %s must start with key,es,en,montaner_verse" % POEM_FORMULAS_PATH)
+		push_warning("Loc: %s must start with key,es,en" % path)
 		return
 	while not file.eof_reached():
 		var line: PackedStringArray = file.get_csv_line()

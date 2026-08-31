@@ -78,6 +78,10 @@ func is_winded() -> bool:
 	return stamina <= 0.0
 
 
+func is_attacking() -> bool:
+	return _attack_left > 0.0
+
+
 func try_sprint(delta: float) -> bool:
 	var cost := float(tunables.get("sprint_stamina_per_sec", 0.0)) * delta
 	if stamina <= 0.0:
@@ -130,6 +134,7 @@ func leap() -> void:
 	var move := moveset.move(&"leap")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	last_move = &"leap"
 	_arm_hit(move, &"leap")
 	_play_sfx(&"leap")
@@ -149,11 +154,32 @@ func shout() -> void:
 	var move := moveset.move(&"shout")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	last_move = &"shout"
 	if hit_box != null:
 		hit_box.disarm()
 	_arm_shout(move)
 	_play_sfx(&"shout")
+
+
+func dump_strike() -> void:
+	if _dead:
+		return
+	var move := {}
+	var mes := _mesura()
+	if mes != null and mes.has_method("dump_move"):
+		move = mes.dump_move()
+	last_move = &"dump"
+	if hit_box != null:
+		hit_box.disarm()
+	_attack_left = float(move.get("duration", 0.0))
+	if shout_ring == null:
+		return
+	shout_ring.source = self
+	var shape_node := shout_ring.get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if shape_node != null and shape_node.shape is SphereShape3D:
+		(shape_node.shape as SphereShape3D).radius = float(move.get("radius", 0.0))
+	shout_ring.arm(float(move.get("damage", 0.0)), &"shout", float(move.get("stagger", 0.0)))
 
 
 func weapon_swap() -> void:
@@ -169,6 +195,11 @@ func weapon_swap() -> void:
 func take_damage(amount: float, damage_type: StringName = &"slash", stagger: float = 0.0, source: Node = null) -> void:
 	if _dead:
 		return
+	var mes := _mesura()
+	if mes != null and mes.has_method("try_parry") and mes.try_parry():
+		return
+	if mes != null and mes.has_method("note_hit_taken"):
+		mes.note_hit_taken()
 	if player_hurt != null and is_instance_valid(player_hurt):
 		player_hurt.apply_hit(amount, damage_type, stagger, source)
 		return
@@ -190,6 +221,7 @@ func _try_melee_combo() -> void:
 	var move := moveset.move(move_id)
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	combo_step += 1
 	_combo_left = float(tunables.get("combo_window", 0.0))
 	last_move = move_id
@@ -263,6 +295,9 @@ func _regen(delta: float) -> void:
 		return
 	var rate := float(tunables.get("stamina_regen_per_sec", 0.0))
 	rate *= float(difficulty.get("stamina_regen", 1.0))
+	var mes := _mesura()
+	if mes != null and mes.has_method("stamina_regen_mult"):
+		rate *= float(mes.stamina_regen_mult())
 	stamina = minf(max_stamina, stamina + rate * delta)
 
 
@@ -393,3 +428,22 @@ func _load_json(path: String) -> Dictionary:
 
 func _body() -> CharacterBody3D:
 	return get_parent() as CharacterBody3D
+
+
+func _mesura() -> Node:
+	var body := get_parent()
+	if body == null:
+		return null
+	var named := body.get_node_or_null("Mesura")
+	if named != null:
+		return named
+	for child in body.get_children():
+		if child.has_method("try_parry") and child.has_method("dump_move"):
+			return child
+	return null
+
+
+func _note_strike() -> void:
+	var mes := _mesura()
+	if mes != null and mes.has_method("note_strike"):
+		mes.note_strike()

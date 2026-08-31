@@ -1,9 +1,10 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://game/actors/player/cid_controller.gd" id="1_controller"]
 [ext_resource type="Script" path="res://game/actors/player/cid_combat.gd" id="2_combat"]
 [ext_resource type="Script" path="res://game/combat/hit_box.gd" id="3_hit"]
 [ext_resource type="Script" path="res://game/combat/hurt_box.gd" id="4_hurt"]
+[ext_resource type="Script" path="res://game/actors/player/mesura_component.gd" id="5_mesura"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_cid"]
 albedo_color = Color(0.22, 0.2, 0.18, 1)
@@ -107,6 +108,9 @@ shape = SubResource("SphereShape_shout")
 
 [node name="CidCombat" type="Node" parent="."]
 script = ExtResource("2_combat")
+
+[node name="Mesura" type="Node" parent="."]
+script = ExtResource("5_mesura")
 
 [node name="CameraRig" type="Node3D" parent="."]
 

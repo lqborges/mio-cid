@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="1_cid"]
 [ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="2_dummy"]
+[ext_resource type="PackedScene" path="res://game/ui/mesura_hud.tscn" id="3_hud"]
 
 [sub_resource type="Environment" id="Environment_arena"]
 background_mode = 1
@@ -105,3 +106,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -6)
 
 [node name="Dummy8" parent="Dummies" instance=ExtResource("2_dummy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.243, 0.05, -4.243)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="MesuraHud" parent="HUD" instance=ExtResource("3_hud")]

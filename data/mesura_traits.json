@@ -1,0 +1,54 @@
+{
+  "mesura_max": 100,
+  "mesura_start": 50,
+  "mesura_regen_per_sec": 6,
+  "mesura_pause_after_strike_sec": 0.9,
+  "parry_mesura": 4,
+  "hold_time_scale": 0.92,
+  "hold_stamina_regen_mult": 1.15,
+  "hold_move_mult": 0.45,
+  "hold_parry_window_ms": 220,
+  "hold_fight_min_sec": 0.4,
+  "rotate_in_cooldown_mult": 1.0,
+  "ira_max": 100,
+  "ira_start": 0,
+  "ira_on_hit": 18,
+  "ira_on_mesura_fail": 22,
+  "dump_ira_min": 40,
+  "dump_damage": 22,
+  "dump_stagger": 0.7,
+  "dump_duration": 0.42,
+  "dump_radius": 5.5,
+  "dump_stamina": 0,
+  "dump_honra": -12,
+  "dump_honra_min": -8,
+  "dump_honra_max": -20,
+  "trait_cap": 6,
+  "traits": [
+    {
+      "id": "hablar_poco",
+      "unlocks_at": { "mesura_speech_lines": 3 }
+    },
+    {
+      "id": "dejar_golpear",
+      "unlocks_at": { "hold_fights": 2 },
+      "rotate_in_cooldown_mult": 0.7
+    },
+    {
+      "id": "mesa_para_el_conde",
+      "unlocks_at": { "honor_event": "tevar_feed_count" }
+    },
+    {
+      "id": "querella_not_hueste",
+      "unlocks_at": { "honor_event": "querella_filed" }
+    },
+    {
+      "id": "gift_the_fifth",
+      "unlocks_at": { "never_skip_quinto": true }
+    },
+    {
+      "id": "keep_avengalvon",
+      "unlocks_at": { "flag": "avengalvon_alive_despedida" }
+    }
+  ]
+}
