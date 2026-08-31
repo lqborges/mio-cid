@@ -4,7 +4,6 @@
     {
       "id": "escape",
       "type": "cinematic",
-      "camera": "hall_sleep",
       "set_flags": [
         "lion_escaped",
         "ferran_hid_leon",
@@ -22,17 +21,13 @@
     {
       "id": "mesura_or_rage",
       "type": "choice",
-      "white": "mesura",
-      "red": "rage"
+      "white": "lion_mesura",
+      "red": "lion_rage"
     },
     {
       "id": "return",
       "type": "blocking",
       "set_flags": ["lion_returned"]
-    },
-    {
-      "id": "lion_mesura",
-      "type": "honor_event"
     },
     {
       "id": "leave",

@@ -15,6 +15,10 @@ const NO_KILL_KEY := "a3_leon.no_kill"
 const PLACE_KEY := "a3_leon.place_name"
 const DIALOGUE_PATH := "res://content/chapters/a3_leon/leon.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
+const BUCAR_SCENE := "res://content/chapters/a3_bucar/world.tscn"
+const HORSE_ID := &"babieca"
+const HORSE_KEY := "a2_jeronimo.horse_name"
+const SPAWN_IDLE_FRAMES := 2
 
 var last_dialogue_speakers: PackedStringArray = PackedStringArray()
 var last_dialogue_keys: PackedStringArray = PackedStringArray()
@@ -28,6 +32,8 @@ var _returned: bool = false
 var _left: bool = false
 var _cid_walk: float = 4.5
 var _cid_run: float = 7.0
+var _spawn_idle_done: bool = false
+var _idle_frames: int = 0
 
 
 func _ready() -> void:
@@ -46,11 +52,72 @@ func _ready() -> void:
 	_lay_cid_asleep()
 	_hold_mesnada_ring()
 	_connect_cage_zone()
+	_connect_hall_zone()
 	_bind_mesura()
 	_show_place_name()
 	_label_infantes()
+	_name_horse()
+	_panic_horse()
 	_whisper(ASLEEP_KEY)
 	intro_played = true
+	set_process(true)
+	set_physics_process(true)
+	set_process_unhandled_input(true)
+	_arm_spawn_idle()
+
+
+func _arm_spawn_idle() -> void:
+	var tree := get_tree()
+	if tree == null:
+		_spawn_idle_done = true
+		return
+	for _i in range(SPAWN_IDLE_FRAMES):
+		await tree.physics_frame
+	_spawn_idle_done = true
+	set_process(false)
+	set_physics_process(false)
+
+
+func _process(_delta: float) -> void:
+	_tick_spawn_idle()
+
+
+func _physics_process(_delta: float) -> void:
+	_tick_spawn_idle()
+
+
+func _tick_spawn_idle() -> void:
+	if _spawn_idle_done:
+		set_process(false)
+		set_physics_process(false)
+		return
+	_idle_frames += 1
+	if _idle_frames >= SPAWN_IDLE_FRAMES:
+		_spawn_idle_done = true
+		set_process(false)
+		set_physics_process(false)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_echo() or event is InputEventMouseMotion or event is InputEventJoypadMotion:
+		return
+	on_sleep_input()
+
+
+func on_sleep_input() -> void:
+	if not _spawn_idle_done or _returned:
+		return
+	if _asleep or not _joke_played:
+		_wake_and_joke()
+
+
+func _wake_and_joke() -> void:
+	if _returned:
+		return
+	if _asleep:
+		wake_cid()
+	if not _joke_played and not _talking:
+		start_joke()
 
 
 func start_cue(cue: String) -> void:
@@ -84,7 +151,7 @@ func start_joke(_cue: String = "joke") -> void:
 			_show_choice()
 		return
 	_talking = true
-	_whisper(JOKE_KEY)
+	_whisper_joke()
 	var resource := _load_dialogue()
 	if resource == null:
 		_finish_joke()
@@ -100,7 +167,7 @@ func run_joke() -> void:
 	if _asleep:
 		wake_cid()
 	_talking = true
-	_whisper(JOKE_KEY)
+	_whisper_joke()
 	var resource := _load_dialogue()
 	if resource:
 		await _walk_lines(resource, "joke")
@@ -196,7 +263,7 @@ func return_lion() -> bool:
 	_clear_flag(&"lion_escaped")
 	_whisper(RETURNED_KEY)
 	_hold_cid_mesura(false)
-	_leave_for_bucar()
+	_finish_beat()
 	return true
 
 
@@ -243,6 +310,8 @@ func place_name_text() -> String:
 func try_travel_bucar() -> bool:
 	if not _returned and not _has_flag(&"lion_returned"):
 		return false
+	if not _dest_ready():
+		return false
 	return _travel(DEST)
 
 
@@ -274,16 +343,19 @@ func _apply_return_honor() -> void:
 
 
 func _open_cage() -> void:
-	var gate: Node = get_node_or_null("LionCage/CageGate")
-	if gate and "visible" in gate:
-		gate.visible = false
+	_set_gate_closed(false)
 	_set_flag(&"lion_escaped")
 
 
 func _close_cage() -> void:
-	var gate: Node = get_node_or_null("LionCage/CageGate")
-	if gate and "visible" in gate:
-		gate.visible = true
+	_set_gate_closed(true)
+
+
+func _set_gate_closed(closed: bool) -> void:
+	for path in PackedStringArray(["LionCage/CageGate", "LionCage/BarA", "LionCage/BarB"]):
+		var node: Node = get_node_or_null(path)
+		if node and "visible" in node:
+			node.visible = closed
 
 
 func _place_lion_in_cage() -> void:
@@ -323,6 +395,10 @@ func _lay_cid_asleep() -> void:
 	var cid: Node = get_node_or_null("Cid")
 	if cid == null:
 		return
+	if cid.has_method("set_chapter_asleep"):
+		cid.call("set_chapter_asleep", true)
+	elif "chapter_asleep" in cid:
+		cid.chapter_asleep = true
 	if "walk_speed" in cid:
 		_cid_walk = float(cid.walk_speed)
 		cid.walk_speed = 0.0
@@ -338,6 +414,10 @@ func _stand_cid() -> void:
 	var cid: Node = get_node_or_null("Cid")
 	if cid == null:
 		return
+	if cid.has_method("set_chapter_asleep"):
+		cid.call("set_chapter_asleep", false)
+	elif "chapter_asleep" in cid:
+		cid.chapter_asleep = false
 	if "walk_speed" in cid:
 		cid.walk_speed = _cid_walk
 	if "run_speed" in cid:
@@ -368,11 +448,11 @@ func _bind_mesura() -> void:
 
 
 func _on_mesura_held(holding: bool) -> void:
-	if not holding or _returned or not _joke_played:
+	if not holding or _returned or not _joke_played or _talking:
 		return
-	if _path.is_empty():
-		_path = &"mesura"
-		_hide_choice()
+	_path = &"mesura"
+	_hide_choice()
+	return_lion()
 
 
 func _on_mesura_dumped(_honra_delta: float) -> void:
@@ -380,6 +460,7 @@ func _on_mesura_dumped(_honra_delta: float) -> void:
 		return
 	_path = &"rage"
 	_hide_choice()
+	return_lion()
 
 
 func _hold_cid_mesura(on: bool) -> void:
@@ -420,12 +501,29 @@ func _connect_cage_zone() -> void:
 		zone.body_entered.connect(_on_cage_entered)
 
 
+func _connect_hall_zone() -> void:
+	var zone: Area3D = get_node_or_null("HallZone") as Area3D
+	if zone and not zone.body_entered.is_connected(_on_hall_entered):
+		zone.body_entered.connect(_on_hall_entered)
+
+
+func _on_hall_entered(body: Node) -> void:
+	if body == null or _returned:
+		return
+	if not body.is_in_group("player"):
+		return
+	if not _spawn_idle_done:
+		return
+	_wake_and_joke()
+
+
 func _on_cage_entered(body: Node) -> void:
 	if body == null or _returned:
 		return
-	if not (body.is_in_group("player") or body.has_method("facing_dir")):
+	if not body.is_in_group("player"):
 		return
 	if _asleep:
+		_wake_and_joke()
 		return
 	if not _joke_played:
 		start_joke()
@@ -465,29 +563,18 @@ func _hide_choice() -> void:
 		ui.visible = false
 
 
-func _leave_for_bucar() -> void:
-	if _left:
-		return
-	_left = true
-	var travelled := false
-	if ChapterRunner and ChapterRunner.has_method("can_travel"):
-		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
-		if not bool(ChapterRunner.can_travel(BEAT_ID, DEST, flags)):
-			if EventBus and EventBus.has_signal("beat_completed"):
-				EventBus.beat_completed.emit(BEAT_ID)
-			_checkpoint()
-			return
-	if ChapterRunner and ChapterRunner.has_method("travel"):
-		travelled = bool(ChapterRunner.travel(DEST))
-	if not travelled:
-		if EventBus and EventBus.has_signal("beat_completed"):
-			EventBus.beat_completed.emit(BEAT_ID)
+func _finish_beat() -> void:
+	if EventBus and EventBus.has_signal("beat_completed"):
+		EventBus.beat_completed.emit(BEAT_ID)
+	# Autosave this hall. Do not hop the graph into unshipped Búcar.
 	_checkpoint()
-	var tree := get_tree()
-	if tree == null or tree.current_scene != self:
+	if not _dest_ready():
 		return
-	if ChapterRunner and ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(DEST)
+	_travel(DEST)
+
+
+func _dest_ready() -> bool:
+	return ResourceLoader.exists(BUCAR_SCENE)
 
 
 func _checkpoint() -> void:
@@ -567,6 +654,39 @@ func _whisper(key: String) -> void:
 		return
 	if whisper and Loc and whisper.has_method("_show"):
 		whisper.call("_show", Loc.text(key))
+
+
+func _whisper_joke() -> void:
+	_whisper(JOKE_KEY)
+	var ferran: MesnadaMember = MesnadaMember.from_id(&"ferran_gonzalez")
+	var maxv := 0
+	if ferran:
+		maxv = int(ferran.mesura_max)
+	var extra := _loc("a3_leon.no_mesura")
+	if extra != "a3_leon.no_mesura" and extra.find(str(maxv)) >= 0:
+		var whisper: Node = find_child("HallWhisper", true, false)
+		if whisper and Loc and whisper.has_method("_show"):
+			whisper.call("_show", "%s %s" % [_loc(JOKE_KEY), extra])
+
+
+func _name_horse() -> void:
+	_set_flag(&"babieca_named")
+	var horse: Node = get_node_or_null("Horse")
+	if horse and horse.has_method("apply_name"):
+		horse.call("apply_name", HORSE_ID, HORSE_KEY)
+	var label: Label3D = get_node_or_null("Horse/Name") as Label3D
+	if label:
+		label.text = _loc(HORSE_KEY)
+		label.visible = true
+
+
+func _panic_horse() -> void:
+	var horse: Node = get_node_or_null("Horse")
+	if horse and horse.has_method("panic"):
+		horse.call("panic", &"lion")
+	var cavalry: Node = horse.get_node_or_null("CavalryCharge") if horse else null
+	if cavalry and cavalry.has_method("panic_for"):
+		cavalry.call("panic_for", &"lion")
 
 
 func _travel(to_id: StringName) -> bool:

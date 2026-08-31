@@ -154,15 +154,26 @@ class TestA3LeonLionScene(unittest.TestCase):
             "Mesnada",
             "Cid",
             "CageZone",
+            "HallZone",
             "ChoiceUI",
         ):
             self.assertIn(f'[node name="{node}"', scene, node)
         self.assertIn("visible = false", scene[scene.find("CageGate") : scene.find("CageGate") + 280])
+        cage_block = scene[scene.find('[node name="LionCage"') : scene.find('[node name="LionProp"')]
+        self.assertIn('[node name="Door"', cage_block)
+        self.assertIn("operation = 2", cage_block)
+        lion_block = scene[scene.find('[node name="LionProp"') : scene.find('[node name="WallWalk"')]
+        self.assertIn("CollisionShape3D", lion_block)
+        self.assertNotIn("Box_appoint", scene)
+        self.assertNotIn("Box_embassy", scene)
         self.assertNotIn('[node name="Jeronimo"', scene)
         self.assertNotIn("GPUParticles3D", scene)
         cage_at = scene.find('[node name="CageZone"')
+        hall_at = scene.find('[node name="HallZone"')
         self.assertGreaterEqual(cage_at, 0)
+        self.assertGreaterEqual(hall_at, 0)
         self.assertIn("collision_mask = 130", scene[cage_at : cage_at + 280])
+        self.assertIn("collision_mask = 130", scene[hall_at : hall_at + 280])
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -185,6 +196,17 @@ class TestA3LeonLionScene(unittest.TestCase):
             _aabb_overlap(horse_min, horse_max, zmin, zmax),
             f"CageZone overlaps Horse spawn {horse}",
         )
+        self.assertAlmostEqual(origin[2], 12.0, delta=0.6)
+        hall_min, hall_max = _zone_aabb(scene, "HallZone", "Box_hall")
+        hall_origin = _origin(scene, "HallZone")
+        self.assertFalse(
+            _aabb_overlap(cid_min, cid_max, hall_min, hall_max),
+            f"HallZone {hall_origin} overlaps Cid spawn {cid}",
+        )
+        self.assertFalse(
+            _aabb_overlap(horse_min, horse_max, hall_min, hall_max),
+            f"HallZone overlaps Horse spawn {horse}",
+        )
         lion = _origin(scene, "LionProp")
         cage = _origin(scene, "LionCage")
         self.assertGreater(
@@ -202,6 +224,8 @@ class TestA3LeonLionScene(unittest.TestCase):
         self.assertLess(abs(ferran[0] - bench[0]), 0.6)
         self.assertLess(abs(ferran[2] - bench[2]), 0.6)
         self.assertLess(ferran[1], 0.4)
+        ferran_block = scene[scene.find('[node name="Ferran"') : scene.find('[node name="Diego"')]
+        self.assertIn("0, 1, 0, -1, 0", ferran_block)
         self.assertLess(abs(diego[0] - bed[0]), 1.2)
         self.assertLess(abs(diego[2] - bed[2]), 1.6)
         ferran_json = json.loads(_read("data/characters/ferran_gonzalez.json"))
@@ -226,6 +250,8 @@ class TestA3LeonLionScene(unittest.TestCase):
             "func is_cage_closed",
             "func is_lion_escaped",
             "func is_cid_asleep",
+            "func on_sleep_input",
+            "func _dest_ready",
         ):
             self.assertIn(name, source, name)
         self.assertIn("lion_mesura", source)
@@ -234,10 +260,18 @@ class TestA3LeonLionScene(unittest.TestCase):
         self.assertIn("diego_hid_leon", source)
         self.assertIn("infantes_cowardice_leon", source)
         self.assertIn("set_holding", source)
+        self.assertIn("mesura_max", source)
+        self.assertIn("set_chapter_asleep", source)
+        self.assertIn("panic", source)
+        self.assertIn("BUCAR_SCENE", source)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("tizona", source.lower())
         self.assertNotIn("flute", source.lower())
         self.assertNotIn("a3_corpes", source)
+        cid = _read("game/actors/player/cid_controller.gd")
+        self.assertIn("chapter_asleep", cid)
+        self.assertIn("_apply_sleep_pose", cid)
+        self.assertIn("_notify_chapter_sleep_input", cid)
 
     def test_honor_events_mesura_dump_costs_honra(self) -> None:
         payload = json.loads(_read("data/honor_events/core.json"))
@@ -273,11 +307,13 @@ class TestA3LeonLionScene(unittest.TestCase):
             "a3_leon.rage_done",
             "a3_leon.returned",
             "a3_leon.no_kill",
+            "a3_leon.no_mesura",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
         self.assertIn("mesura", rows["a3_leon.joke"]["es"].lower())
+        self.assertIn("mesura_max", rows["a3_leon.no_mesura"]["es"])
         self.assertIn("banco", rows["a3_leon.ferran_hide"]["es"].lower())
         self.assertIn("solar", rows["a3_leon.diego_hide"]["es"].lower())
         self.assertIn("jaula", rows["a3_leon.returned"]["es"].lower())
@@ -308,8 +344,15 @@ class TestA3LeonLionScene(unittest.TestCase):
         types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
         self.assertIn("dialogue", types)
         self.assertIn("choice", types)
-        self.assertIn("honor_event", types)
         self.assertIn("blocking", types)
+        self.assertNotIn("honor_event", types)
+        choice = next(
+            step
+            for step in beats["steps"]
+            if isinstance(step, dict) and step.get("id") == "mesura_or_rage"
+        )
+        self.assertEqual(choice.get("white"), "lion_mesura")
+        self.assertEqual(choice.get("red"), "lion_rage")
         flags = []
         for step in beats["steps"]:
             if isinstance(step, dict):

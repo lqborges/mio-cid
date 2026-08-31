@@ -51,6 +51,8 @@ class TestCidController(unittest.TestCase):
         self.assertIn("_lock_isometric_camera", source)
         self.assertIn("click_move", source)
         self.assertIn("dodge", source)
+        self.assertIn("chapter_asleep", source)
+        self.assertIn("_apply_sleep_pose", source)
         self.assertNotRegex(source, re.compile(r"^func roll\b", re.MULTILINE))
         self.assertNotIn("SpringArm3D", source)
         self.assertNotRegex(source, re.compile(r"yaw\s*\+="))

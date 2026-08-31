@@ -89,6 +89,9 @@ func _check_scene_loads() -> PackedStringArray:
 		"Diego",
 		"Mesnada",
 		"CageZone",
+		"HallZone",
+		"LionProp/CollisionShape3D",
+		"LionCage/Door",
 		"PlaceName",
 	]:
 		if _world.get_node_or_null(path) == null:
@@ -140,6 +143,9 @@ func _check_cage_open_and_infantes_hide() -> PackedStringArray:
 		failures.append("lion must start escaped")
 	if _world.has_method("is_cid_asleep") and not bool(_world.is_cid_asleep()):
 		failures.append("Cid must start asleep")
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and "chapter_asleep" in cid and not bool(cid.chapter_asleep):
+		failures.append("CidController.chapter_asleep must start true")
 	var gate: Node = _world.get_node_or_null("LionCage/CageGate")
 	if gate and "visible" in gate and bool(gate.visible):
 		failures.append("CageGate must start hidden (open)")
@@ -216,6 +222,13 @@ func _check_zones_accept_player() -> PackedStringArray:
 		return failures
 	if (zone.collision_mask & 130) != 130:
 		failures.append("CageZone must listen for player and horse, mask %s" % zone.collision_mask)
+	if zone.global_position.z < 11.0 or zone.global_position.z > 13.0:
+		failures.append("CageZone must sit on the south threshold, z %s" % zone.global_position.z)
+	var hall: Area3D = _world.get_node_or_null("HallZone") as Area3D
+	if hall == null:
+		failures.append("HallZone missing")
+	elif (hall.collision_mask & 130) != 130:
+		failures.append("HallZone must listen for player and horse, mask %s" % hall.collision_mask)
 	return failures
 
 
@@ -234,6 +247,14 @@ func _check_spawn_does_not_auto_flow() -> PackedStringArray:
 		failures.append("ChoiceUI must stay hidden on spawn")
 	if _world.has_method("is_cid_asleep") and not bool(_world.is_cid_asleep()):
 		failures.append("Cid must stay asleep on spawn")
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and "chapter_asleep" in cid and not bool(cid.chapter_asleep):
+		failures.append("sleep flag must survive four physics frames")
+	var visual: Node3D = cid.get_node_or_null("Visual") as Node3D if cid else null
+	if visual and visual.rotation_degrees.x < 45.0:
+		failures.append("sleep pose must hold after look_at; got %s" % visual.rotation_degrees)
+	if "_spawn_idle_done" in _world and not bool(_world.get("_spawn_idle_done")):
+		failures.append("wake input must arm after four physics frames")
 	return failures
 
 
@@ -248,11 +269,24 @@ func _check_joke_then_choice() -> PackedStringArray:
 	get_root().add_child(world)
 	_logged.clear()
 	_completed.clear()
+	for _i in range(4):
+		await physics_frame
+	if bool(world.get("_joke_played")):
+		failures.append("joke must wait for wake input")
+	if world.has_method("on_sleep_input"):
+		world.call("on_sleep_input")
+	if bool(world.get("_asleep")):
+		failures.append("on_sleep_input after idle must wake Cid")
 	if not world.has_method("run_joke"):
 		failures.append("world missing run_joke")
 		world.free()
 		return failures
-	await world.run_joke()
+	for _j in range(45):
+		if bool(world.get("_joke_played")):
+			break
+		await process_frame
+	if not bool(world.get("_joke_played")):
+		await world.run_joke()
 	if bool(world.get("_returned")):
 		failures.append("joke must not skip to returning the lion")
 	if "lion_mesura" in _logged or "lion_rage" in _logged:
@@ -337,8 +371,12 @@ func _check_mesura_path_returns_lion() -> PackedStringArray:
 		for flag in HIDE_FLAGS:
 			if flag not in flags:
 				failures.append("cowardice flag dropped after return: %s" % flag)
-		if String(_runner.current_id) != "a3_bucar":
-			failures.append("mesura travel must land on a3_bucar, got %s" % _runner.current_id)
+		if String(_runner.current_id) != "a3_leon":
+			failures.append("return must stay on a3_leon until Búcar ships, got %s" % _runner.current_id)
+		if bool(world.get("_left")):
+			failures.append("must not _left into missing a3_bucar")
+		if _runner.has_method("can_travel") and not bool(_runner.can_travel(&"a3_leon", &"a3_bucar", flags)):
+			failures.append("lion_returned must open leon -> bucar")
 	var cid: Node = world.get_node_or_null("Cid")
 	var mesura: Node = cid.get_node_or_null("Mesura") if cid else null
 	if mesura == null and cid:

@@ -139,6 +139,7 @@ a3_leon.escaped,El león ha salido de la jaula.,The lion has come out of the cag
 a3_leon.wake,Me levanto. El león está en la sala.,I rise. The lion is in the hall.
 a3_leon.ring,"La mesnada os rodea, mio Cid. El león anda suelto.","The mesnada rings you, my Cid. The lion walks loose."
 a3_leon.joke,Los infantes no tienen mesura. Eso es el chiste.,The infantes have no mesura. That is the joke.
+a3_leon.no_mesura,Ferrán González: mesura_max 0.,Ferrán González: mesura_max 0.
 a3_leon.ferran_hide,Ferrán se metió debajo del banco.,Ferrán crawled under the bench.
 a3_leon.diego_hide,Diego se escondió en el solar.,Diego hid in the solar.
 a3_leon.choice_prompt,¿Cómo volvéis el león a la jaula?,How do you return the lion to the cage?
