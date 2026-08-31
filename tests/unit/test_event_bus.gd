@@ -22,6 +22,7 @@ func _check_autoloads_are_nodes() -> PackedStringArray:
 		"TreasuryService",
 		"GameState",
 		"Loc",
+		"DialogueManager",
 	])
 	for name in names:
 		var node: Node = get_root().get_node_or_null(NodePath(name))

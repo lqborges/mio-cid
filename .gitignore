@@ -17,6 +17,10 @@ user://
 # Compiled translation binaries generated from CSV
 *.translation
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Mono / C# (this project is GDScript-only in game/)
 .mono/
 data_*/
