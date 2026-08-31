@@ -351,6 +351,9 @@ member_id = &"muno_gustioz"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0.05, 11.2)
 character_id = &"ferran_gonzalez"
 
+[node name="HurtBox" parent="Infantes/Ferran" index="2"]
+spectator = true
+
 [node name="Name" type="Label3D" parent="Infantes/Ferran"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
 pixel_size = 0.010
@@ -363,6 +366,9 @@ font_size = 24
 [node name="Diego" parent="Infantes" instance=ExtResource("7_dummy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.05, 11.2)
 character_id = &"diego_gonzalez"
+
+[node name="HurtBox" parent="Infantes/Diego" index="2"]
+spectator = true
 
 [node name="Name" type="Label3D" parent="Infantes/Diego"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)

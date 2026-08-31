@@ -564,12 +564,13 @@ func _hide_choice() -> void:
 
 
 func _finish_beat() -> void:
-	if EventBus and EventBus.has_signal("beat_completed"):
-		EventBus.beat_completed.emit(BEAT_ID)
-	_checkpoint()
-	if not _dest_ready():
+	if _left:
 		return
-	_travel(DEST)
+	# ChapterRunner.travel emits beat_completed; only emit here if travel does not run.
+	if not _dest_ready() or not _travel(DEST):
+		if EventBus and EventBus.has_signal("beat_completed"):
+			EventBus.beat_completed.emit(BEAT_ID)
+		_checkpoint()
 
 
 func _dest_ready() -> bool:

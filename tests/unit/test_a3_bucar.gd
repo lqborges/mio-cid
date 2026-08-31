@@ -46,10 +46,12 @@ func _run() -> void:
 		failures.append_array(_check_zones_accept_horse())
 		failures.append_array(_check_spanish_copy())
 		failures.append_array(await _check_spawn_does_not_auto_flow())
+		failures.append_array(_check_infantes_not_killable())
 		_world.free()
 		_world = null
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_battle_flees_without_tizona())
+	failures.append_array(_check_death_only_win_hides_infantes())
 	failures.append_array(_check_win_keeps_tizona_in_hand())
 	failures.append_array(await _check_win_line_keeps_tizona())
 	failures.append_array(_check_graph_spine())
@@ -240,6 +242,23 @@ func _check_spawn_does_not_auto_flow() -> PackedStringArray:
 	return failures
 
 
+func _check_infantes_not_killable() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	for path in ["Infantes/Ferran", "Infantes/Diego"]:
+		var body: Node = _world.get_node_or_null(path)
+		if body == null:
+			failures.append("%s missing" % path)
+			continue
+		var hurt: Node = body.get_node_or_null("HurtBox")
+		if hurt == null:
+			continue
+		if "spectator" in hurt and not bool(hurt.get("spectator")):
+			failures.append("%s HurtBox must be spectator so the Infantes cannot be cut down" % path)
+		if hurt.has_method("can_take_hit") and bool(hurt.call("can_take_hit")):
+			failures.append("%s must not be a killable HurtBox" % path)
+	return failures
+
+
 func _check_thinner_refuse_wedge() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_prep_campaign()
@@ -346,6 +365,77 @@ func _check_battle_flees_without_tizona() -> PackedStringArray:
 	if pero and pero.global_position.distance_to(Vector3(-1.8, 0.05, 11.2)) > 0.8:
 		failures.append("Pero Bermúdez must cover the Infantes' gap")
 	world.free()
+	return failures
+
+
+func _check_death_only_win_hides_infantes() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("death-only: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	_logged.clear()
+	_fails.clear()
+	_completed.clear()
+	if bool(world.get("_fled")) or bool(world.get("_won")):
+		failures.append("death-only: world must start unfled")
+		world.free()
+		return failures
+	var bucar: Node = world.get_node_or_null("Host/Bucar")
+	var hurt: Node = bucar.get_node_or_null("HurtBox") if bucar else null
+	if hurt and hurt.has_signal("died"):
+		hurt.died.emit()
+	elif world.has_method("_on_bucar_died"):
+		world.call("_on_bucar_died")
+	else:
+		failures.append("death-only: cannot fire Búcar died")
+		world.free()
+		return failures
+	if not bool(world.get("_won")):
+		failures.append("killing Búcar without BattleZone must still win")
+	if not bool(world.get("_fled")):
+		failures.append("death-only win must still record the Infantes fleeing")
+	if not bool(world.get("_covered")):
+		failures.append("death-only win must still record captains covering")
+	if _runner:
+		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		for flag in COWARDICE_FLAGS:
+			if flag not in flags:
+				failures.append("cowardice flag missing after death-only win: %s" % flag)
+		if "tizona_acquired" not in flags:
+			failures.append("death-only win must set tizona_acquired")
+	var item: SwordItem = _tizona()
+	if item == null or item.phase != SwordItem.Phase.IN_HAND:
+		failures.append("death-only win must keep Tizona IN_HAND")
+	elif item.lootable():
+		failures.append("death-only Tizona must not become loot")
+	failures.append_array(_assert_infantes_hidden(world, "death-only"))
+	world.free()
+	return failures
+
+
+func _assert_infantes_hidden(world: Node, label: String) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var ferran: Node = world.get_node_or_null("Infantes/Ferran")
+	if ferran == null:
+		failures.append("%s: Ferran missing after flee" % label)
+		return failures
+	if ferran.process_mode != Node.PROCESS_MODE_DISABLED:
+		failures.append("%s: Ferran must PROCESS_MODE_DISABLED after flee" % label)
+	if ferran is CollisionObject3D and int((ferran as CollisionObject3D).collision_layer) != 0:
+		failures.append("%s: Ferran collision_layer must be 0 after flee, got %s" % [label, (ferran as CollisionObject3D).collision_layer])
+	var ferran_hurt: Area3D = ferran.get_node_or_null("HurtBox") as Area3D
+	if ferran_hurt:
+		if ferran_hurt.monitorable:
+			failures.append("%s: Ferran HurtBox must not be monitorable after flee" % label)
+		if ferran_hurt.collision_layer != 0:
+			failures.append("%s: Ferran HurtBox collision_layer must be 0 after flee" % label)
+	var diego: Node = world.get_node_or_null("Infantes/Diego")
+	if diego and diego is CollisionObject3D and int((diego as CollisionObject3D).collision_layer) != 0:
+		failures.append("%s: Diego collision_layer must be 0 after flee" % label)
 	return failures
 
 

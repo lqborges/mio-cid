@@ -375,6 +375,10 @@ func _check_mesura_path_returns_lion() -> PackedStringArray:
 			failures.append("return must travel to a3_bucar, got %s" % _runner.current_id)
 		if not bool(world.get("_left")):
 			failures.append("return must leave for a3_bucar")
+		if _completed.count("a3_leon") > 1:
+			failures.append("beat_completed must not double-fire, got %s" % str(_completed))
+		if _completed.count("a3_leon") < 1:
+			failures.append("leave must emit beat_completed once, got %s" % str(_completed))
 		if _runner.has_method("can_travel") and not bool(_runner.can_travel(&"a3_leon", &"a3_bucar", flags)):
 			failures.append("lion_returned must open leon -> bucar")
 	var cid: Node = world.get_node_or_null("Cid")
@@ -399,6 +403,7 @@ func _check_rage_dump_costs_honra() -> PackedStringArray:
 	get_root().add_child(world)
 	_logged.clear()
 	_fails.clear()
+	_completed.clear()
 	var honra_before := 0.0
 	if _honor and _honor.state:
 		honra_before = float(_honor.state.honra)
@@ -426,6 +431,8 @@ func _check_rage_dump_costs_honra() -> PackedStringArray:
 			failures.append("rage dump must cost honra")
 	if not _fails.is_empty():
 		failures.append("rage path must not hard_fail: %s" % ", ".join(_fails))
+	if _completed.count("a3_leon") > 1:
+		failures.append("rage leave must not double-fire beat_completed, got %s" % str(_completed))
 	world.free()
 	return failures
 

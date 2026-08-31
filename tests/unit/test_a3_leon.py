@@ -264,6 +264,8 @@ class TestA3LeonLionScene(unittest.TestCase):
         self.assertIn("set_chapter_asleep", source)
         self.assertIn("panic", source)
         self.assertIn("BUCAR_SCENE", source)
+        leave = source.split("func _finish_beat", 1)[1].split("func _dest_ready", 1)[0]
+        self.assertIn("not _dest_ready() or not _travel", leave)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("tizona", source.lower())
         self.assertNotIn("flute", source.lower())

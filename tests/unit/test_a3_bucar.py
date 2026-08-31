@@ -161,6 +161,12 @@ class TestA3BucarTizona(unittest.TestCase):
         self.assertIn('character_id = &"bucar"', scene)
         self.assertIn('character_id = &"ferran_gonzalez"', scene)
         self.assertIn('character_id = &"diego_gonzalez"', scene)
+        ferran_block = scene[scene.find('[node name="Ferran"') : scene.find('[node name="Diego"')]
+        diego_block = scene[scene.find('[node name="Diego"') : scene.find('[node name="Host"')]
+        bucar_block = scene[scene.find('[node name="Bucar"') : scene.find('[node name="Dummy1"')]
+        self.assertIn("spectator = true", ferran_block)
+        self.assertIn("spectator = true", diego_block)
+        self.assertNotIn("spectator = true", bucar_block)
         self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
         self.assertIn("NavigationRegion3D", scene)
         self.assertNotIn('[node name="RestZone"', scene)
@@ -223,6 +229,14 @@ class TestA3BucarTizona(unittest.TestCase):
         self.assertIn("MesnadaMember.from_id", source)
         self.assertIn("goto", source)
         self.assertIn("ResourceLoader.exists", source)
+        self.assertIn("_protect_infantes", source)
+        self.assertIn("spectator", source)
+        finish = source.split("func _finish_win", 1)[1].split("func try_travel", 1)[0]
+        self.assertLess(finish.find("start_flee"), finish.find("_won = true"))
+        self.assertNotIn("if _fled or _won", source)
+        self.assertNotIn("if _covered or _won", source)
+        leave = source.split("func _leave_for_despedida", 1)[1].split("func _dest_ready", 1)[0]
+        self.assertIn("not _dest_ready() or not _travel", leave)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn('apply_id(&"tizona")', source)
         self.assertNotIn('apply_id("tizona")', source)
@@ -355,6 +369,25 @@ class TestA3BucarTizona(unittest.TestCase):
         self.assertEqual(bucar_out.get("set_flags"), ["tizona_acquired"])
         node = next(n for n in graph["nodes"] if n["id"] == "a3_bucar")
         self.assertEqual(node["scene"], "res://content/chapters/a3_bucar/world.tscn")
+
+    def test_ci_keeps_leon_and_runs_bucar_after_import(self) -> None:
+        workflow = _read(".github/workflows/import-and-test.yml")
+        self.assertIn("Run Python a3_leon tests", workflow)
+        self.assertIn("Run Python a3_bucar tests", workflow)
+        self.assertIn("tests/unit/test_a3_leon.py", workflow)
+        self.assertIn("tests/unit/test_a3_bucar.py", workflow)
+        self.assertIn("Run a3_leon lion scene headless test", workflow)
+        self.assertIn("Run a3_bucar shore/Tizona headless test", workflow)
+        self.assertIn("res://tests/unit/test_a3_leon.gd", workflow)
+        self.assertIn("res://tests/unit/test_a3_bucar.gd", workflow)
+        leon_py = workflow.find("Run Python a3_leon tests")
+        bucar_py = workflow.find("Run Python a3_bucar tests")
+        imported = workflow.find("Import project")
+        leon_gd = workflow.find("res://tests/unit/test_a3_leon.gd")
+        bucar_gd = workflow.find("res://tests/unit/test_a3_bucar.gd")
+        self.assertLess(leon_py, bucar_py)
+        self.assertLess(imported, leon_gd)
+        self.assertLess(imported, bucar_gd)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

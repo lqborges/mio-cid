@@ -48,6 +48,7 @@ func _ready() -> void:
 	_hide_plazo_bar()
 	_ensure_tizona()
 	_bind_bucar()
+	_protect_infantes()
 	_connect_host()
 	_connect_battle_zone()
 	_cache_cover_marks()
@@ -72,7 +73,7 @@ func run_battle() -> void:
 
 
 func start_flee(_cue: String = "flee") -> void:
-	if _fled or _won:
+	if _fled:
 		return
 	_battle_started = true
 	_fled = true
@@ -90,7 +91,7 @@ func run_flee() -> void:
 
 
 func start_cover(_cue: String = "cover") -> void:
-	if _covered or _won:
+	if _covered:
 		return
 	if not _fled:
 		start_flee()
@@ -149,9 +150,10 @@ func start_win(_cue: String = "win") -> void:
 func _finish_win() -> void:
 	if _won:
 		return
-	_won = true
+	# Flee/cover before _won so a death-only win still hides the Infantes.
 	if not _fled:
 		start_flee()
+	_won = true
 	_hold_mesnada()
 	_disable_host()
 	_apply_honor(WIN_EVENT)
@@ -176,12 +178,13 @@ func can_leave_to_despedida() -> bool:
 
 
 func _leave_for_despedida() -> void:
-	if EventBus and EventBus.has_signal("beat_completed"):
-		EventBus.beat_completed.emit(BEAT_ID)
-	_checkpoint()
-	if not _dest_ready():
+	if _left:
 		return
-	_travel(DEST)
+	# ChapterRunner.travel emits beat_completed; only emit here if travel does not run.
+	if not _dest_ready() or not _travel(DEST):
+		if EventBus and EventBus.has_signal("beat_completed"):
+			EventBus.beat_completed.emit(BEAT_ID)
+		_checkpoint()
 
 
 func _dest_ready() -> bool:
@@ -229,6 +232,21 @@ func _bind_bucar() -> void:
 
 func _on_bucar_died() -> void:
 	_finish_win()
+
+
+func _protect_infantes() -> void:
+	# Plot Infantes must not be DummyEnemy kill targets (JSON stays unkillable: false).
+	for path in ["Infantes/Ferran", "Infantes/Diego"]:
+		var body: Node = get_node_or_null(path)
+		if body == null:
+			continue
+		var hurt: Node = body.get_node_or_null("HurtBox")
+		if hurt == null:
+			continue
+		if "spectator" in hurt:
+			hurt.spectator = true
+		if hurt.has_method("_apply_collision"):
+			hurt.call("_apply_collision")
 
 
 func _connect_host() -> void:
