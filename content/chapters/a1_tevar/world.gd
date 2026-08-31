@@ -18,10 +18,13 @@ const DIALOGUE_PATH := "res://content/chapters/a1_tevar/tevar.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 
 var colada: SwordItem
+var last_dialogue_speakers: PackedStringArray = PackedStringArray()
+var last_dialogue_keys: PackedStringArray = PackedStringArray()
 var _battle_started: bool = false
 var _captured: bool = false
 var _hunger_played: bool = false
 var _ate: bool = false
+var _eat_started: bool = false
 var _talking: bool = false
 var _left: bool = false
 
@@ -68,8 +71,10 @@ func complete_capture() -> void:
 		return
 	_battle_started = true
 	_captured = true
+	_hold_mesnada()
 	_disable_host_except_ramon()
 	_seat_count()
+	_restore_living_seated(_ramon())
 	_whisper(CAPTURE_KEY)
 	_set_zone_monitoring("BattleZone", false)
 	_set_zone_monitoring("TableZone", true)
@@ -120,17 +125,42 @@ func start_cue(cue: String) -> void:
 		choose_eat()
 
 
+func run_eat() -> void:
+	# Headless: skip ~ eat balloon so same-frame tests can assert Colada.
+	if not _captured:
+		run_battle()
+	_eat_started = true
+	_finish_eat()
+
+
 func choose_eat() -> void:
-	if _ate:
+	if _ate or _eat_started:
 		return
 	if not _captured:
 		run_battle()
+	_eat_started = true
+	_hide_choice()
+	_talking = true
+	var resource := _load_dialogue()
+	if resource == null:
+		_talking = false
+		_finish_eat()
+		return
+	if _try_balloon(resource, "eat"):
+		return
+	await _walk_lines(resource, "eat")
+	_talking = false
+	_finish_eat()
+
+
+func _finish_eat() -> void:
+	if _ate:
+		return
 	_ate = true
 	_hunger_played = true
 	_hide_choice()
 	_apply_honor(FEED_EVENT)
 	_acquire_colada()
-	_whisper(EAT_KEY)
 	_whisper(COLADA_KEY)
 	_leave_for_murviedro()
 
@@ -207,7 +237,13 @@ func _bind_ramon() -> void:
 		ramon.set("character_id", RAMON_ID)
 	var member := MesnadaMember.from_id(RAMON_ID)
 	if member and "unkillable" in ramon:
+		# Keep the pinewood fight killable; capture restores a living seat.
 		ramon.unkillable = member.unkillable
+	var mesh: MeshInstance3D = ramon.get_node_or_null("Visual/MeshInstance3D") as MeshInstance3D
+	if mesh:
+		var mat := mesh.get_active_material(0)
+		if mat is StandardMaterial3D:
+			ramon.set_meta("alive_albedo", (mat as StandardMaterial3D).albedo_color)
 	var hurt: Node = ramon.get_node_or_null("HurtBox")
 	if hurt and hurt.has_signal("died") and not hurt.died.is_connected(_on_ramon_died):
 		hurt.died.connect(_on_ramon_died)
@@ -241,16 +277,34 @@ func _seat_count() -> void:
 		return
 	if ramon is Node3D:
 		(ramon as Node3D).global_position = seat.global_position
-	_disarm_captured(ramon)
 
 
-func _disarm_captured(body: Node) -> void:
+func _restore_living_seated(body: Node) -> void:
+	# 0 HP is capture; restore a living seated pose before hunger.
+	if body == null:
+		return
+	body.process_mode = Node.PROCESS_MODE_DISABLED
+	if body is CharacterBody3D:
+		(body as CharacterBody3D).velocity = Vector3.ZERO
 	if body is CollisionObject3D:
 		(body as CollisionObject3D).collision_layer = 0
 	var hurt: Area3D = body.get_node_or_null("HurtBox") as Area3D
 	if hurt:
-		hurt.set_deferred("monitorable", false)
+		if "hp" in hurt and "max_hp" in hurt:
+			hurt.hp = hurt.max_hp
+		hurt.monitorable = false
 		hurt.collision_layer = 0
+	if not body.has_meta("alive_albedo"):
+		return
+	var mesh: MeshInstance3D = body.get_node_or_null("Visual/MeshInstance3D") as MeshInstance3D
+	if mesh == null:
+		return
+	var mat := mesh.get_active_material(0)
+	var live: StandardMaterial3D = StandardMaterial3D.new()
+	if mat is StandardMaterial3D:
+		live = (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+	live.albedo_color = body.get_meta("alive_albedo")
+	mesh.material_override = live
 
 
 func _disable_host_except_ramon() -> void:
@@ -265,6 +319,8 @@ func _disable_host_except_ramon() -> void:
 
 
 func _set_body_active(node: Node, active: bool) -> void:
+	# PROCESS_MODE_DISABLED still leaves bodies on the physics server.
+	node.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if node is CollisionObject3D:
 		var body := node as CollisionObject3D
 		if not body.has_meta("host_layer"):
@@ -338,6 +394,14 @@ func _form_wedge() -> void:
 		mesnada.plant_banner_at_leader()
 	if mesnada.has_method("set_order"):
 		mesnada.set_order(&"charge")
+
+
+func _hold_mesnada() -> void:
+	var mesnada: Node = get_node_or_null("Mesnada")
+	if mesnada == null:
+		return
+	if mesnada.has_method("set_order"):
+		mesnada.set_order(&"hold")
 
 
 func _bind_mesnada() -> void:
@@ -457,6 +521,9 @@ func _on_dialogue_ended(_resource: Variant = null) -> void:
 	if dm and dm.has_signal("dialogue_ended") and dm.dialogue_ended.is_connected(_on_dialogue_ended):
 		dm.dialogue_ended.disconnect(_on_dialogue_ended)
 	_talking = false
+	if _eat_started and not _ate:
+		_finish_eat()
+		return
 	if _captured and not _ate:
 		_show_choice()
 
@@ -475,17 +542,29 @@ func _try_balloon(resource: Resource, cue: String) -> bool:
 
 
 func _walk_lines(resource: Resource, cue: String) -> void:
+	last_dialogue_speakers = PackedStringArray()
+	last_dialogue_keys = PackedStringArray()
 	var dm := _dialogue_manager()
 	if dm == null or not dm.has_method("get_next_dialogue_line"):
 		return
 	var line: Variant = await dm.get_next_dialogue_line(resource, cue)
 	while line != null:
+		_record_dialogue_line(line)
 		var next_id := ""
 		if typeof(line) == TYPE_OBJECT and "next_id" in line:
 			next_id = str(line.next_id)
 		if next_id.is_empty() or next_id == "end":
 			break
 		line = await dm.get_next_dialogue_line(resource, next_id)
+
+
+func _record_dialogue_line(line: Variant) -> void:
+	if typeof(line) != TYPE_OBJECT:
+		return
+	if "character" in line:
+		last_dialogue_speakers.append(str(line.character))
+	if "text" in line:
+		last_dialogue_keys.append(str(line.text))
 
 
 func _load_dialogue() -> Resource:

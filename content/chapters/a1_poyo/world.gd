@@ -145,7 +145,16 @@ func _travel(to_id: StringName) -> bool:
 		return false
 	if "current_id" in runner:
 		runner.current_id = BEAT_ID
-	return bool(runner.travel(to_id))
+	if not bool(runner.travel(to_id)):
+		return false
+	# travel() only advances the graph; goto swaps the greybox.
+	var loop := Engine.get_main_loop()
+	var tree: SceneTree = loop as SceneTree if loop is SceneTree else null
+	if tree == null or tree.current_scene != self:
+		return true
+	if runner.has_method("goto"):
+		runner.goto(to_id)
+	return true
 
 
 func _can_travel(to_id: StringName) -> bool:
