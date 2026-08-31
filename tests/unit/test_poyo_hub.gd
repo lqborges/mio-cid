@@ -28,6 +28,7 @@ func _initialize() -> void:
 	failures.append_array(_test_second_visit_skips_intro())
 	failures.append_array(_test_cannot_return_to_cardena())
 	failures.append_array(_test_cannot_skip_tevar())
+	failures.append_array(await _test_tevar_exit_changes_scene())
 	failures.append_array(_test_extra_raid_closed())
 	failures.append_array(_test_skip_repeatable_travel())
 	failures.append_array(_test_mesnada_can_camp())
@@ -160,6 +161,49 @@ func _test_cannot_skip_tevar() -> PackedStringArray:
 			failures.append("Poyo -> Tévar travel should succeed")
 		if String(_runner.current_id) != "a1_tevar":
 			failures.append("forward exit must land on a1_tevar")
+	return failures
+
+
+func _test_tevar_exit_changes_scene() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	await process_frame
+	var flags := PackedStringArray(["poyo_named", "hub_lock_cardena"])
+	if _runner != null and _runner.has_method("restore"):
+		_runner.restore(&"a1_poyo", flags)
+	var packed: Resource = load(WORLD_PATH)
+	if packed == null or not (packed is PackedScene):
+		failures.append("poyo world failed to load for TevarExit")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	current_scene = world
+	if not world.has_method("travel_to_tevar"):
+		failures.append("poyo missing travel_to_tevar")
+		world.free()
+		current_scene = null
+		return failures
+	if not bool(world.call("travel_to_tevar")):
+		failures.append("TevarExit travel_to_tevar must succeed")
+		if is_instance_valid(world):
+			world.free()
+		current_scene = null
+		return failures
+	for _i in range(8):
+		await process_frame
+	var scene := current_scene
+	var path := ""
+	if scene != null:
+		path = str(scene.scene_file_path)
+	if path.find("a1_tevar/world.tscn") < 0:
+		failures.append("Poyo TevarExit must change_scene into a1_tevar/world.tscn, got %s" % path)
+	if is_instance_valid(world) and world != current_scene:
+		world.queue_free()
+	if current_scene != null:
+		var leftover: Node = current_scene
+		current_scene = null
+		leftover.queue_free()
+	await process_frame
+	await process_frame
 	return failures
 
 

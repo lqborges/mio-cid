@@ -50,6 +50,9 @@ func _run() -> void:
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_battle_captures_without_colada())
 	failures.append_array(_check_eat_keeps_colada_in_hand())
+	failures.append_array(await _check_hunger_presents_eat_line())
+	failures.append_array(_check_new_game_resets_swords())
+	failures.append_array(await _check_poyo_exit_loads_tevar())
 	failures.append_array(_check_cannot_skip_tevar())
 	failures.append_array(_check_hub_lock_still_blocks_cardena())
 	_finish(failures)
@@ -330,6 +333,48 @@ func _check_battle_captures_without_colada() -> PackedStringArray:
 	if ramon is Node3D and seat:
 		if ramon.global_position.distance_to(seat.global_position) > 0.4:
 			failures.append("captured Ramón must sit at the table")
+	if ramon:
+		if ramon.process_mode != Node.PROCESS_MODE_DISABLED:
+			failures.append("captured Ramón must sit with process off")
+		if ramon is CollisionObject3D and int((ramon as CollisionObject3D).collision_layer) != 0:
+			failures.append("captured Ramón combat layer must be 0")
+		if "unkillable" in ramon and bool(ramon.get("unkillable")):
+			failures.append("Ramón must stay killable; capture is not unkillable")
+		var hurt: Node = ramon.get_node_or_null("HurtBox")
+		if hurt == null:
+			failures.append("seated Ramón missing HurtBox")
+		else:
+			if "hp" in hurt and "max_hp" in hurt and not is_equal_approx(float(hurt.hp), float(hurt.max_hp)):
+				failures.append("seated Ramón hp must be restored")
+			if hurt is Area3D and (hurt as Area3D).monitorable:
+				failures.append("seated Ramón HurtBox must not be monitorable")
+		var mesh: MeshInstance3D = ramon.get_node_or_null("Visual/MeshInstance3D") as MeshInstance3D
+		if mesh:
+			var mat: Material = mesh.material_override
+			if mat == null:
+				mat = mesh.get_active_material(0)
+			if mat is StandardMaterial3D:
+				var c: Color = (mat as StandardMaterial3D).albedo_color
+				if is_equal_approx(c.r, 0.28) and is_equal_approx(c.g, 0.26) and is_equal_approx(c.b, 0.24):
+					failures.append("seated Ramón must not keep the death-grey mesh")
+	var dummy: Node = world.get_node_or_null("Host/Dummy1")
+	if dummy == null:
+		failures.append("Dummy1 missing after capture")
+	else:
+		if dummy.process_mode != Node.PROCESS_MODE_DISABLED:
+			failures.append("Dummy1 must PROCESS_MODE_DISABLED after capture")
+		if dummy is CollisionObject3D and int((dummy as CollisionObject3D).collision_layer) != 0:
+			failures.append("Dummy1 collision_layer must be 0 after capture, got %s" % (dummy as CollisionObject3D).collision_layer)
+		var dummy_hurt: Area3D = dummy.get_node_or_null("HurtBox") as Area3D
+		if dummy_hurt == null:
+			failures.append("Dummy1 HurtBox missing")
+		elif dummy_hurt.monitorable:
+			failures.append("Dummy1 HurtBox must not be monitorable after capture")
+		elif dummy_hurt.collision_layer != 0:
+			failures.append("Dummy1 HurtBox collision_layer must be 0 after capture")
+	var mesnada: Node = world.get_node_or_null("Mesnada")
+	if mesnada and str(mesnada.get("order")) != "hold":
+		failures.append("capture must hold the mesnada, order %s" % mesnada.get("order"))
 	var table: Area3D = world.get_node_or_null("TableZone") as Area3D
 	if table and not table.monitoring:
 		failures.append("TableZone must open after capture")
@@ -356,7 +401,11 @@ func _check_eat_keeps_colada_in_hand() -> PackedStringArray:
 	world.run_battle()
 	_logged.clear()
 	_completed.clear()
-	world.choose_eat()
+	if not world.has_method("run_eat"):
+		failures.append("world missing run_eat skip-cinematic path")
+		world.free()
+		return failures
+	world.run_eat()
 	if current_scene != scene_before:
 		failures.append("eat must not change_scene when current_scene != world (Murviedro is later)")
 	if "tevar_feed_count" not in _logged:
@@ -366,7 +415,7 @@ func _check_eat_keeps_colada_in_hand() -> PackedStringArray:
 	if not _fails.is_empty():
 		failures.append("eat must not hard_fail: %s" % ", ".join(_fails))
 	if not bool(world.get("_ate")):
-		failures.append("choose_eat must force the count to eat")
+		failures.append("run_eat must force the count to eat")
 	if _honor:
 		var event: HonorEvent = _honor.event_by_id(&"tevar_feed_count")
 		var want := honra_before
@@ -407,6 +456,136 @@ func _check_eat_keeps_colada_in_hand() -> PackedStringArray:
 	if ResourceLoader.exists(MURVIEDRO):
 		failures.append("goto must no-op because a2_murviedro is missing")
 	world.free()
+	return failures
+
+
+func _check_hunger_presents_eat_line() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("hunger: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	_logged.clear()
+	_completed.clear()
+	if not world.has_method("run_hunger"):
+		failures.append("world missing run_hunger")
+		world.free()
+		return failures
+	await world.run_hunger()
+	var ui: Node = world.find_child("TableChoice", true, false)
+	if ui == null or not bool(ui.visible):
+		failures.append("run_hunger must present TableChoice")
+	if bool(world.get("_ate")):
+		failures.append("hunger must not skip to eat")
+	var item: SwordItem = _colada()
+	if item and item.phase != SwordItem.Phase.NOT_YET:
+		failures.append("Colada must stay NOT_YET until the eat cue")
+	var flags: PackedStringArray = _runner.flags if _runner and "flags" in _runner else PackedStringArray()
+	if "colada_acquired" in flags:
+		failures.append("colada_acquired must wait until after Ramón eats")
+	if not world.has_method("choose_eat"):
+		failures.append("world missing choose_eat")
+		world.free()
+		return failures
+	await world.choose_eat()
+	var speakers: PackedStringArray = world.get("last_dialogue_speakers")
+	var keys: PackedStringArray = world.get("last_dialogue_keys")
+	var has_ramon := false
+	for speaker in speakers:
+		var lowered := str(speaker).to_lower()
+		if lowered.contains("ramón") or lowered.contains("ramon"):
+			has_ramon = true
+	if not has_ramon:
+		failures.append("eat cue must speak as Ramón before Colada, speakers %s" % str(speakers))
+	if "a1_tevar.eat_done" not in keys:
+		failures.append("eat cue must play a1_tevar.eat_done before colada_acquired, keys %s" % str(keys))
+	if "tevar_feed_count" not in _logged:
+		failures.append("eat after hunger must apply tevar_feed_count, logged %s" % str(_logged))
+	item = _colada()
+	if item == null or item.phase != SwordItem.Phase.IN_HAND:
+		failures.append("Colada IN_HAND must follow Ramón's eat line")
+	flags = _runner.flags if _runner and "flags" in _runner else PackedStringArray()
+	if "colada_acquired" not in flags:
+		failures.append("colada_acquired must follow Ramón's eat line")
+	world.free()
+	return failures
+
+
+func _check_new_game_resets_swords() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var colada: SwordItem = _colada()
+	var tizona: SwordItem = _tizona()
+	if colada:
+		colada.phase = SwordItem.Phase.IN_HAND
+	if tizona:
+		tizona.phase = SwordItem.Phase.IN_HAND
+	var packed: Resource = load("res://game/ui/main_menu.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("main_menu.tscn failed to load")
+		return failures
+	var menu: Node = (packed as PackedScene).instantiate()
+	root.add_child(menu)
+	if not menu.has_method("_reset_campaign"):
+		failures.append("main_menu missing _reset_campaign")
+		menu.free()
+		return failures
+	menu.call("_reset_campaign")
+	colada = _colada()
+	tizona = _tizona()
+	if colada == null or colada.phase != SwordItem.Phase.NOT_YET:
+		failures.append("New Game must reset Colada to NOT_YET, got %s" % (colada.phase_name() if colada else "missing"))
+	if tizona == null or tizona.phase != SwordItem.Phase.NOT_YET:
+		failures.append("New Game must reset Tizona to NOT_YET, got %s" % (tizona.phase_name() if tizona else "missing"))
+	menu.free()
+	return failures
+
+
+func _check_poyo_exit_loads_tevar() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	await process_frame
+	if _runner == null:
+		failures.append("ChapterRunner missing for Poyo TevarExit")
+		return failures
+	if _runner.has_method("restore"):
+		_runner.restore(&"a1_poyo", PackedStringArray(["poyo_named", "hub_lock_cardena", "horse_companion"]))
+	var packed: Resource = load("res://content/chapters/a1_poyo/world.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("a1_poyo/world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	current_scene = world
+	if not world.has_method("travel_to_tevar"):
+		failures.append("poyo missing travel_to_tevar")
+		world.free()
+		current_scene = null
+		return failures
+	if not bool(world.call("travel_to_tevar")):
+		failures.append("Poyo TevarExit travel_to_tevar must succeed")
+		if is_instance_valid(world):
+			world.free()
+		current_scene = null
+		return failures
+	for _i in range(8):
+		await process_frame
+	var scene := current_scene
+	var path := ""
+	if scene != null:
+		path = str(scene.scene_file_path)
+	if path.find("a1_tevar/world.tscn") < 0:
+		failures.append("Poyo TevarExit must change_scene into a1_tevar/world.tscn, got %s" % path)
+	if is_instance_valid(world) and world != current_scene:
+		world.queue_free()
+	if current_scene != null:
+		var leftover: Node = current_scene
+		current_scene = null
+		leftover.queue_free()
+	await process_frame
+	await process_frame
 	return failures
 
 

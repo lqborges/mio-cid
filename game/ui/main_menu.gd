@@ -64,6 +64,8 @@ func _reset_campaign() -> void:
 		TreasuryService.reset()
 	if CampaignClock:
 		CampaignClock.reset()
+	if GameState and GameState.has_method("reset_swords"):
+		GameState.reset_swords()
 	if ChapterRunner and ChapterRunner.has_method("reset"):
 		ChapterRunner.reset()
 	elif ChapterRunner:

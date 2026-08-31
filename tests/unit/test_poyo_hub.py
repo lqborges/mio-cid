@@ -80,6 +80,8 @@ class TestPoyoCampHub(unittest.TestCase):
         world = _read("content/chapters/a1_poyo/world.gd")
         self.assertNotIn("func _enter_tree", world)
         self.assertNotIn("clock.segment = 1", world)
+        self.assertIn("goto", world)
+        self.assertIn("current_scene != self", world)
 
     def test_graph_locks(self) -> None:
         self.assertEqual(validate_main([]), 0)

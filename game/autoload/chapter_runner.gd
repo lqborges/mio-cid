@@ -113,9 +113,9 @@ func goto(beat_id: StringName) -> void:
 	var path := _scene_path(beat_id)
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
-	var tree := get_tree()
-	if tree:
-		tree.change_scene_to_file(path)
+	var loop := Engine.get_main_loop()
+	if loop is SceneTree:
+		(loop as SceneTree).change_scene_to_file(path)
 
 
 func _scene_path(beat_id: StringName) -> String:
