@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="1_cid"]
 [ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="2_dummy"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="3_ai"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="4_captain"]
 
 [sub_resource type="Environment" id="Environment_arena"]
 background_mode = 1
@@ -25,6 +27,10 @@ roughness = 1.0
 [sub_resource type="StandardMaterial3D" id="Mat_box"]
 albedo_color = Color(0.62, 0.58, 0.5, 1)
 roughness = 1.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_arena"]
+vertices = PackedVector3Array(-20, 0.05, -20, 20, 0.05, -20, 20, 0.05, 20, -20, 0.05, 20)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
 
 [node name="Arena" type="Node3D"]
 
@@ -79,6 +85,42 @@ collision_mask = 0
 
 [node name="Cid" parent="." instance=ExtResource("1_cid")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_arena")
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("3_ai")
+leader_path = NodePath("../Cid")
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_box")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_box")
+cast_shadow = 0
+
+[node name="AlvarFanez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 2.4)
+member_id = &"alvar_fanez"
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 2.4)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 3.6)
+member_id = &"pero_bermudez"
 
 [node name="Dummies" type="Node3D" parent="."]
 

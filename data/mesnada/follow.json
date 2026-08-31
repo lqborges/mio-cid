@@ -1,0 +1,15 @@
+{
+  "follow_distance": 3.0,
+  "wedge_row_depth": 1.5,
+  "wedge_row_width": 1.6,
+  "arrive_distance": 0.4,
+  "walk_speed": 4.6,
+  "charge_speed": 7.2,
+  "flee_speed": 5.5,
+  "skinned_cap": 24,
+  "lod_distance": 25,
+  "impostor_distance": 40,
+  "visible_lanza_bodies": 8,
+  "nav_plane_half": 20,
+  "nav_plane_y": 0.05
+}

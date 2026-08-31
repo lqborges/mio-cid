@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_follower.gd" id="1_follower"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_captain"]
+albedo_color = Color(0.28, 0.26, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_skinned"]
+radius = 0.38
+height = 1.75
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_captain")
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_lod"]
+radius = 0.38
+height = 1.75
+radial_segments = 4
+rings = 1
+material = SubResource("Mat_captain")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_captain"]
+radius = 0.38
+height = 1.75
+
+[sub_resource type="StandardMaterial3D" id="Mat_facing"]
+albedo_color = Color(0.62, 0.5, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_facing"]
+size = Vector3(0.18, 0.14, 0.32)
+material = SubResource("Mat_facing")
+
+[node name="Captain" type="CharacterBody3D"]
+collision_layer = 8
+collision_mask = 1
+floor_snap_length = 0.25
+script = ExtResource("1_follower")
+kind = &"captain"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape_captain")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="MeshSkinned" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+cast_shadow = 0
+mesh = SubResource("CapsuleMesh_skinned")
+
+[node name="MeshCapsule" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+visible = false
+cast_shadow = 0
+mesh = SubResource("CapsuleMesh_lod")
+
+[node name="FacingMarker" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -0.34)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_facing")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+avoidance_enabled = false

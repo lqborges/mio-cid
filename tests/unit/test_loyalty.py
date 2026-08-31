@@ -218,7 +218,10 @@ class TestMesnadaDataAndRoster(unittest.TestCase):
         project = _read("project.godot")
         self.assertNotIn("MesnadaRoster=", project)
         self.assertNotIn("MesnadaMember=", project)
-        self.assertFalse((ROOT / "game" / "actors" / "mesnada" / "mesnada_ai.gd").exists())
+        self.assertTrue((ROOT / "game" / "actors" / "mesnada" / "mesnada_ai.gd").is_file())
+        ai = _read("game/actors/mesnada/mesnada_ai.gd")
+        self.assertRegex(ai, re.compile(r"^class_name MesnadaAI$", re.MULTILINE))
+        self.assertNotIn("MesnadaAI=", project)
 
     def test_no_combat_in_mesnada_scripts(self) -> None:
         for rel in (

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/mesnada_follow",
+  "title": "MesnadaFollow",
+  "description": "Follow/wedge tunables. Named captains are full AI; lanzas are a count plus cheap bodies.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "follow_distance",
+    "wedge_row_depth",
+    "wedge_row_width",
+    "arrive_distance",
+    "walk_speed",
+    "charge_speed",
+    "flee_speed",
+    "skinned_cap",
+    "lod_distance",
+    "impostor_distance",
+    "visible_lanza_bodies",
+    "nav_plane_half",
+    "nav_plane_y"
+  ],
+  "properties": {
+    "follow_distance": { "type": "number", "minimum": 0 },
+    "wedge_row_depth": { "type": "number", "minimum": 0 },
+    "wedge_row_width": { "type": "number", "minimum": 0 },
+    "arrive_distance": { "type": "number", "minimum": 0 },
+    "walk_speed": { "type": "number", "minimum": 0 },
+    "charge_speed": { "type": "number", "minimum": 0 },
+    "flee_speed": { "type": "number", "minimum": 0 },
+    "skinned_cap": { "type": "integer", "minimum": 1, "maximum": 24 },
+    "lod_distance": { "type": "number", "minimum": 0 },
+    "impostor_distance": { "type": "number", "minimum": 0 },
+    "visible_lanza_bodies": { "type": "integer", "minimum": 0 },
+    "nav_plane_half": { "type": "number", "minimum": 0 },
+    "nav_plane_y": { "type": "number" }
+  }
+}
