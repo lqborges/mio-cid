@@ -2,7 +2,7 @@ extends Node
 # Autoload HonorService extends this script. Do not add class_name (collides with the singleton).
 
 const EVENTS_PATH := "res://data/honor_events/core.json"
-const COMBAT_TAGS := PackedStringArray(["battle", "raid", "combat"])
+const COMBAT_TAGS := ["battle", "raid", "combat"]
 const STAIN_UNCURABLE := &"uncurable_by_combat"
 
 var state: HonorState = HonorState.new()
