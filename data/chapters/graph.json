@@ -242,11 +242,22 @@
     },
     {
       "from": "a2_jeronimo",
-      "to": "a2_embassy2"
+      "to": "a2_embassy2",
+      "forbid_flags": ["embassy2_done"]
+    },
+    {
+      "from": "a2_embassy2",
+      "to": "a2_jeronimo",
+      "set_flags": ["embassy2_done"]
     },
     {
       "from": "a2_embassy2",
       "to": "a2_yusuf"
+    },
+    {
+      "from": "a2_jeronimo",
+      "to": "a2_yusuf",
+      "req_flags": ["embassy2_done"]
     },
     {
       "from": "a2_yusuf",

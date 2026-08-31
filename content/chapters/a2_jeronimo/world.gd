@@ -48,6 +48,7 @@ func _ready() -> void:
 	_show_place_name()
 	_name_horse()
 	_label_npc()
+	_join_family_if_ready()
 	_whisper(ARRIVE_KEY)
 	intro_played = true
 
@@ -131,6 +132,75 @@ func travel_to_embassy2() -> bool:
 		_whisper("a2_jeronimo.appoint_first")
 		return false
 	return _travel(DEST)
+
+
+func join_family() -> void:
+	if family_in_hub():
+		return
+	_spawn_family_capsule("Jimena", &"jimena", Vector3(-17.2, 0.05, -4.2), Color(0.42, 0.32, 0.28), 1.7, 0.38)
+	_spawn_family_capsule("Elvira", &"elvira", Vector3(-16.2, 0.05, -3.4), Color(0.48, 0.38, 0.30), 1.35, 0.32)
+	_spawn_family_capsule("Sol", &"sol", Vector3(-15.4, 0.05, -4.6), Color(0.50, 0.40, 0.32), 1.25, 0.30)
+
+
+func family_in_hub() -> bool:
+	return (
+		get_node_or_null("Jimena") != null
+		and get_node_or_null("Elvira") != null
+		and get_node_or_null("Sol") != null
+	)
+
+
+func _join_family_if_ready() -> void:
+	if _has_flag(&"embassy2_done") or _has_flag(&"family_in_valencia"):
+		join_family()
+
+
+func _spawn_family_capsule(
+	node_name: String,
+	character_id: StringName,
+	origin: Vector3,
+	color: Color,
+	height: float,
+	radius: float
+) -> void:
+	if get_node_or_null(node_name) != null:
+		return
+	var body := StaticBody3D.new()
+	body.name = node_name
+	body.position = origin
+	body.collision_layer = 1
+	body.collision_mask = 0
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 1.0
+	var mesh := CapsuleMesh.new()
+	mesh.radius = radius
+	mesh.height = height
+	mesh.radial_segments = 8
+	mesh.rings = 4
+	mesh.material = mat
+	var visual := MeshInstance3D.new()
+	visual.name = "MeshInstance3D"
+	visual.position = Vector3(0.0, height * 0.5, 0.0)
+	visual.mesh = mesh
+	body.add_child(visual)
+	var shape := CapsuleShape3D.new()
+	shape.radius = radius
+	shape.height = height
+	var col := CollisionShape3D.new()
+	col.name = "CollisionShape3D"
+	col.position = Vector3(0.0, height * 0.5, 0.0)
+	col.shape = shape
+	body.add_child(col)
+	var label := Label3D.new()
+	label.name = "Name"
+	label.position = Vector3(0.0, height + 0.3, 0.0)
+	label.pixel_size = 0.012
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.text = _loc("char.%s" % String(character_id))
+	label.modulate = Color(0.91, 0.85, 0.72, 1)
+	body.add_child(label)
+	add_child(body)
 
 
 func can_leave_to_embassy2() -> bool:

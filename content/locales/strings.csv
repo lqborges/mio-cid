@@ -132,3 +132,18 @@ a2_jeronimo.gift,Marcos para el obispado. Es administración.,Marks for the bish
 a2_jeronimo.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
 a2_jeronimo.appoint_first,Primero el obispado.,The bishopric first.
 a2_jeronimo.to_embassy,Hacia Alfonso,Toward Alfonso
+char.avengalvon,Avengalvón,Avengalvón
+location.medinaceli,Medinaceli,Medinaceli
+a2_embassy2.prompt,Álvar llevará el segundo presente a Alfonso. Jimena y las hijas vienen por Medinaceli.,Álvar will take the second gift to Alfonso. Jimena and the daughters come via Medinaceli.
+a2_embassy2.avengalvon_kin,Soy Avengalvón de Molina. Vuestras mujeres van a mi cargo. Somos de un bando.,I am Avengalvón of Molina. Your women ride in my care. We are of one side.
+a2_embassy2.keep_him,Quedaos con nosotros. La mesnada os guarda.,Stay with us. The mesnada keeps you.
+a2_embassy2.recruit,Avengalvón entra en la mesnada. Es de los nuestros.,Avengalvón joins the mesnada. He is one of ours.
+a2_embassy2.escort_prompt,El camino de Medinaceli. Guardad a Jimena y a las hijas.,The Medinaceli road. Keep Jimena and the daughters.
+a2_embassy2.jimena_road,Como la uña de la carne. Ya no nos apartáis.,Like the nail from the flesh. You do not part us now.
+a2_embassy2.elvira_road,"Por Medinaceli vamos, padre.","We go by Medinaceli, father."
+a2_embassy2.sol_road,Avengalvón nos guarda el camino.,Avengalvón keeps the road for us.
+a2_embassy2.not_creed,Avengalvón es aliado. Esta casa no pelea por un credo.,Avengalvón is an ally. This house does not fight for a creed.
+a2_embassy2.alvar_leave,Álvar Fáñez parte con el segundo presente.,Álvar Fáñez rides with the second gift.
+a2_embassy2.alvar_return,Álvar entrega el presente. Alfonso deja salir a Jimena de Cardeña.,Álvar delivers the gift. Alfonso lets Jimena leave Cardeña.
+a2_embassy2.family_arrives,"Jimena, Elvira y Sol entran en Valencia. Avengalvón queda.","Jimena, Elvira and Sol enter Valencia. Avengalvón stays."
+a2_embassy2.need_avengalvon,Sin Avengalvón no hay escolta.,Without Avengalvón there is no escort.

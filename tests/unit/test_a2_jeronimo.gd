@@ -384,7 +384,7 @@ func _check_appoint_jeronimo() -> PackedStringArray:
 	if _runner and String(_runner.current_id) != "a2_embassy2":
 		failures.append("hub exit must land on a2_embassy2, got %s" % _runner.current_id)
 	if current_scene != scene_before:
-		failures.append("goto must no-op when embassy2 is missing")
+		failures.append("goto must no-op when current_scene is not the hub")
 	world.free()
 	return failures
 
@@ -410,8 +410,8 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(EMBASSY2):
-		failures.append("a2_embassy2 must not ship in this PR")
+	if not ResourceLoader.exists(EMBASSY2):
+		failures.append("a2_embassy2 must ship with the hub")
 	if ResourceLoader.exists(LEON):
 		failures.append("a3_leon must not ship in this PR")
 	if ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):
