@@ -84,6 +84,9 @@ func start_sortie(_cue: String = "dawn") -> void:
 	_whisper(DAWN_KEY)
 	_set_host_active(true)
 	_form_wedge()
+	# Early kills while Host was down must not soft-lock the win.
+	if _captains_left <= 0:
+		complete_sortie()
 
 
 func run_sortie() -> void:
@@ -207,7 +210,7 @@ func _connect_wait_zone() -> void:
 func _on_wait_entered(body: Node) -> void:
 	if body == null:
 		return
-	if body.is_in_group("player") or body.has_method("facing_dir"):
+	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
 		start_wait()
 
 
@@ -289,6 +292,20 @@ func _set_host_active(active: bool) -> void:
 		return
 	host.visible = active
 	host.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
+	_set_host_collision(host, active)
+
+
+func _set_host_collision(node: Node, active: bool) -> void:
+	# PROCESS_MODE_DISABLED still leaves bodies on the physics server.
+	if node is CollisionObject3D:
+		var body := node as CollisionObject3D
+		if not body.has_meta("host_layer"):
+			body.set_meta("host_layer", body.collision_layer)
+		body.collision_layer = int(body.get_meta("host_layer")) if active else 0
+		if node is Area3D:
+			(node as Area3D).monitorable = active
+	for child in node.get_children():
+		_set_host_collision(child, active)
 
 
 func _set_zone_monitoring(zone_name: String, on: bool) -> void:

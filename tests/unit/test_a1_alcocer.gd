@@ -37,6 +37,8 @@ func _run() -> void:
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(_check_horse_and_cavalry())
 		failures.append_array(_check_fariz_galve_from_json())
+		failures.append_array(_check_host_inactive_not_hittable())
+		failures.append_array(_check_wait_zone_accepts_horse())
 		failures.append_array(_check_spanish_copy())
 		failures.append_array(_check_no_booty_ui())
 		failures.append_array(await _check_spawn_does_not_auto_flow())
@@ -45,6 +47,7 @@ func _run() -> void:
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_occupy_does_not_win())
 	failures.append_array(_check_wait_uses_clock_not_plazo())
+	failures.append_array(_check_early_captain_deaths_still_win())
 	failures.append_array(_check_sortie_win_travels_to_embassy())
 	failures.append_array(_check_hub_lock_still_blocks_cardena())
 	_finish(failures)
@@ -185,6 +188,46 @@ func _check_fariz_galve_from_json() -> PackedStringArray:
 		failures.append("Galve hp want combat %s got %s" % [galve_member.combat, galve_hurt.max_hp])
 	if fariz_hurt and "unkillable" in fariz_hurt and bool(fariz_hurt.get("unkillable")):
 		failures.append("Fariz HurtBox must be killable")
+	return failures
+
+
+func _check_host_inactive_not_hittable() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var host: Node = _world.get_node_or_null("Host")
+	if host == null:
+		failures.append("Host missing")
+		return failures
+	if bool(host.visible):
+		failures.append("Host must stay hidden until dawn")
+	for path in ["Host/Fariz", "Host/Galve", "Host/Dummy1"]:
+		var body: Node = _world.get_node_or_null(path)
+		if body == null:
+			failures.append("%s missing while Host is down" % path)
+			continue
+		if body is CollisionObject3D and int((body as CollisionObject3D).collision_layer) != 0:
+			failures.append("%s collision_layer must be 0 before dawn, got %s" % [path, (body as CollisionObject3D).collision_layer])
+		var hurt: Area3D = body.get_node_or_null("HurtBox") as Area3D
+		if hurt == null:
+			failures.append("%s HurtBox missing" % path)
+		elif hurt.monitorable:
+			failures.append("%s HurtBox must not be monitorable before dawn" % path)
+		elif hurt.collision_layer != 0:
+			failures.append("%s HurtBox collision_layer must be 0 before dawn" % path)
+	return failures
+
+
+func _check_wait_zone_accepts_horse() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var zone: Area3D = _world.get_node_or_null("WaitZone") as Area3D
+	var occupy: Area3D = _world.get_node_or_null("OccupyZone") as Area3D
+	if zone == null:
+		failures.append("WaitZone missing")
+		return failures
+	if occupy and zone.collision_mask != occupy.collision_mask:
+		failures.append("WaitZone mask want OccupyZone %s got %s" % [occupy.collision_mask, zone.collision_mask])
+	# player (2) + horse (128)
+	if (zone.collision_mask & 130) != 130:
+		failures.append("WaitZone must listen for player and horse, mask %s" % zone.collision_mask)
 	return failures
 
 
@@ -348,6 +391,37 @@ func _check_wait_uses_clock_not_plazo() -> PackedStringArray:
 		failures.append("dawn sortie host must appear after wait")
 	if not bool(world.get("_sortie_started")):
 		failures.append("wait until dawn must start the sortie")
+	var fariz: Node = world.get_node_or_null("Host/Fariz")
+	if fariz is CollisionObject3D and int((fariz as CollisionObject3D).collision_layer) == 0:
+		failures.append("Fariz must be collidable after dawn sortie starts")
+	var fariz_hurt: Area3D = fariz.get_node_or_null("HurtBox") as Area3D if fariz else null
+	if fariz_hurt and not fariz_hurt.monitorable:
+		failures.append("Fariz HurtBox must be monitorable after dawn")
+	world.free()
+	return failures
+
+
+func _check_early_captain_deaths_still_win() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("early death: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	_fails.clear()
+	_logged.clear()
+	world.run_occupy()
+	world.set("_captains_left", 0)
+	_logged.clear()
+	world.run_wait()
+	if not bool(world.get("_won")):
+		failures.append("killing both captains before dawn must still win after wait, not soft-lock")
+	if "alcocer_sortie_win" not in _logged:
+		failures.append("early captain deaths must still apply alcocer_sortie_win, logged %s" % str(_logged))
+	if not _fails.is_empty():
+		failures.append("early win must not hard_fail: %s" % ", ".join(_fails))
 	world.free()
 	return failures
 
