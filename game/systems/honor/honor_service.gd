@@ -3,13 +3,13 @@ extends Node
 
 const EVENTS_PATH := "res://data/honor_events/core.json"
 const COMBAT_TAGS := PackedStringArray(["battle", "raid", "combat"])
+const STAIN_UNCURABLE := &"uncurable_by_combat"
 
 var state: HonorState = HonorState.new()
 var roster: Variant = null
 var catalog: Dictionary = {}
 
 var _applied_once: Dictionary = {}
-var _uncurable_honra: bool = false
 
 
 func _ready() -> void:
@@ -17,9 +17,11 @@ func _ready() -> void:
 
 
 func reset_state() -> void:
-	state = HonorState.new()
+	if state == null:
+		state = HonorState.new()
+	else:
+		state.reset()
 	_applied_once.clear()
-	_uncurable_honra = false
 
 
 func event_by_id(id: StringName) -> HonorEvent:
@@ -44,17 +46,14 @@ func apply(event: HonorEvent) -> Dictionary:
 		_load_catalog()
 	if event.once and _applied_once.has(String(event.id)):
 		return {}
+	var to_apply := event
 	if _blocks_combat_honra(event):
-		return {}
-	var result := state.apply(event)
+		to_apply = _with_honra_zeroed(event)
+	var result := state.apply(to_apply)
 	if event.once:
 		_applied_once[String(event.id)] = true
-	if event.has_tag(&"uncurable_by_combat"):
-		_uncurable_honra = true
-	if event.has_tag(&"speech"):
-		_uncurable_honra = false
 	_apply_flags(event)
-	EventBus.honor_logged.emit(event)
+	EventBus.honor_logged.emit(to_apply)
 	# Distinct EventBus signals; never fold one into the other.
 	if result.has("soft_warn") and result["soft_warn"] != &"":
 		EventBus.soft_warn.emit(result["soft_warn"])
@@ -64,7 +63,7 @@ func apply(event: HonorEvent) -> Dictionary:
 
 
 func _blocks_combat_honra(event: HonorEvent) -> bool:
-	if not _uncurable_honra:
+	if state == null or not state.has_stain(STAIN_UNCURABLE):
 		return false
 	if event.delta_for(&"honra") <= 0.0:
 		return false
@@ -72,6 +71,26 @@ func _blocks_combat_honra(event: HonorEvent) -> bool:
 		if event.has_tag(StringName(tag)):
 			return true
 	return false
+
+
+func _with_honra_zeroed(event: HonorEvent) -> HonorEvent:
+	# New Resource so catalog rows are not mutated.
+	var copy := HonorEvent.new()
+	copy.id = event.id
+	copy.deltas = event.deltas.duplicate()
+	copy.deltas.erase("honra")
+	if copy.deltas.has(&"honra"):
+		copy.deltas.erase(&"honra")
+	copy.tags = event.tags.duplicate()
+	copy.stain_id = event.stain_id
+	copy.clear_stain = event.clear_stain
+	copy.flags_set = event.flags_set.duplicate()
+	copy.hard_fail = event.hard_fail
+	copy.hard_fail_reason = event.hard_fail_reason
+	copy.beat = event.beat
+	copy.once = event.once
+	copy.ui_whisper_key = event.ui_whisper_key
+	return copy
 
 
 func _apply_flags(event: HonorEvent) -> void:

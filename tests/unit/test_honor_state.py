@@ -45,9 +45,14 @@ class TestHonorMeters(unittest.TestCase):
         self.assertIn("@export var honor: float = 15.0", source)
         self.assertIn("@export var honra: float = 40.0", source)
         self.assertIn("func apply(event: HonorEvent) -> Dictionary:", source)
+        self.assertIn("func reset() -> void:", source)
+        self.assertIn("func has_stain(id: StringName) -> bool:", source)
         self.assertIsNone(re.search(r"^(@export )?var unfed_streak\b", source, re.MULTILINE))
         self.assertIn('result["soft_warn"]', source)
         self.assertIn('result["hard_fail"]', source)
+        self.assertIn('result["soft_warn"] = &"honra_stolen"', source)
+        self.assertIn("elif onores <= 0.0:", source)
+        self.assertIn("elif honra < 10.0:", source)
 
     def test_honor_service_has_no_class_name_and_no_combat_treasury(self) -> None:
         autoload = _read("game/autoload/honor_service.gd")
@@ -58,6 +63,8 @@ class TestHonorMeters(unittest.TestCase):
         self.assertIn("core.json", impl)
         self.assertIn("EventBus.soft_warn", impl)
         self.assertIn("EventBus.hard_fail", impl)
+        self.assertIn("state.reset()", impl)
+        self.assertNotIn("_uncurable_honra", impl)
         self.assertNotIn("Treasury", impl)
         self.assertNotIn("CidCombat", impl)
         state_src = _read("game/systems/honor/honor_state.gd")
@@ -77,6 +84,10 @@ class TestHonorMeters(unittest.TestCase):
         unfed = events["camp_unfed"]
         self.assertEqual(unfed["deltas"]["onores"], -8)
         self.assertFalse(unfed.get("hard_fail", False))
+        corpes = events["corpes_news"]
+        self.assertIn("uncurable_by_combat", corpes["tags"])
+        self.assertEqual(corpes.get("stain_id"), "uncurable_by_combat")
+        self.assertEqual(events["toledo_ask1_swords"].get("clear_stain"), "uncurable_by_combat")
         for forbidden in SWORD_ITEM_IDS:
             self.assertNotIn(forbidden, events)
         for event_id in events:

@@ -10,8 +10,10 @@ func _initialize() -> void:
 	failures.append_array(_test_apply_single_and_multi_meter())
 	failures.append_array(_test_stains_and_clamp())
 	failures.append_array(_test_soft_warn_vs_hard_fail())
+	failures.append_array(_test_soft_warn_priority())
 	failures.append_array(_test_service_catalog_and_facade())
 	failures.append_array(_test_uncurable_combat_honra_refused())
+	failures.append_array(_test_reset_keeps_resource())
 	failures.append_array(_test_no_unfed_streak_on_honor_state())
 	_finish(failures)
 
@@ -147,6 +149,37 @@ func _test_soft_warn_vs_hard_fail() -> PackedStringArray:
 	return failures
 
 
+func _test_soft_warn_priority() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var warned: Array[StringName] = []
+	var on_warn := func(reason: StringName) -> void:
+		warned.append(reason)
+	EventBus.soft_warn.connect(on_warn)
+
+	HonorService.reset_state()
+	var news := HonorService.apply_id(&"corpes_news")
+	if news.get("soft_warn", &"") != &"honra_stolen":
+		failures.append("corpes_news should soft_warn honra_stolen, got %s" % news.get("soft_warn", &""))
+	if warned.size() != 1 or warned[0] != &"honra_stolen":
+		failures.append("corpes_news did not emit honra_stolen")
+	if not HonorService.state.has_stain(&"uncurable_by_combat"):
+		failures.append("corpes_news must persist uncurable_by_combat on HonorState")
+
+	HonorService.reset_state()
+	HonorService.state.honra = 5.0
+	warned.clear()
+	var unfed := HonorService.apply_id(&"camp_unfed")
+	if unfed.get("soft_warn", &"") != &"cannot_feed":
+		failures.append("camp_unfed with low honra should still emit cannot_feed")
+	if warned.size() != 1 or warned[0] != &"cannot_feed":
+		failures.append("camp_unfed with honra=5 did not emit cannot_feed")
+	if unfed.has("hard_fail"):
+		failures.append("camp_unfed must not hard_fail")
+
+	EventBus.soft_warn.disconnect(on_warn)
+	return failures
+
+
 func _test_service_catalog_and_facade() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	HonorService.reset_state()
@@ -168,15 +201,50 @@ func _test_uncurable_combat_honra_refused() -> PackedStringArray:
 	HonorService.reset_state()
 	HonorService.apply_id(&"corpes_news")
 	var honra_after_news := HonorService.state.honra
+	var onores_after_news := HonorService.state.onores
 	var fake := HonorEvent.new()
 	fake.id = &"combat_farm"
 	fake.deltas = {"honra": 10.0}
 	fake.tags = PackedStringArray(["battle"])
-	var blocked := HonorService.apply(fake)
-	if not blocked.is_empty():
-		failures.append("combat honra raise after corpes_news should be refused")
+	HonorService.apply(fake)
 	if not is_equal_approx(HonorService.state.honra, honra_after_news):
 		failures.append("combat must not restore honra while uncurable_by_combat is active")
+	if not is_equal_approx(HonorService.state.onores, onores_after_news):
+		failures.append("honra-only combat refuse should not change onores")
+
+	var mixed := HonorEvent.new()
+	mixed.id = &"sortie_mix"
+	mixed.deltas = {"onores": 18.0, "honra": 5.0}
+	mixed.tags = PackedStringArray(["battle"])
+	HonorService.apply(mixed)
+	if not is_equal_approx(HonorService.state.onores, onores_after_news + 18.0):
+		failures.append("battle onores after corpes_news should still apply, got %s" % HonorService.state.onores)
+	if not is_equal_approx(HonorService.state.honra, honra_after_news):
+		failures.append("mixed battle must leave honra unchanged after corpes_news")
+
+	HonorService.apply_id(&"toledo_ask1_swords")
+	if HonorService.state.has_stain(&"uncurable_by_combat"):
+		failures.append("Toledo ask should clear uncurable_by_combat stain")
+	return failures
+
+
+func _test_reset_keeps_resource() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	HonorService.reset_state()
+	var before: HonorState = HonorService.state
+	HonorService.apply_id(&"arcas_cheat")
+	HonorService.apply_id(&"corpes_news")
+	HonorService.reset_state()
+	if HonorService.state != before:
+		failures.append("reset_state replaced HonorState; HUD meter_changed would drop")
+	if not is_equal_approx(HonorService.state.onores, 8.0):
+		failures.append("reset_state onores want 8 got %s" % HonorService.state.onores)
+	if not is_equal_approx(HonorService.state.honor, 15.0):
+		failures.append("reset_state honor want 15 got %s" % HonorService.state.honor)
+	if not is_equal_approx(HonorService.state.honra, 40.0):
+		failures.append("reset_state honra want 40 got %s" % HonorService.state.honra)
+	if HonorService.state.has_stain(&"arcas_cheat") or HonorService.state.has_stain(&"uncurable_by_combat"):
+		failures.append("reset_state must clear stains")
 	return failures
 
 

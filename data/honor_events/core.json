@@ -147,6 +147,7 @@
       "id": "corpes_news",
       "deltas": { "honra": -35 },
       "tags": ["crime_against_you", "uncurable_by_combat"],
+      "stain_id": "uncurable_by_combat",
       "beat": "a3_corpes"
     },
     {
@@ -171,18 +172,21 @@
       "id": "toledo_ask1_swords",
       "deltas": { "honra": 4 },
       "tags": ["speech", "joke"],
+      "clear_stain": "uncurable_by_combat",
       "beat": "a3_toledo"
     },
     {
       "id": "toledo_ask2_dowry",
       "deltas": { "honra": 8 },
       "tags": ["speech", "humiliation_them"],
+      "clear_stain": "uncurable_by_combat",
       "beat": "a3_toledo"
     },
     {
       "id": "toledo_ask3_riepto",
       "deltas": { "honra": 12 },
       "tags": ["speech"],
+      "clear_stain": "uncurable_by_combat",
       "beat": "a3_toledo"
     },
     {
