@@ -1,0 +1,17 @@
+{
+  "id": "a1_poyo",
+  "steps": [
+    {
+      "id": "arrive_name",
+      "type": "cinematic",
+      "camera": "place_name",
+      "skip_if": ["poyo_named"],
+      "set_flags": ["poyo_named"]
+    },
+    {
+      "id": "camp",
+      "type": "clock_segment",
+      "segment": "camp_night"
+    }
+  ]
+}

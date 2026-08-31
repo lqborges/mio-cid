@@ -16,6 +16,13 @@ config/version="0.0.0"
 run/main_scene="res://game/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
 [autoload]
 
 EventBus="*res://game/autoload/event_bus.gd"

@@ -119,6 +119,9 @@ jobs:
       - name: Run Python embassy1 tests
         run: python3 tests/unit/test_embassy1.py
 
+      - name: Run Python Poyo hub tests
+        run: python3 tests/unit/test_poyo_hub.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -214,6 +217,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_horse_companion.gd
+
+      - name: Run Poyo hub headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_poyo_hub.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

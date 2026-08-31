@@ -29,6 +29,8 @@ func _on_honor_logged(event: HonorEvent) -> void:
 
 
 func _show(text: String) -> void:
+	if line == null:
+		line = get_node_or_null("Line")
 	if line == null or text.is_empty():
 		return
 	line.text = text
