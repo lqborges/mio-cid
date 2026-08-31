@@ -38,7 +38,7 @@ func _run() -> void:
 		failures.append_array(_check_horse_and_cavalry())
 		failures.append_array(_check_fariz_galve_from_json())
 		failures.append_array(_check_spanish_copy())
-		failures.append_array(_check_no_booty_ui())
+		failures.append_array(_check_booty_ui_hidden_until_win())
 		failures.append_array(await _check_spawn_does_not_auto_flow())
 		_world.free()
 		_world = null
@@ -94,8 +94,10 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("honor meters missing from a1_alcocer HUD")
 	if _world.find_child("MesuraHud", true, false) == null:
 		failures.append("mesura hud missing from a1_alcocer HUD")
-	if _world.find_child("KeepOrSell", true, false) != null:
-		failures.append("keep-or-sell must not ship on Alcocer combat PR")
+	if _world.find_child("KeepOrSell", true, false) == null:
+		failures.append("keep-or-sell missing from a1_alcocer HUD")
+	if _world.find_child("BootyDivide", true, false) == null:
+		failures.append("booty divide missing from a1_alcocer HUD")
 	if _runner and "current_id" in _runner and String(_runner.current_id) != "a1_alcocer":
 		failures.append("ChapterRunner.current_id want a1_alcocer got %s" % _runner.current_id)
 	var plazo: Node = _world.find_child("PlazoBar", true, false)
@@ -207,16 +209,22 @@ func _check_spanish_copy() -> PackedStringArray:
 	return failures
 
 
-func _check_no_booty_ui() -> PackedStringArray:
+func _check_booty_ui_hidden_until_win() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if _world.find_child("KeepOrSell", true, false) != null:
-		failures.append("KeepOrSell UI must not ship on combat-only Alcocer")
-	if _world.find_child("BootyDivide", true, false) != null:
-		failures.append("BootyDivide UI must not ship on combat-only Alcocer")
-	if ResourceLoader.exists("res://game/ui/booty_divide.tscn"):
-		failures.append("PR-16 must not ship booty_divide.tscn")
+	var keep_ui: Node = _world.find_child("KeepOrSell", true, false)
+	var divide_ui: Node = _world.find_child("BootyDivide", true, false)
+	if keep_ui == null:
+		failures.append("KeepOrSell UI missing on Alcocer")
+	elif bool(keep_ui.visible):
+		failures.append("KeepOrSell must stay hidden until sortie win")
+	if divide_ui == null:
+		failures.append("BootyDivide UI missing on Alcocer")
+	elif bool(divide_ui.visible):
+		failures.append("BootyDivide must stay hidden until sell")
+	if not ResourceLoader.exists("res://game/ui/booty_divide.tscn"):
+		failures.append("booty_divide.tscn missing")
 	if ResourceLoader.exists("res://content/chapters/a1_embassy1/world.tscn"):
-		failures.append("PR-16 must not ship a1_embassy1/world.tscn")
+		failures.append("must not ship a1_embassy1/world.tscn")
 	return failures
 
 
@@ -235,6 +243,12 @@ func _check_spawn_does_not_auto_flow() -> PackedStringArray:
 	var host: Node = _world.get_node_or_null("Host")
 	if host and bool(host.visible):
 		failures.append("Host must stay hidden until dawn sortie")
+	var keep_ui: Node = _world.find_child("KeepOrSell", true, false)
+	if keep_ui and bool(keep_ui.visible):
+		failures.append("KeepOrSell must stay hidden on spawn")
+	var divide_ui: Node = _world.find_child("BootyDivide", true, false)
+	if divide_ui and bool(divide_ui.visible):
+		failures.append("BootyDivide must stay hidden on spawn")
 	return failures
 
 
@@ -377,13 +391,15 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 	if "alcocer_sortie_win" not in _logged:
 		failures.append("win must apply alcocer_sortie_win, logged %s" % str(_logged))
 	if "alcocer_sell" in _logged:
-		failures.append("combat PR must not apply alcocer_sell")
+		failures.append("sortie must not apply alcocer_sell")
 	if "alcocer_keep" in _logged:
-		failures.append("combat PR must not apply alcocer_keep")
+		failures.append("sortie must not apply alcocer_keep")
 	if not _fails.is_empty():
 		failures.append("sortie win must not hard_fail: %s" % ", ".join(_fails))
 	if not bool(world.get("_won")):
-		failures.append("run_sortie must resolve the beat")
+		failures.append("run_sortie must win the sortie")
+	if bool(world.get("_divided")):
+		failures.append("sortie must not skip the divide")
 	if _honor:
 		var event: HonorEvent = _honor.event_by_id(&"alcocer_sortie_win")
 		var want := onores_before
@@ -391,12 +407,29 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 			want += event.delta_for(&"onores")
 		if not is_equal_approx(float(_honor.state.onores), want):
 			failures.append("alcocer_sortie_win onores want %s got %s" % [want, _honor.state.onores])
+	if _runner:
+		if String(_runner.current_id) == "a1_embassy1":
+			failures.append("embassy travel must wait for divide, got %s" % _runner.current_id)
+		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		if _runner.has_method("can_travel") and bool(_runner.can_travel(&"a1_alcocer", &"a1_embassy1", flags)):
+			failures.append("can_travel embassy must wait for alcocer_booty_divided")
+	_logged.clear()
+	_completed.clear()
+	world.run_divide()
+	if current_scene != scene_before:
+		failures.append("divide must not change_scene when embassy tscn is missing")
+	if "alcocer_sell" not in _logged:
+		failures.append("divide path must apply alcocer_sell, logged %s" % str(_logged))
+	if not bool(world.get("_divided")):
+		failures.append("run_divide must confirm the split")
 	if _completed.count("a1_alcocer") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _runner:
 		if String(_runner.current_id) != "a1_embassy1":
-			failures.append("win travel must land on a1_embassy1, got %s" % _runner.current_id)
+			failures.append("divide travel must land on a1_embassy1, got %s" % _runner.current_id)
 		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		if "alcocer_booty_divided" not in flags:
+			failures.append("divide must set alcocer_booty_divided")
 		if _runner.has_method("can_travel"):
 			if bool(_runner.can_travel(&"a1_alcocer", &"a1_cardena", flags)):
 				failures.append("hub_lock_cardena still blocks cardena")
@@ -407,7 +440,7 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 			if current_scene != scene_before:
 				failures.append("goto a1_embassy1 must no-op missing scene")
 	if ResourceLoader.exists("res://content/chapters/a1_embassy1/world.tscn"):
-		failures.append("PR-16 must not ship a1_embassy1/world.tscn")
+		failures.append("must not ship a1_embassy1/world.tscn")
 	world.free()
 	return failures
 
@@ -424,8 +457,12 @@ func _check_hub_lock_still_blocks_cardena() -> PackedStringArray:
 		_runner.flags = PackedStringArray(["hub_lock_cardena", "horse_companion"])
 	var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
 	if _runner.has_method("can_travel"):
-		if not bool(_runner.can_travel(&"a1_alcocer", &"a1_embassy1", flags)):
-			failures.append("can_travel alcocer -> embassy1 should be true")
+		if bool(_runner.can_travel(&"a1_alcocer", &"a1_embassy1", flags)):
+			failures.append("can_travel alcocer -> embassy1 must wait for divide")
+		var divided := flags.duplicate()
+		divided.append("alcocer_booty_divided")
+		if not bool(_runner.can_travel(&"a1_alcocer", &"a1_embassy1", divided)):
+			failures.append("can_travel alcocer -> embassy1 should be true after divide")
 		if bool(_runner.can_travel(&"a1_alcocer", &"a1_cardena", flags)):
 			failures.append("can_travel alcocer -> cardena must be false after hub lock")
 		if bool(_runner.can_travel(&"a1_alcocer", &"a1_castejon", flags)):

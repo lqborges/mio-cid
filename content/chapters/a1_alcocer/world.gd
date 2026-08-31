@@ -1,17 +1,20 @@
 extends Node3D
-## a1_alcocer: occupy, campaign-clock wait, dawn sortie vs Fáriz and Galve.
-# Combat only. Booty divide / keep-or-sell is a later beat.
+## a1_alcocer: occupy, wait, dawn sortie, then sell and divide booty.
 
 const BEAT_ID := &"a1_alcocer"
 const DEST := &"a1_embassy1"
 const HUB_LOCK := &"hub_lock_cardena"
 const HORSE_FLAG := "horse_companion"
+const DIVIDE_FLAG := "alcocer_booty_divided"
 const TOWN_ID := &"alcocer"
 const WIN_EVENT := &"alcocer_sortie_win"
 const OCCUPY_KEY := "a1_alcocer.occupy"
 const WAIT_KEY := "a1_alcocer.wait"
 const DAWN_KEY := "a1_alcocer.dawn"
 const WIN_KEY := "a1_alcocer.sortie_win"
+const SELL_KEY := "a1_alcocer.sell_done"
+const DIVIDE_KEY := "a1_alcocer.divide_done"
+const GIFT_KEY := "a1_alcocer.gift_alvar"
 const DIALOGUE_PATH := "res://content/chapters/a1_alcocer/alcocer.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 const FARIZ_ID := &"fariz"
@@ -23,6 +26,8 @@ var _occupied: bool = false
 var _waited: bool = false
 var _sortie_started: bool = false
 var _won: bool = false
+var _sold: bool = false
+var _divided: bool = false
 var _garrison_left: int = 0
 var _captains_left: int = 0
 
@@ -40,6 +45,10 @@ func _ready() -> void:
 	_load_holding()
 	_bind_mesnada()
 	_hide_plazo_bar()
+	_connect_keep_or_sell()
+	_connect_booty_divide()
+	_hide_keep_or_sell()
+	_hide_booty_divide()
 	_set_host_active(false)
 	_set_zone_monitoring("WaitZone", false)
 	_connect_occupy_zone()
@@ -104,6 +113,12 @@ func start_cue(cue: String) -> void:
 		start_sortie()
 	elif cue == "win":
 		complete_sortie()
+	elif cue == "keep":
+		choose_keep()
+	elif cue == "sell":
+		choose_sell()
+	elif cue == "divide":
+		confirm_divide()
 
 
 func complete_occupy() -> void:
@@ -141,7 +156,7 @@ func complete_sortie() -> void:
 	var honor := _honor()
 	if honor and honor.has_method("apply_id"):
 		honor.apply_id(WIN_EVENT)
-	_leave_for_embassy()
+	_show_keep_or_sell()
 
 
 func _hold_town() -> void:
@@ -152,6 +167,98 @@ func _hold_town() -> void:
 	holding.held = true
 	holding.sold = false
 	holding.days_held = 0
+
+
+func choose_keep() -> void:
+	if _divided:
+		return
+	if not _won:
+		complete_sortie()
+	var ui := _keep_or_sell()
+	if ui and ui.has_method("_on_keep"):
+		ui.call("_on_keep")
+		return
+	_on_keep_or_sell(&"keep", {})
+
+
+func choose_sell() -> void:
+	if _divided:
+		return
+	if not _won:
+		complete_sortie()
+	var ui := _keep_or_sell()
+	if ui and ui.has_method("_on_sell"):
+		ui.call("_on_sell")
+		return
+	_on_keep_or_sell(&"sell", {})
+
+
+func confirm_divide(gift_alvar: bool = false) -> void:
+	if _divided:
+		return
+	if not _sold:
+		choose_sell()
+	var ui := _booty_divide()
+	if ui:
+		if ui.has_method("set_gift_to_alvar"):
+			ui.call("set_gift_to_alvar", gift_alvar)
+		if ui.has_method("confirm"):
+			ui.call("confirm")
+			return
+	_finish_divide({})
+
+
+func run_divide(gift_alvar: bool = false) -> void:
+	# Headless: win, sell, confirm the split.
+	if not _won:
+		run_sortie()
+	confirm_divide(gift_alvar)
+
+
+func _on_keep_or_sell(choice: StringName, result: Dictionary) -> void:
+	if choice == &"keep":
+		_finish_keep(result)
+	elif choice == &"sell":
+		_finish_sell(result)
+
+
+func _finish_keep(result: Dictionary) -> void:
+	if _divided:
+		return
+	if result.get("hard_fail", &"") != &"":
+		_hide_keep_or_sell()
+		_hide_booty_divide()
+
+
+func _finish_sell(_result: Dictionary) -> void:
+	if _divided or _sold:
+		return
+	_sold = true
+	_hide_keep_or_sell()
+	_whisper(SELL_KEY)
+	if holding and holding.has_method("sell") and not bool(holding.get("sold")):
+		holding.sell({}, false)
+	_show_booty_divide()
+
+
+func _on_booty_confirmed(split: Dictionary) -> void:
+	_finish_divide(split)
+
+
+func _finish_divide(split: Dictionary) -> void:
+	if _divided:
+		return
+	_divided = true
+	_sold = true
+	_hide_keep_or_sell()
+	_hide_booty_divide()
+	if bool((split if split else {}).get("gift_to_alvar", false)):
+		_whisper(GIFT_KEY)
+	else:
+		_whisper(DIVIDE_KEY)
+	if ChapterRunner and ChapterRunner.has_method("add_flag"):
+		ChapterRunner.add_flag(DIVIDE_FLAG)
+	_leave_for_embassy()
 
 
 func _leave_for_embassy() -> void:
@@ -301,6 +408,64 @@ func _hide_plazo_bar() -> void:
 	var bar: Node = find_child("PlazoBar", true, false)
 	if bar:
 		bar.visible = false
+
+
+func _connect_keep_or_sell() -> void:
+	var ui := _keep_or_sell()
+	if ui == null:
+		return
+	if "defer_split" in ui:
+		ui.set("defer_split", true)
+	if ui.has_signal("resolved") and not ui.resolved.is_connected(_on_keep_or_sell):
+		ui.resolved.connect(_on_keep_or_sell)
+
+
+func _connect_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui == null:
+		return
+	if ui.has_signal("confirmed") and not ui.confirmed.is_connected(_on_booty_confirmed):
+		ui.confirmed.connect(_on_booty_confirmed)
+
+
+func _show_keep_or_sell() -> void:
+	var ui := _keep_or_sell()
+	if ui == null:
+		return
+	_load_holding()
+	if ui.has_method("bind_holding"):
+		ui.bind_holding(holding)
+	ui.visible = true
+
+
+func _hide_keep_or_sell() -> void:
+	var ui := _keep_or_sell()
+	if ui:
+		ui.visible = false
+
+
+func _show_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui == null:
+		return
+	_load_holding()
+	if ui.has_method("bind_holding"):
+		ui.bind_holding(holding)
+	ui.visible = true
+
+
+func _hide_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui:
+		ui.visible = false
+
+
+func _keep_or_sell() -> Node:
+	return find_child("KeepOrSell", true, false)
+
+
+func _booty_divide() -> Node:
+	return find_child("BootyDivide", true, false)
 
 
 func _form_wedge() -> void:

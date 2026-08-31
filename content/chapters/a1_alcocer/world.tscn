@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=27 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a1_alcocer/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="9_horse"]
 [ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="10_ai"]
 [ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="11_bridge"]
+[ext_resource type="PackedScene" path="res://game/ui/keep_or_sell.tscn" id="12_keep"]
+[ext_resource type="PackedScene" path="res://game/ui/booty_divide.tscn" id="13_booty"]
 
 [sub_resource type="Environment" id="Environment_alcocer"]
 background_mode = 1
@@ -355,3 +357,10 @@ script = ExtResource("11_bridge")
 [node name="MesuraHud" parent="HUD" instance=ExtResource("6_mesura")]
 
 [node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
+
+[node name="KeepOrSell" parent="HUD" instance=ExtResource("12_keep")]
+visible = false
+defer_split = true
+
+[node name="BootyDivide" parent="HUD" instance=ExtResource("13_booty")]
+visible = false

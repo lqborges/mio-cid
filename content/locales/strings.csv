@@ -67,3 +67,16 @@ a1_alcocer.occupy,Ocupamos Alcocer y nos hacemos fuertes.,We occupy Alcocer and 
 a1_alcocer.wait,Velamos en el real. El reloj de campaña cuenta la noche.,We keep watch in camp. The campaign clock counts the night.
 a1_alcocer.dawn,Al alba salimos contra Fáriz y Galve.,At dawn we sortie against Fáriz and Galve.
 a1_alcocer.sortie_win,Vencemos. Fáriz y Galve caen. Alcocer es nuestro.,We win. Fáriz and Galve fall. Alcocer is ours.
+a1_alcocer.sell_done,Vendemos Alcocer. El quinto espera al rey.,We sell Alcocer. The fifth waits for the king.
+a1_alcocer.divide_done,Repartimos el botín. El camino a Alfonso queda abierto.,We divide the booty. The road to Alfonso is open.
+a1_alcocer.gift_alvar,Álvar recibe de la parte de la mesnada.,Álvar receives from the mesnada share.
+ui.booty_divide.title,Reparto del botín,Booty division
+ui.booty_divide.quinto,Quinto real,Royal fifth
+ui.booty_divide.mesnada,Mesnada,Mesnada
+ui.booty_divide.treasury,Tesoro,Treasury
+ui.booty_divide.marks,marcos,marks
+ui.booty_divide.horses,caballos,horses
+ui.booty_divide.gift_alvar,Dar a Álvar Fáñez,Gift to Álvar Fáñez
+ui.booty_divide.gift_note,De la mesnada:,From the mesnada:
+ui.booty_divide.confirm,Confirmar,Confirm
+ui.booty_divide.done,El botín está partido.,The booty is divided.

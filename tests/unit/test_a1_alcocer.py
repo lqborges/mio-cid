@@ -120,7 +120,7 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
         self.assertFalse((ROOT / "content/chapters/a1_embassy1/world.tscn").is_file())
-        self.assertFalse((ROOT / "game/ui/booty_divide.tscn").is_file())
+        self.assertTrue((ROOT / "game/ui/booty_divide.tscn").is_file())
 
     def test_scene_is_cheap_greybox_dawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -131,8 +131,8 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertIn("hall_whisper.tscn", scene)
         self.assertIn("honor_meters.tscn", scene)
         self.assertIn("mesura_hud.tscn", scene)
-        self.assertNotIn("keep_or_sell.tscn", scene)
-        self.assertNotIn("booty_divide", scene)
+        self.assertIn("keep_or_sell.tscn", scene)
+        self.assertIn("booty_divide.tscn", scene)
         self.assertIn('type="DirectionalLight3D"', scene)
         self.assertEqual(scene.count('type="DirectionalLight3D"'), 1)
         self.assertNotIn("OmniLight3D", scene)
@@ -158,7 +158,8 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertIn('character_id = &"galve"', scene)
         self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
         self.assertNotIn("AlvarFanez", scene)
-        self.assertNotIn("KeepOrSell", scene)
+        self.assertIn("KeepOrSell", scene)
+        self.assertIn("BootyDivide", scene)
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -223,9 +224,11 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("advance_plazo", source)
         self.assertNotIn("camp_night(", source)
-        self.assertNotIn("keep_or_sell", source)
-        self.assertNotIn("booty_divide", source)
-        self.assertNotIn("alcocer_sell", source)
+        self.assertIn("keep_or_sell", source)
+        self.assertIn("booty_divide", source)
+        self.assertIn("alcocer_booty_divided", source)
+        self.assertIn("func confirm_divide", source)
+        self.assertIn("func run_divide", source)
         self.assertNotIn("alcocer_keep", source)
         self.assertNotIn("12", source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
@@ -259,7 +262,9 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertEqual(win["deltas"]["onores"], 18)
         self.assertIn("battle", win["tags"])
         self.assertEqual(win["beat"], "a1_alcocer")
-        self.assertNotIn("alcocer_sell", _read(f"{CHAPTER}/world.gd"))
+        sell = events["alcocer_sell"]
+        self.assertEqual(sell["deltas"]["onores"], 10)
+        self.assertEqual(sell["beat"], "a1_alcocer")
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -271,6 +276,8 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
             "a1_alcocer.wait",
             "a1_alcocer.dawn",
             "a1_alcocer.sortie_win",
+            "a1_alcocer.sell_done",
+            "a1_alcocer.divide_done",
             "location.alcocer",
             "char.fariz",
             "char.galve",
@@ -311,7 +318,8 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertIn("clock_segment", types)
         self.assertIn("honor_event", types)
         self.assertIn("travel_spawn", types)
-        self.assertNotIn("keep_or_sell", types)
+        self.assertIn("keep_or_sell", types)
+        self.assertIn("booty_divide", types)
         segments = [
             step.get("segment") for step in payload["steps"] if isinstance(step, dict)
         ]
@@ -326,7 +334,10 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertIn(("a1_alcocer", "a1_embassy1"), pairs)
         locked = ["hub_lock_cardena"]
         self.assertTrue(can_travel(graph, "a1_castejon", "a1_alcocer", locked))
-        self.assertTrue(can_travel(graph, "a1_alcocer", "a1_embassy1", locked))
+        self.assertFalse(can_travel(graph, "a1_alcocer", "a1_embassy1", locked))
+        self.assertTrue(
+            can_travel(graph, "a1_alcocer", "a1_embassy1", locked + ["alcocer_booty_divided"])
+        )
         self.assertFalse(can_travel(graph, "a1_alcocer", "a1_cardena", locked))
         self.assertFalse(can_travel(graph, "a1_alcocer", "a1_castejon", locked))
         self.assertFalse(can_travel(graph, "a1_alcocer", "a1_navapalos", locked))

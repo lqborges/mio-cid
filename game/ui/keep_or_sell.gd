@@ -5,6 +5,9 @@ extends Control
 
 signal resolved(choice: StringName, result: Dictionary)
 
+## When true, sell marks the town sold and fires honor without dividing the pile.
+@export var defer_split: bool = false
+
 var holding: Resource
 
 @onready var _title: Label = $Center/Title
@@ -38,7 +41,11 @@ func _on_keep() -> void:
 func _on_sell() -> void:
 	if holding == null or not holding.has_method("sell"):
 		return
-	var result: Dictionary = holding.sell()
+	var result: Dictionary
+	if defer_split:
+		result = holding.sell({}, false)
+	else:
+		result = holding.sell()
 	resolved.emit(&"sell", result)
 
 

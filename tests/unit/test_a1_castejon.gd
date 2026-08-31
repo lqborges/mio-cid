@@ -83,6 +83,8 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("honor meters missing from a1_castejon HUD")
 	if _world.find_child("KeepOrSell", true, false) == null:
 		failures.append("keep-or-sell missing from a1_castejon HUD")
+	if _world.find_child("BootyDivide", true, false) == null:
+		failures.append("booty divide missing from a1_castejon HUD")
 	if _world.find_child("AlvarReport", true, false) == null:
 		failures.append("AlvarReport missing (Henares is off-map, not a second map)")
 	if _world.find_child("MesuraHud", true, false) == null:
@@ -177,6 +179,9 @@ func _check_spawn_does_not_auto_take() -> PackedStringArray:
 	var ui: Node = _world.find_child("KeepOrSell", true, false)
 	if ui and bool(ui.visible):
 		failures.append("keep-or-sell must stay hidden until take")
+	var divide_ui: Node = _world.find_child("BootyDivide", true, false)
+	if divide_ui and bool(divide_ui.visible):
+		failures.append("booty divide must stay hidden until sell")
 	return failures
 
 
@@ -282,6 +287,11 @@ func _check_sell_advances_to_alcocer() -> PackedStringArray:
 	var scene_before: Node = current_scene
 	world.run_take()
 	world.choose_sell()
+	if bool(world.get("_divided")):
+		failures.append("sell must wait for booty confirm")
+	if String(_runner.current_id) == "a1_alcocer":
+		failures.append("sell must not skip booty divide")
+	world.confirm_divide()
 	if current_scene != scene_before:
 		failures.append("sell must not change_scene when current_scene != world (Alcocer is later)")
 	if "castejon_sell" not in _logged:

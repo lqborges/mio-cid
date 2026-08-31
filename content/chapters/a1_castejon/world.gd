@@ -23,6 +23,7 @@ var _raid_started: bool = false
 var _taken: bool = false
 var _looted: bool = false
 var _resolved: bool = false
+var _divided: bool = false
 var _garrison_left: int = 0
 
 
@@ -41,7 +42,9 @@ func _ready() -> void:
 	_connect_take_zone()
 	_connect_garrison()
 	_connect_keep_or_sell()
+	_connect_booty_divide()
 	_hide_keep_or_sell()
+	_hide_booty_divide()
 	_whisper(DAWN_KEY)
 
 
@@ -68,6 +71,8 @@ func start_cue(cue: String) -> void:
 		choose_keep()
 	elif cue == "sell":
 		choose_sell()
+	elif cue == "divide":
+		confirm_divide()
 
 
 func complete_take() -> void:
@@ -93,7 +98,7 @@ func choose_keep() -> void:
 
 
 func choose_sell() -> void:
-	if _resolved:
+	if _resolved or _divided:
 		return
 	if not _taken:
 		complete_take()
@@ -102,6 +107,23 @@ func choose_sell() -> void:
 		ui.call("_on_sell")
 		return
 	_finish_sell({})
+
+
+func confirm_divide(gift_alvar: bool = false) -> void:
+	if _resolved or _divided:
+		return
+	if not _taken:
+		complete_take()
+	if holding and not bool(holding.get("sold")):
+		choose_sell()
+	var ui := _booty_divide()
+	if ui:
+		if ui.has_method("set_gift_to_alvar"):
+			ui.call("set_gift_to_alvar", gift_alvar)
+		if ui.has_method("confirm"):
+			ui.call("confirm")
+			return
+	_finish_divide({})
 
 
 func _on_keep_or_sell(choice: StringName, result: Dictionary) -> void:
@@ -124,13 +146,26 @@ func _finish_keep(_result: Dictionary) -> void:
 
 
 func _finish_sell(_result: Dictionary) -> void:
-	if _resolved:
+	if _resolved or _divided:
 		return
-	_resolved = true
 	_hide_keep_or_sell()
 	_whisper(SELL_KEY)
 	if holding and holding.has_method("sell") and not bool(holding.get("sold")):
-		holding.sell()
+		holding.sell({}, false)
+	_show_booty_divide()
+
+
+func _on_booty_confirmed(split: Dictionary) -> void:
+	_finish_divide(split)
+
+
+func _finish_divide(_split: Dictionary) -> void:
+	if _resolved or _divided:
+		return
+	_divided = true
+	_resolved = true
+	_hide_keep_or_sell()
+	_hide_booty_divide()
 	_leave_for_alcocer()
 
 
@@ -224,8 +259,18 @@ func _connect_keep_or_sell() -> void:
 	var ui := _keep_or_sell()
 	if ui == null:
 		return
+	if "defer_split" in ui:
+		ui.set("defer_split", true)
 	if ui.has_signal("resolved") and not ui.resolved.is_connected(_on_keep_or_sell):
 		ui.resolved.connect(_on_keep_or_sell)
+
+
+func _connect_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui == null:
+		return
+	if ui.has_signal("confirmed") and not ui.confirmed.is_connected(_on_booty_confirmed):
+		ui.confirmed.connect(_on_booty_confirmed)
 
 
 func _show_keep_or_sell() -> void:
@@ -244,8 +289,28 @@ func _hide_keep_or_sell() -> void:
 		ui.visible = false
 
 
+func _show_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui == null:
+		return
+	_load_holding()
+	if ui.has_method("bind_holding"):
+		ui.bind_holding(holding)
+	ui.visible = true
+
+
+func _hide_booty_divide() -> void:
+	var ui := _booty_divide()
+	if ui:
+		ui.visible = false
+
+
 func _keep_or_sell() -> Node:
 	return find_child("KeepOrSell", true, false)
+
+
+func _booty_divide() -> Node:
+	return find_child("BootyDivide", true, false)
 
 
 func _form_wedge() -> void:

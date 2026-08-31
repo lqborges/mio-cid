@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a1_castejon/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="10_horse"]
 [ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="11_ai"]
 [ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="12_bridge"]
+[ext_resource type="PackedScene" path="res://game/ui/booty_divide.tscn" id="13_booty"]
 
 [sub_resource type="Environment" id="Environment_castejon"]
 background_mode = 1
@@ -335,4 +336,8 @@ autowrap_mode = 2
 text = ""
 
 [node name="KeepOrSell" parent="HUD" instance=ExtResource("7_keep")]
+visible = false
+defer_split = true
+
+[node name="BootyDivide" parent="HUD" instance=ExtResource("13_booty")]
 visible = false

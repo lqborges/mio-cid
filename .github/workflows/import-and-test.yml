@@ -113,6 +113,9 @@ jobs:
       - name: Run Python a1_alcocer tests
         run: python3 tests/unit/test_a1_alcocer.py
 
+      - name: Run Python booty-divide tests
+        run: python3 tests/unit/test_booty_divide.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -188,6 +191,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_alcocer.gd
+
+      - name: Run booty-divide headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_booty_divide.gd
 
       - name: Run combat headless test
         if: steps.godot.outputs.found == 'true'

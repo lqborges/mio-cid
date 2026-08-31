@@ -24,6 +24,10 @@
       "type": "keep_or_sell"
     },
     {
+      "id": "booty_divide",
+      "type": "booty_divide"
+    },
+    {
       "id": "sell",
       "type": "travel_spawn",
       "next": "a1_alcocer"

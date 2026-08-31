@@ -23,6 +23,19 @@
       "type": "honor_event"
     },
     {
+      "id": "keep_or_sell",
+      "type": "keep_or_sell"
+    },
+    {
+      "id": "alcocer_sell",
+      "type": "honor_event"
+    },
+    {
+      "id": "booty_divide",
+      "type": "booty_divide",
+      "set_flags": ["alcocer_booty_divided"]
+    },
+    {
       "id": "leave",
       "type": "travel_spawn",
       "next": "a1_embassy1"

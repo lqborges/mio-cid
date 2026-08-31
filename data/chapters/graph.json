@@ -206,7 +206,8 @@
     },
     {
       "from": "a1_alcocer",
-      "to": "a1_embassy1"
+      "to": "a1_embassy1",
+      "req_flags": ["alcocer_booty_divided"]
     },
     {
       "from": "a1_embassy1",

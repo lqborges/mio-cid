@@ -78,22 +78,24 @@ func keep() -> Dictionary:
 	return result
 
 
-func sell(pile: Dictionary = {}) -> Dictionary:
+func sell(pile: Dictionary = {}, divide_now: bool = true) -> Dictionary:
 	var result := _blank()
 	result["choice"] = &"sell"
 	if sold:
 		result["sold"] = true
 		return result
 	var to_split: Dictionary = pile if not pile.is_empty() else booty
-	result["split"] = divide(to_split)
-	var honor := _autoload("HonorService")
-	if sell_event_id != &"" and honor and honor.has_method("apply_id"):
-		result["event_id"] = sell_event_id
-		result["honor"] = honor.apply_id(sell_event_id)
+	result["pile"] = to_split
+	if divide_now:
+		result["split"] = divide(to_split)
 	held = false
 	sold = true
 	result["sold"] = true
 	result["held"] = false
+	var honor := _autoload("HonorService")
+	if sell_event_id != &"" and honor and honor.has_method("apply_id"):
+		result["event_id"] = sell_event_id
+		result["honor"] = honor.apply_id(sell_event_id)
 	return result
 
 
@@ -154,6 +156,7 @@ func _blank() -> Dictionary:
 		"event_id": &"",
 		"honor": {},
 		"split": {},
+		"pile": {},
 	}
 
 

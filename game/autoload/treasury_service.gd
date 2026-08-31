@@ -119,52 +119,64 @@ func camp_night() -> Dictionary:
 	return result
 
 
-func divide_booty(pile: Dictionary) -> Dictionary:
+func preview_booty(pile: Dictionary, gift: Dictionary = {}) -> Dictionary:
+	if tunables.is_empty():
+		load_economy()
+	return BootySplit.preview(pile, _fractions(), gift)
+
+
+func divide_booty(pile: Dictionary, gift: Dictionary = {}) -> Dictionary:
 	if tunables.is_empty():
 		load_economy()
 	if state == null:
 		state = Treasury.new()
-	var marks: int = maxi(0, int(pile.get("marks", 0)))
-	var horses: int = maxi(0, int(pile.get("horses", 0)))
-	var cloth: int = maxi(0, int(pile.get("cloth", 0)))
-	var arms: int = maxi(0, int(pile.get("arms", 0)))
-	var quinto_f := tunable_float("quinto_fraction", 0.2)
-	var mesnada_f := tunable_float("mesnada_fraction", 0.4)
-	var quinto_marks := _share(marks, quinto_f)
-	var mesnada_marks := _share(marks, mesnada_f)
-	var keep_marks: int = marks - quinto_marks - mesnada_marks
-	var quinto_horses := 0
-	var mesnada_horses := 0
-	var keep_horses := 0
-	if tunable_bool("horses_all_to_treasury", false):
-		keep_horses = horses
-	elif tunable_bool("horses_follow_fractions", true):
-		quinto_horses = _share(horses, quinto_f)
-		mesnada_horses = _share(horses, mesnada_f)
-		keep_horses = horses - quinto_horses - mesnada_horses
-	else:
-		keep_horses = horses
+	var split: Dictionary = preview_booty(pile, gift)
+	var quinto_marks: int = int(split.get("quinto_marks", 0))
+	var mesnada_marks: int = int(split.get("mesnada_marks", 0))
+	var keep_marks: int = int(split.get("treasury_marks", 0))
+	var quinto_horses: int = int(split.get("quinto_horses", 0))
+	var mesnada_horses: int = int(split.get("mesnada_horses", 0))
+	var keep_horses: int = int(split.get("treasury_horses", 0))
 	state.royal_escrow_marks += quinto_marks
 	state.royal_escrow_horses += quinto_horses
 	state.marks += keep_marks
 	state.horses += keep_horses
-	state.cloth += cloth
-	state.arms += arms
-	_gift_mesnada_share(mesnada_marks, mesnada_horses)
+	state.cloth += int(split.get("cloth", 0))
+	state.arms += int(split.get("arms", 0))
+	var gift_marks: int = int(split.get("gift_marks", 0))
+	var gift_horses: int = int(split.get("gift_horses", 0))
+	if bool(split.get("gift_to_alvar", false)):
+		_gift_alvar(gift_marks, gift_horses)
+		var rest_marks: int = mesnada_marks - gift_marks
+		var rest_horses: int = mesnada_horses - gift_horses
+		_gift_mesnada_share(rest_marks, rest_horses)
+	else:
+		_gift_mesnada_share(mesnada_marks, mesnada_horses)
+	return split
+
+
+func _fractions() -> Dictionary:
 	return {
-		"quinto_marks": quinto_marks,
-		"mesnada_marks": mesnada_marks,
-		"treasury_marks": keep_marks,
-		"quinto_horses": quinto_horses,
-		"mesnada_horses": mesnada_horses,
-		"treasury_horses": keep_horses,
+		"quinto_fraction": tunable_float("quinto_fraction", 0.2),
+		"mesnada_fraction": tunable_float("mesnada_fraction", 0.4),
+		"horses_follow_fractions": tunable_bool("horses_follow_fractions", true),
+		"horses_all_to_treasury": tunable_bool("horses_all_to_treasury", false),
 	}
 
 
 func _share(total: int, fraction: float) -> int:
-	if total <= 0 or fraction <= 0.0:
-		return 0
-	return int(floor(float(total) * fraction + 1e-9))
+	return BootySplit.share(total, fraction)
+
+
+func _gift_alvar(gift_marks: int, gift_horses: int) -> void:
+	if gift_marks <= 0 and gift_horses <= 0:
+		return
+	var roster := _roster(false)
+	if roster and roster.has_method("gift_to"):
+		var horse_value: int = gift_horses * tunable_int("horse_marks", 10)
+		roster.gift_to(&"alvar_fanez", float(gift_marks + horse_value), true)
+	if HonorService and HonorService.has_method("apply_id"):
+		HonorService.apply_id(&"gift_to_alvar")
 
 
 func _gift_mesnada_share(mesnada_marks: int, mesnada_horses: int) -> void:

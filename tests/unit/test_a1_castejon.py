@@ -104,6 +104,7 @@ class TestA1CastejonDawnTake(unittest.TestCase):
             "content/art/characters/horse/horse.tscn",
             "content/art/characters/dummy/dummy.tscn",
             "game/ui/keep_or_sell.tscn",
+            "game/ui/booty_divide.tscn",
             "game/systems/travel/town_holding.gd",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
@@ -115,6 +116,7 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         self.assertIn("dummy.tscn", scene)
         self.assertIn("captain.tscn", scene)
         self.assertIn("keep_or_sell.tscn", scene)
+        self.assertIn("booty_divide.tscn", scene)
         self.assertIn("hall_whisper.tscn", scene)
         self.assertIn("honor_meters.tscn", scene)
         self.assertIn("mesura_hud.tscn", scene)
@@ -134,6 +136,7 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         self.assertIn("Horse", scene)
         self.assertIn("AlvarReport", scene)
         self.assertIn("KeepOrSell", scene)
+        self.assertIn("BootyDivide", scene)
         self.assertIn("River", scene)
         self.assertIn("Keep", scene)
         self.assertIn("LootPile", scene)
@@ -258,6 +261,7 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         self.assertIn("a1_alcocer", nexts)
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
         self.assertIn("keep_or_sell", types)
+        self.assertIn("booty_divide", types)
         self.assertIn("fail_copy", types)
         self.assertIn("travel_spawn", types)
         reasons = [
