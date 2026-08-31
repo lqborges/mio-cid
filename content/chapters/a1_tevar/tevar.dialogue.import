@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dm1hbupr5bom5"
+path="res://.godot/imported/tevar.dialogue-cb8e42b78e589c90d947c0ef0a342cd5.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_tevar/tevar.dialogue"
+dest_files=["res://.godot/imported/tevar.dialogue-cb8e42b78e589c90d947c0ef0a342cd5.tres"]
+
+[params]
+
+defaults=true

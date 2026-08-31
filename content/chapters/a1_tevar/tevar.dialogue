@@ -1,0 +1,22 @@
+# Spoken lines are CSV keys. Don Remont speaks apart from the Cid.
+
+~ start
+=> battle
+
+~ battle
+Cid: a1_tevar.battle
+=> END
+
+~ capture
+Cid: a1_tevar.capture
+=> END
+
+~ hunger
+Ramón: a1_tevar.hunger
+Cid: a1_tevar.table_ask
+=> END
+
+~ eat
+Ramón: a1_tevar.eat_done
+Cid: a1_tevar.colada_kept
+=> END

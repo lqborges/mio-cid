@@ -49,6 +49,7 @@ func collect_payload() -> Dictionary:
 			payload["lanzas"] = int(roster.lanzas)
 	payload["treasury"] = _treasury_dict()
 	payload["clock"] = _clock_dict()
+	payload["swords"] = _swords_dict()
 	return payload
 
 
@@ -113,6 +114,11 @@ func migrate(payload: Dictionary) -> Dictionary:
 			"unfed_streak": 0,
 			"plazo_days_left": 9,
 		}
+	if not out.has("swords"):
+		out["swords"] = {
+			"colada": "NOT_YET",
+			"tizona": "NOT_YET",
+		}
 	return out
 
 
@@ -159,6 +165,7 @@ func apply_payload(payload: Dictionary) -> void:
 	_apply_applied_once(body)
 	_apply_treasury(body.get("treasury", {}))
 	_apply_clock(body.get("clock", {}))
+	_apply_swords(body.get("swords", {}))
 
 
 func _canonical_payload_bytes(payload: Dictionary) -> PackedByteArray:
@@ -428,6 +435,24 @@ func _apply_clock(raw: Variant) -> void:
 		return
 	if CampaignClock != null and CampaignClock.has_method("from_save"):
 		CampaignClock.from_save(raw)
+
+
+func _swords_dict() -> Dictionary:
+	var out := {
+		"colada": "NOT_YET",
+		"tizona": "NOT_YET",
+	}
+	if GameState != null and GameState.has_method("swords"):
+		var saved: Variant = GameState.swords()
+		if typeof(saved) == TYPE_DICTIONARY:
+			for key in saved:
+				out[str(key)] = str(saved[key])
+	return out
+
+
+func _apply_swords(raw: Variant) -> void:
+	if GameState != null and GameState.has_method("apply_swords"):
+		GameState.apply_swords(raw)
 
 
 func _apply_roster(payload: Dictionary) -> void:

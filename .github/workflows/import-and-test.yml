@@ -122,6 +122,9 @@ jobs:
       - name: Run Python Poyo hub tests
         run: python3 tests/unit/test_poyo_hub.py
 
+      - name: Run Python a1_tevar tests
+        run: python3 tests/unit/test_a1_tevar.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -222,6 +225,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_poyo_hub.gd
+
+      - name: Run a1_tevar table/Colada headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_tevar.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

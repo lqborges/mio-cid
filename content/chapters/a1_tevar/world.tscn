@@ -1,0 +1,423 @@
+[gd_scene load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_tevar/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="PackedScene" path="res://game/ui/mesura_hud.tscn" id="6_mesura"]
+[ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="7_dummy"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="8_captain"]
+[ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="9_horse"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="10_ai"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="11_bridge"]
+[ext_resource type="PackedScene" path="res://content/chapters/a1_tevar/table_choice.tscn" id="12_choice"]
+
+[sub_resource type="Environment" id="Environment_tevar"]
+background_mode = 1
+background_color = Color(0.34, 0.40, 0.30, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.48, 0.52, 0.40, 1)
+ambient_light_energy = 0.40
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.38, 0.42, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_pine_trunk"]
+albedo_color = Color(0.28, 0.20, 0.14, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_pine_canopy"]
+albedo_color = Color(0.18, 0.32, 0.20, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_path"]
+albedo_color = Color(0.42, 0.36, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_table"]
+albedo_color = Color(0.36, 0.26, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.46, 0.44, 0.38, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_banner"]
+albedo_color = Color(0.52, 0.22, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_tevar"]
+vertices = PackedVector3Array(-22, 0.05, -22, 22, 0.05, -22, 22, 0.05, 22, -22, 0.05, 22)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[sub_resource type="BoxShape3D" id="Box_battle"]
+size = Vector3(12, 2.4, 10)
+
+[sub_resource type="BoxShape3D" id="Box_table"]
+size = Vector3(3.2, 2.4, 3.2)
+
+[node name="Tevar" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tevar")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1, 0.94, 0.80, 1)
+light_energy = 0.92
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(48, 1, 48)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Path" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 6)
+size = Vector3(3.6, 0.08, 22)
+material = SubResource("Mat_path")
+
+[node name="PineA" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.4, 1.2, -14.2)
+radius = 0.22
+height = 2.4
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+radius = 1.35
+height = 3.4
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineB" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.8, 1.2, -13.6)
+radius = 0.20
+height = 2.4
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+radius = 1.28
+height = 3.6
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineC" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.2, 1.1, 2.4)
+radius = 0.18
+height = 2.2
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+radius = 1.18
+height = 3.2
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineD" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.4, 1.15, -3.2)
+radius = 0.21
+height = 2.3
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineD"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+radius = 1.30
+height = 3.5
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineE" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15.2, 1.05, 12.8)
+radius = 0.19
+height = 2.1
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineE"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.85, 0)
+radius = 1.22
+height = 3.1
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineF" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.2, 1.25, 14.4)
+radius = 0.23
+height = 2.5
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineF"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.15, 0)
+radius = 1.40
+height = 3.7
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineG" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.6, 1.1, -18.4)
+radius = 0.17
+height = 2.2
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineG"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, 0)
+radius = 1.16
+height = 3.3
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="PineH" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.4, 1.2, -17.8)
+radius = 0.20
+height = 2.4
+sides = 8
+material = SubResource("Mat_pine_trunk")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Canopy" type="CSGCylinder3D" parent="PineH"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
+radius = 1.26
+height = 3.4
+sides = 8
+cone = true
+material = SubResource("Mat_pine_canopy")
+
+[node name="NameStone" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 1.0, 8.2)
+size = Vector3(0.5, 2.0, 0.4)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="PlaceName" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 2.4, 8.2)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="TableCamp" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 10)
+
+[node name="Table" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+size = Vector3(2.4, 0.18, 1.2)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="LegA" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.24, -0.42)
+size = Vector3(0.12, 0.48, 0.12)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="LegB" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.24, -0.42)
+size = Vector3(0.12, 0.48, 0.12)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="LegC" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.95, 0.24, 0.42)
+size = Vector3(0.12, 0.48, 0.12)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="LegD" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.95, 0.24, 0.42)
+size = Vector3(0.12, 0.48, 0.12)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BenchA" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, -0.95)
+size = Vector3(2.2, 0.28, 0.38)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BenchB" type="CSGBox3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22, 0.95)
+size = Vector3(2.2, 0.28, 0.38)
+material = SubResource("Mat_table")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Bowl" type="CSGCylinder3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.70, 0.1)
+radius = 0.16
+height = 0.10
+sides = 8
+material = SubResource("Mat_stone")
+
+[node name="Seat" type="Marker3D" parent="TableCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0.95)
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_tevar")
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 16)
+
+[node name="Horse" parent="." instance=ExtResource("9_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, 16.6)
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("10_ai")
+leader_path = NodePath("../Cid")
+spawn_lanza_bodies = true
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="AlvarFanez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 18.2)
+member_id = &"alvar_fanez"
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 18.2)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.05, 19.2)
+member_id = &"pero_bermudez"
+
+[node name="MunoGustioz" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.05, 19.2)
+member_id = &"muno_gustioz"
+
+[node name="Host" type="Node3D" parent="."]
+
+[node name="Ramon" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -8.0)
+character_id = &"ramon_berenguer"
+
+[node name="Dummy1" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.05, -6.4)
+
+[node name="Dummy2" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, -6.4)
+
+[node name="Dummy3" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0.05, -9.6)
+
+[node name="Dummy4" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.05, -9.8)
+
+[node name="BattleZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -6)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BattleZone"]
+shape = SubResource("Box_battle")
+
+[node name="TableZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.0, 10)
+collision_layer = 0
+collision_mask = 130
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TableZone"]
+shape = SubResource("Box_table")
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("11_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="MesuraHud" parent="HUD" instance=ExtResource("6_mesura")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
+
+[node name="TableChoice" parent="HUD" instance=ExtResource("12_choice")]
+visible = false

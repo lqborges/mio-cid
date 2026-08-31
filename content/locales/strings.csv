@@ -93,3 +93,11 @@ a1_embassy1.prompt,Álvar llevará el presente a Alfonso.,Álvar will take the g
 a1_embassy1.alvar_leave,Álvar Fáñez parte con el presente. El rey está lejos.,Álvar Fáñez rides with the gift. The king is far off.
 a1_embassy1.alvar_return,Álvar vuelve. Minaya recobra sus tierras.,Álvar returns. Minaya's lands are restored.
 a1_embassy1.lands_restored,Alfonso restituye las tierras de Minaya. A vos no os perdona aún. Ya pueden juntarse más lanzas.,Alfonso restores Minaya's lands. He does not pardon you yet. More lanzas may gather.
+char.ramon_berenguer,Conde don Remont,Count don Remont
+a1_tevar.battle,"En el pinar de Tévar sale el conde don Remont.","In the pinewood of Tévar count don Remont rides out."
+a1_tevar.capture,"Prendemos al conde. Colada no es botín.","We take the count. Colada is not booty."
+a1_tevar.hunger,"No comeré a vuestra mesa.","I will not eat at your table."
+a1_tevar.table_ask,"Comed, conde. En esta mesa se come.","Eat, count. At this table one eats."
+a1_tevar.choice_eat,Hacedle comer,Make him eat
+a1_tevar.eat_done,"Como, pues me forzáis.","I eat, since you force me."
+a1_tevar.colada_kept,"Colada queda en mi mano.","Colada stays in my hand."

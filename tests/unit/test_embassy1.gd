@@ -307,12 +307,6 @@ func _check_ten_horses_cheat_branch() -> PackedStringArray:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if not _fails.is_empty():
 		failures.append("gift must not hard_fail: %s" % ", ".join(_fails))
-	if _runner and _runner.has_method("goto"):
-		_runner.goto(&"a1_poyo")
-		if current_scene != scene_before:
-			failures.append("goto a1_poyo must no-op missing scene")
-	if ResourceLoader.exists("res://content/chapters/a1_poyo/world.tscn"):
-		failures.append("must not ship a1_poyo/world.tscn on this PR")
 	world.free()
 	return failures
 

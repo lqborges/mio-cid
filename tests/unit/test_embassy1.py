@@ -108,8 +108,6 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
             "content/art/characters/captain/captain.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a1_poyo/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a1_tevar/world.tscn").is_file())
 
     def test_gift_json_horses_are_animals_not_marks(self) -> None:
         payload = json.loads(_read("data/gifts/embassy_1.json"))

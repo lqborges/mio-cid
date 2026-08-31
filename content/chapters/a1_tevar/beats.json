@@ -1,0 +1,32 @@
+{
+  "id": "a1_tevar",
+  "steps": [
+    {
+      "id": "battle",
+      "type": "blocking"
+    },
+    {
+      "id": "capture",
+      "type": "blocking"
+    },
+    {
+      "id": "hunger",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_tevar/tevar.dialogue",
+      "start": "hunger"
+    },
+    {
+      "id": "eat",
+      "type": "choice"
+    },
+    {
+      "id": "tevar_feed_count",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_murviedro"
+    }
+  ]
+}
