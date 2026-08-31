@@ -74,6 +74,9 @@ jobs:
       - name: Run Python autoload tests
         run: python3 tests/unit/test_event_bus.py
 
+      - name: Run Python controller tests
+        run: python3 tests/unit/test_cid_controller.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -83,6 +86,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_event_bus.gd
+
+      - name: Run CidController headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_cid_controller.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
@@ -108,4 +116,4 @@ jobs:
 
       - name: Skip notice
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus headless test, and gdUnit4 skipped."
+        run: echo "Godot binary missing in CI cache; import, EventBus/CidController headless tests, and gdUnit4 skipped."

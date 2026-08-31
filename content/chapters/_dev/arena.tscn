@@ -1,0 +1,80 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="1_cid"]
+
+[sub_resource type="Environment" id="Environment_arena"]
+background_mode = 1
+background_color = Color(0.145, 0.165, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.35, 0.4, 0.48, 1)
+ambient_light_energy = 0.45
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.18, 0.18, 0.17, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_box"]
+albedo_color = Color(0.62, 0.58, 0.5, 1)
+roughness = 1.0
+
+[node name="Arena" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_arena")
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.624695, -0.685189, 0.37453, 0, 0.479632, 0.87747, -0.780869, -0.548151, 0.299624, 0, 14, 0)
+light_color = Color(0.75, 0.82, 0.95, 1)
+light_energy = 1.05
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(40, 1, 40)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BoxA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.6, 3)
+size = Vector3(4, 1.2, 1.5)
+material = SubResource("Mat_box")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BoxB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -4)
+size = Vector3(1.5, 2, 1.5)
+material = SubResource("Mat_box")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BoxC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 8)
+size = Vector3(3, 0.8, 3)
+material = SubResource("Mat_box")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="BoxD" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0.75, 6)
+size = Vector3(2, 1.5, 2)
+material = SubResource("Mat_box")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cid" parent="." instance=ExtResource("1_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)

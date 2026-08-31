@@ -7,7 +7,7 @@ This file is binding for anyone (human or agent) editing this repository.
 | Item | Value |
 | --- | --- |
 | Engine | **Godot 4.7.2** (standard / non-.NET). Upgrade only on a dedicated PR. |
-| Renderer | Forward+ |
+| Renderer | **GL Compatibility default** (Intel HD 4000 / Envy 720p30). Forward+ is allowed on Iris Xe / discrete GPU via `--rendering-method forward_plus`. Do not ship Forward+ as the only renderer. |
 | Runtime language | **GDScript only** in `game/`. Tools are Python. No C# assemblies. |
 | Physics | **Built-in Jolt Physics**. `physics/3d/physics_engine="Jolt Physics"` in `project.godot`. |
 

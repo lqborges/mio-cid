@@ -85,8 +85,10 @@ class TestAutoloadsAndEventBus(unittest.TestCase):
     def test_event_bus_gd_test_parses(self) -> None:
         source = _read("tests/unit/test_event_bus.gd")
         self.assertIn("extends SceneTree", source)
-        self.assertIn("EventBus.soft_warn", source)
-        self.assertIn("EventBus.hard_fail", source)
+        self.assertIn("soft_warn.connect", source)
+        self.assertIn("hard_fail.connect", source)
+        self.assertIn("soft_warn.emit", source)
+        self.assertIn("hard_fail.emit", source)
         self.assertIn("cannot_feed", source)
         self.assertIn("name_empty", source)
         self.assertNotIn("load(\"res://game/autoload/event_bus.gd\")", source)
