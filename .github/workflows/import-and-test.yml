@@ -134,6 +134,9 @@ jobs:
       - name: Run Python embassy2 tests
         run: python3 tests/unit/test_embassy2.py
 
+      - name: Run Python a2 Yusuf tests
+        run: python3 tests/unit/test_a2_yusuf.py
+
       - name: Run Python a2 repay Raquel tests
         run: python3 tests/unit/test_a2_repay_raquel.py
 
@@ -257,6 +260,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy2.gd
+
+      - name: Run a2 Yusuf headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a2_yusuf.gd
 
       - name: Run a2 repay Raquel headless test
         if: steps.godot.outputs.found == 'true'

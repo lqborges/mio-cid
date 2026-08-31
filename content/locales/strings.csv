@@ -147,6 +147,15 @@ a2_embassy2.alvar_leave,Álvar Fáñez parte con el segundo presente.,Álvar Fá
 a2_embassy2.alvar_return,Álvar entrega el presente. Alfonso deja salir a Jimena de Cardeña.,Álvar delivers the gift. Alfonso lets Jimena leave Cardeña.
 a2_embassy2.family_arrives,"Jimena, Elvira y Sol entran en Valencia. Avengalvón queda.","Jimena, Elvira and Sol enter Valencia. Avengalvón stays."
 a2_embassy2.need_avengalvon,Sin Avengalvón no hay escolta.,Without Avengalvón there is no escort.
+char.yusuf,Yusuf,Yusuf
+a2_yusuf.jimena_watch,Jimena mira el campo desde el muro.,Jimena watches the field from the wall.
+a2_yusuf.field,"Salimos a la huerta. Yusuf espera en el campo, no en el muro.","We ride into the huerta. Yusuf waits in the field, not on the wall."
+a2_yusuf.win,El primer día es nuestro. Jimena mira desde el muro.,The first day is ours. Jimena watches from the wall.
+a2_yusuf.wall_refused,Álvar: este día se pelea en la huerta. No hay escala.,Álvar: this day is fought in the huerta. There is no climb.
+a2_yusuf.day1_hold,"Anochece. Mañana, el segundo día.","Night falls. Tomorrow, the second day."
+a2_yusuf.day2_watch,Segundo día. Jimena mira otra vez desde el muro.,Second day. Jimena watches from the wall again.
+a2_yusuf.day2_charge,"Una carga. De frente, en la huerta.","One charge. Straight, in the huerta."
+a2_yusuf.day2_win,Yusuf se retira. Jimena ve el campo nuestro.,Yusuf withdraws. Jimena sees the field is ours.
 a2_repay_raquel.minaya,"Raquel y Vidas vienen a mí, mio Cid. Piden las arcas.","Raquel and Vidas come to me, my Cid. They ask for the chests."
 a2_repay_raquel.raquel,"Mio Cid, pagad lo que os prestamos. Valencia es vuestra.","My Cid, pay what we lent you. Valencia is yours."
 a2_repay_raquel.vidas,Las arcas eran de arena. Ahora cobramos en marcos.,The chests were sand. Now we collect in marks.
