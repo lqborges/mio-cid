@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for PR-25 Valencia hub / Jerónimo appointment.
+"""Structural tests for PR-29 a3_leon lion scene.
 
-Run: python3 tests/unit/test_a2_jeronimo.py
+Run: python3 tests/unit/test_a3_leon.py
 """
 
 from __future__ import annotations
@@ -34,8 +34,13 @@ DENY = (
     "holy_war",
 )
 
-CHAPTER = "content/chapters/a2_jeronimo"
-ROOMS = ("Hall", "Forge", "LionCage", "Bishopric", "WallWalk", "Solar", "Treasury")
+CHAPTER = "content/chapters/a3_leon"
+HIDE_FLAGS = (
+    "ferran_hid_leon",
+    "diego_hid_leon",
+    "infantes_hid_leon",
+    "infantes_cowardice_leon",
+)
 
 
 def _read(rel: str) -> str:
@@ -103,63 +108,61 @@ def _zone_aabb(
     )
 
 
-class TestA2JeronimoValenciaHub(unittest.TestCase):
+class TestA3LeonLionScene(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/jeronimo.dialogue",
+            f"{CHAPTER}/leon.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/bishop.gd",
-            "data/honor_events/jeronimo.json",
-            "data/characters/jeronimo.json",
+            f"{CHAPTER}/choice_ui.tscn",
+            f"{CHAPTER}/choice_ui.gd",
+            "data/honor_events/core.json",
+            "data/characters/ferran_gonzalez.json",
+            "data/characters/diego_gonzalez.json",
             "content/art/characters/cid/cid.tscn",
-            "content/art/characters/horse/horse.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_embassy2/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a2_yusuf/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a2_valencia_hub/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
 
-    def test_hub_rooms_and_greybox(self) -> None:
+    def test_scene_is_cheap_greybox_hall(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         self.assertIn("cid.tscn", scene)
-        self.assertIn("horse.tscn", scene)
         self.assertIn("captain.tscn", scene)
         self.assertIn("hall_whisper.tscn", scene)
         self.assertIn("honor_meters.tscn", scene)
         self.assertIn("mesura_hud.tscn", scene)
+        self.assertIn("choice_ui.tscn", scene)
         self.assertEqual(scene.count('type="DirectionalLight3D"'), 1)
         self.assertNotIn("OmniLight3D", scene)
         self.assertNotIn("SpotLight3D", scene)
         self.assertIn("sdfgi_enabled = false", scene)
         self.assertIn("shadow_enabled = false", scene)
-        self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 12)
-        self.assertIn("CSGCombiner3D", scene)
-        for room in ROOMS:
-            self.assertIn(f'[node name="{room}"', scene, room)
-        self.assertIn("CageGate", scene)
-        self.assertIn("LionProp", scene)
-        self.assertIn("Jeronimo", scene)
-        self.assertIn("AppointZone", scene)
-        self.assertIn("CageZone", scene)
-        self.assertIn("EmbassyExit", scene)
-        self.assertIn("Altar", scene)
-        self.assertIn("Anvil", scene)
-        self.assertIn("SolarBed", scene)
-        self.assertIn("ChestA", scene)
-        self.assertNotIn('[node name="Jimena"', scene)
+        self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
+        for node in (
+            "Hall",
+            "LionCage",
+            "CageGate",
+            "LionProp",
+            "SleepCouch",
+            "HallBenchA",
+            "Solar",
+            "SolarBed",
+            "Ferran",
+            "Diego",
+            "Mesnada",
+            "Cid",
+            "CageZone",
+            "ChoiceUI",
+        ):
+            self.assertIn(f'[node name="{node}"', scene, node)
+        self.assertIn("visible = false", scene[scene.find("CageGate") : scene.find("CageGate") + 280])
+        self.assertNotIn('[node name="Jeronimo"', scene)
         self.assertNotIn("GPUParticles3D", scene)
-        appoint_at = scene.find('[node name="AppointZone"')
         cage_at = scene.find('[node name="CageZone"')
-        exit_at = scene.find('[node name="EmbassyExit"')
-        self.assertGreaterEqual(appoint_at, 0)
         self.assertGreaterEqual(cage_at, 0)
-        self.assertGreaterEqual(exit_at, 0)
-        self.assertIn("collision_mask = 130", scene[appoint_at : appoint_at + 280])
         self.assertIn("collision_mask = 130", scene[cage_at : cage_at + 280])
-        self.assertIn("collision_mask = 130", scene[exit_at : exit_at + 280])
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -171,66 +174,86 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
         horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
         horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
-        for node_name, shape_id in (
-            ("AppointZone", "Box_appoint"),
-            ("CageZone", "Box_cage"),
-            ("EmbassyExit", "Box_embassy"),
-        ):
-            zmin, zmax = _zone_aabb(scene, node_name, shape_id)
-            size = _subresource_size(scene, shape_id)
-            origin = _origin(scene, node_name)
-            self.assertFalse(
-                _aabb_overlap(cid_min, cid_max, zmin, zmax),
-                f"{node_name} {origin} size {size} overlaps Cid spawn {cid}",
-            )
-            self.assertFalse(
-                _aabb_overlap(horse_min, horse_max, zmin, zmax),
-                f"{node_name} overlaps Horse spawn {horse}",
-            )
+        zmin, zmax = _zone_aabb(scene, "CageZone", "Box_cage")
+        size = _subresource_size(scene, "Box_cage")
+        origin = _origin(scene, "CageZone")
+        self.assertFalse(
+            _aabb_overlap(cid_min, cid_max, zmin, zmax),
+            f"CageZone {origin} size {size} overlaps Cid spawn {cid}",
+        )
+        self.assertFalse(
+            _aabb_overlap(horse_min, horse_max, zmin, zmax),
+            f"CageZone overlaps Horse spawn {horse}",
+        )
+        lion = _origin(scene, "LionProp")
+        cage = _origin(scene, "LionCage")
+        self.assertGreater(
+            abs(lion[2] - cage[2]),
+            2.0,
+            f"escaped lion {lion} must not start inside the cage {cage}",
+        )
 
-    def test_honor_and_character_json(self) -> None:
-        payload = json.loads(_read("data/honor_events/jeronimo.json"))
-        self.assertEqual(payload["gift_marks"], 40)
-        events = {row["id"]: row for row in payload["events"]}
-        row = events["jeronimo_appointed"]
-        self.assertEqual(row["beat"], "a2_jeronimo")
-        self.assertIn("honor", row["deltas"])
-        self.assertIn("honra", row["deltas"])
-        self.assertIn("gift_down", row["tags"])
-        self.assertIn("city", row["tags"])
-        self.assertIn("jeronimo_appointed", row["flags_set"])
-        self.assertFalse(row.get("hard_fail", False))
-        person = json.loads(_read("data/characters/jeronimo.json"))
-        self.assertEqual(person["id"], "jeronimo")
-        self.assertEqual(person["role"], "bishop")
-        self.assertEqual(person["recruitable_beat"], "a2_jeronimo")
-        self.assertTrue(person["list_eligible"])
-        self.assertEqual(person["gift_bias"], "chapel")
+    def test_infantes_hide_under_bench_and_solar(self) -> None:
+        scene = _read(f"{CHAPTER}/world.tscn")
+        ferran = _origin(scene, "Ferran")
+        bench = _origin(scene, "HallBenchA")
+        diego = _origin(scene, "Diego")
+        bed = _origin(scene, "SolarBed")
+        self.assertLess(abs(ferran[0] - bench[0]), 0.6)
+        self.assertLess(abs(ferran[2] - bench[2]), 0.6)
+        self.assertLess(ferran[1], 0.4)
+        self.assertLess(abs(diego[0] - bed[0]), 1.2)
+        self.assertLess(abs(diego[2] - bed[2]), 1.6)
+        ferran_json = json.loads(_read("data/characters/ferran_gonzalez.json"))
+        diego_json = json.loads(_read("data/characters/diego_gonzalez.json"))
+        self.assertEqual(ferran_json["mesura_max"], 0)
+        self.assertEqual(diego_json["mesura_max"], 0)
 
-    def test_world_script_appointment_and_name(self) -> None:
+    def test_world_script_mesura_vs_rage(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
-        self.assertIn("func appoint_jeronimo", source)
-        self.assertIn("func run_appoint", source)
-        self.assertIn("func try_open_cage", source)
-        self.assertIn("func is_cage_closed", source)
-        self.assertIn("func travel_to_embassy2", source)
-        self.assertIn("apply_name", source)
-        self.assertIn("babieca", source)
-        self.assertIn("jeronimo_appointed", source)
-        self.assertIn("gift_marks", source)
-        self.assertIn("_tunable_int", source)
+        for name in (
+            "func wake_cid",
+            "func start_joke",
+            "func run_joke",
+            "func choose_mesura",
+            "func choose_rage",
+            "func run_mesura",
+            "func run_rage",
+            "func return_lion",
+            "func try_kill_lion",
+            "func is_cage_closed",
+            "func is_lion_escaped",
+            "func is_cid_asleep",
+        ):
+            self.assertIn(name, source, name)
+        self.assertIn("lion_mesura", source)
+        self.assertIn("lion_rage", source)
+        self.assertIn("ferran_hid_leon", source)
+        self.assertIn("diego_hid_leon", source)
+        self.assertIn("infantes_cowardice_leon", source)
+        self.assertIn("set_holding", source)
         self.assertNotIn("func _enter_tree", source)
-        self.assertNotIn("a3_leon", source)
+        self.assertNotIn("tizona", source.lower())
         self.assertNotIn("flute", source.lower())
-        horse = _read("game/actors/player/horse_companion.gd")
-        self.assertIn("func apply_name(", horse)
-        self.assertNotIn("babieca", horse.lower())
-        tevar = _read("content/chapters/a1_tevar/world.gd").lower()
-        self.assertNotIn("babieca", tevar)
-        siege = _read("content/chapters/a2_siege/world.gd").lower()
-        self.assertNotIn("babieca", siege)
+        self.assertNotIn("a3_corpes", source)
+
+    def test_honor_events_mesura_dump_costs_honra(self) -> None:
+        payload = json.loads(_read("data/honor_events/core.json"))
+        events = {row["id"]: row for row in payload["events"]}
+        mesura = events["lion_mesura"]
+        rage = events["lion_rage"]
+        self.assertEqual(mesura["beat"], "a3_leon")
+        self.assertEqual(rage["beat"], "a3_leon")
+        self.assertEqual(mesura["deltas"]["honra"], 8)
+        self.assertEqual(rage["deltas"]["honra"], -10)
+        self.assertIn("mesura", mesura["tags"])
+        self.assertIn("mesura_fail", rage["tags"])
+        self.assertIn("lion_returned", mesura["flags_set"])
+        self.assertIn("lion_returned", rage["flags_set"])
+        self.assertNotIn("onores", rage["deltas"])
+        self.assertLess(rage["deltas"]["honra"], 0)
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -238,77 +261,93 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "char.jeronimo",
-            "a2_jeronimo.appoint",
-            "a2_jeronimo.wants_lance",
-            "a2_jeronimo.give_lance",
-            "a2_jeronimo.bishop_admin",
-            "a2_jeronimo.appointed",
-            "a2_jeronimo.gift",
-            "a2_jeronimo.cage_locked",
+            "char.ferran_gonzalez",
+            "char.diego_gonzalez",
+            "a3_leon.asleep",
+            "a3_leon.joke",
+            "a3_leon.ferran_hide",
+            "a3_leon.diego_hide",
+            "a3_leon.choice_mesura",
+            "a3_leon.choice_rage",
+            "a3_leon.mesura_done",
+            "a3_leon.rage_done",
+            "a3_leon.returned",
+            "a3_leon.no_kill",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        self.assertIn("Jerónimo", rows["a2_jeronimo.appoint"]["es"])
-        self.assertIn("obispado", rows["a2_jeronimo.appoint"]["es"].lower())
-        self.assertIn("administra", rows["a2_jeronimo.bishop_admin"]["es"].lower())
-        self.assertNotIn("cruzada", rows["a2_jeronimo.appoint"]["es"].lower())
-        self.assertNotIn("reconquista", rows["a2_jeronimo.appoint"]["es"].lower())
-        self.assertIn("jaula", rows["a2_jeronimo.cage_locked"]["es"].lower())
-        loc_blob = _read("content/locales/strings.csv").lower()
-        self.assertNotIn("babieca", loc_blob)
+        self.assertIn("mesura", rows["a3_leon.joke"]["es"].lower())
+        self.assertIn("banco", rows["a3_leon.ferran_hide"]["es"].lower())
+        self.assertIn("solar", rows["a3_leon.diego_hide"]["es"].lower())
+        self.assertIn("jaula", rows["a3_leon.returned"]["es"].lower())
+        self.assertIn("honra", rows["a3_leon.rage_done"]["es"].lower())
         poem = _read("content/locales/poem_formulas.csv")
-        self.assertIn("a2_jeronimo.place_name,Valencia,", poem)
-        self.assertIn("a2_jeronimo.horse_name,Babieca,", poem)
-        self.assertIn("a2_jeronimo.arrive,", poem)
-        self.assertIn("Babieca", poem)
+        self.assertIn("a3_leon.place_name,Valencia,", poem)
+
+    def test_dialogue_joke_before_choice(self) -> None:
+        text = _read(f"{CHAPTER}/leon.dialogue")
+        self.assertIn("~ joke", text)
+        self.assertIn("~ mesura", text)
+        self.assertIn("~ rage", text)
+        self.assertIn("a3_leon.joke", text)
+        self.assertIn("a3_leon.ferran_hide", text)
+        self.assertIn("a3_leon.diego_hide", text)
+        joke_at = text.find("~ joke")
+        mesura_at = text.find("~ mesura")
+        self.assertLess(joke_at, mesura_at)
+        self.assertNotIn("{{", text)
+        lowered = text.lower()
+        for banned in DENY:
+            self.assertNotIn(banned, lowered, banned)
 
     def test_beats_graph_and_validate(self) -> None:
         self.assertEqual(validate_main([]), 0)
         beats = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(beats["id"], "a2_jeronimo")
+        self.assertEqual(beats["id"], "a3_leon")
         types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
         self.assertIn("dialogue", types)
+        self.assertIn("choice", types)
         self.assertIn("honor_event", types)
         self.assertIn("blocking", types)
         flags = []
         for step in beats["steps"]:
             if isinstance(step, dict):
                 flags.extend(step.get("set_flags", []))
-        self.assertIn("babieca_named", flags)
+        for flag in HIDE_FLAGS:
+            self.assertIn(flag, flags, flag)
+        self.assertIn("lion_returned", flags)
+        self.assertIn("lion_escaped", flags)
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a2_siege", "a2_jeronimo"), pairs)
-        self.assertIn(("a2_jeronimo", "a2_embassy2"), pairs)
-        self.assertNotIn(("a2_siege", "a2_embassy2"), pairs)
+        self.assertIn(("a2_bodas", "a3_leon"), pairs)
+        self.assertIn(("a3_leon", "a3_bucar"), pairs)
         locked = ["hub_lock_cardena"]
-        self.assertTrue(can_travel(graph, "a2_siege", "a2_jeronimo", locked))
-        self.assertTrue(can_travel(graph, "a2_jeronimo", "a2_embassy2", locked))
-        self.assertFalse(can_travel(graph, "a2_siege", "a2_embassy2", locked))
-        node = next(n for n in graph["nodes"] if n["id"] == "a2_jeronimo")
-        self.assertEqual(node["scene"], "res://content/chapters/a2_jeronimo/world.tscn")
+        self.assertTrue(can_travel(graph, "a2_bodas", "a3_leon", locked))
+        self.assertFalse(can_travel(graph, "a3_leon", "a3_bucar", locked))
+        self.assertTrue(
+            can_travel(graph, "a3_leon", "a3_bucar", locked + ["lion_returned"])
+        )
+        self.assertFalse(can_travel(graph, "a2_bodas", "a3_bucar", locked))
+        self.assertFalse(can_travel(graph, "a3_leon", "a3_corpes", locked + ["lion_returned"]))
+        node = next(n for n in graph["nodes"] if n["id"] == "a3_leon")
+        self.assertEqual(node["scene"], "res://content/chapters/a3_leon/world.tscn")
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a2_jeronimo/world.tscn", runner)
-        self.assertIn('&"a2_jeronimo"', runner)
+        self.assertIn("res://content/chapters/a3_leon/world.tscn", runner)
+        self.assertIn('&"a3_leon"', runner)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/jeronimo.dialogue",
+            f"{CHAPTER}/leon.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/bishop.gd",
-            "data/honor_events/jeronimo.json",
+            f"{CHAPTER}/choice_ui.gd",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
             for token in DENY:
                 self.assertNotIn(token, lowered, f"{rel} has {token}")
-        world = _read(f"{CHAPTER}/world.gd").lower()
-        self.assertIn("babieca", world)
-        self.assertNotIn("flute", world)
-        self.assertNotIn("corpse", world)
 
     def test_godot_headless_if_available(self) -> None:
         godot = None
@@ -344,7 +383,7 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a2_jeronimo.gd",
+                "res://tests/unit/test_a3_leon.gd",
             ],
             check=False,
             capture_output=True,

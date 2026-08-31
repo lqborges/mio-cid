@@ -149,12 +149,18 @@
       "id": "lion_mesura",
       "deltas": { "honra": 8 },
       "tags": ["mesura"],
+      "flags_set": ["lion_returned"],
+      "ui_whisper_key": "a3_leon.mesura_done",
+      "once": true,
       "beat": "a3_leon"
     },
     {
       "id": "lion_rage",
       "deltas": { "honra": -10 },
       "tags": ["mesura_fail"],
+      "flags_set": ["lion_returned"],
+      "ui_whisper_key": "a3_leon.rage_done",
+      "once": true,
       "beat": "a3_leon"
     },
     {

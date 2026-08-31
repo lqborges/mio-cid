@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://cmn3vv4engghr"
+path="res://.godot/imported/leon.dialogue-6e7080a98a81ad066a0dfdcb02ff4b1f.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_leon/leon.dialogue"
+dest_files=["res://.godot/imported/leon.dialogue-6e7080a98a81ad066a0dfdcb02ff4b1f.tres"]
+
+[params]
+
+defaults=true

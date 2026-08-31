@@ -132,3 +132,19 @@ a2_jeronimo.gift,Marcos para el obispado. Es administración.,Marks for the bish
 a2_jeronimo.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
 a2_jeronimo.appoint_first,Primero el obispado.,The bishopric first.
 a2_jeronimo.to_embassy,Hacia Alfonso,Toward Alfonso
+char.ferran_gonzalez,Ferrán González,Ferrán González
+char.diego_gonzalez,Diego González,Diego González
+a3_leon.asleep,Rodrigo duerme. La mesnada le hace anillo.,Rodrigo sleeps. The mesnada rings him.
+a3_leon.escaped,El león ha salido de la jaula.,The lion has come out of the cage.
+a3_leon.wake,Me levanto. El león está en la sala.,I rise. The lion is in the hall.
+a3_leon.ring,"La mesnada os rodea, mio Cid. El león anda suelto.","The mesnada rings you, my Cid. The lion walks loose."
+a3_leon.joke,Los infantes no tienen mesura. Eso es el chiste.,The infantes have no mesura. That is the joke.
+a3_leon.ferran_hide,Ferrán se metió debajo del banco.,Ferrán crawled under the bench.
+a3_leon.diego_hide,Diego se escondió en el solar.,Diego hid in the solar.
+a3_leon.choice_prompt,¿Cómo volvéis el león a la jaula?,How do you return the lion to the cage?
+a3_leon.choice_mesura,Con mesura,With mesura
+a3_leon.choice_rage,Ira,Rage
+a3_leon.mesura_done,Lo llevo con la mano. El león entra.,I lead it by the hand. The lion goes in.
+a3_leon.rage_done,La ira cuesta honra. Aun así el león vuelve.,Rage costs honra. Still the lion goes back.
+a3_leon.returned,El león está en la jaula. No es pelea de señor.,The lion is in the cage. It is not a lord's fight.
+a3_leon.no_kill,No. El león se vuelve a la jaula. No se mata.,No. The lion goes back to the cage. It is not killed.

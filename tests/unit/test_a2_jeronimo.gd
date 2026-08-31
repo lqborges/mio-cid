@@ -6,7 +6,7 @@ const WORLD := "res://content/chapters/a2_jeronimo/world.tscn"
 const SIEGE := "res://content/chapters/a2_siege/world.tscn"
 const TEVAR := "res://content/chapters/a1_tevar/world.tscn"
 const EMBASSY2 := "res://content/chapters/a2_embassy2/world.tscn"
-const LEON := "res://content/chapters/a3_leon/world.tscn"
+const BUCAR := "res://content/chapters/a3_bucar/world.tscn"
 const CID := "res://content/art/characters/cid/cid.tscn"
 const HORSE := "res://content/art/characters/horse/horse.tscn"
 const APPOINT_KEY := "a2_jeronimo.appoint"
@@ -412,8 +412,8 @@ func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if ResourceLoader.exists(EMBASSY2):
 		failures.append("a2_embassy2 must not ship in this PR")
-	if ResourceLoader.exists(LEON):
-		failures.append("a3_leon must not ship in this PR")
+	if ResourceLoader.exists(BUCAR):
+		failures.append("a3_bucar must not ship in this PR")
 	if ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):
 		failures.append("a2_yusuf must not ship in this PR")
 	return failures
