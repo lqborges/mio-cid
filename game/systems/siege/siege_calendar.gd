@@ -12,8 +12,33 @@ const DEFAULT_PATH := "res://data/siege/valencia_events.json"
 @export var events: Array = []
 
 
-func rest_skip_days() -> int:
-	return rest_skip_min_days
+func rest_skip_days(siege_day: int = 0, fired: PackedStringArray = PackedStringArray()) -> int:
+	# Land on the next authored day when it sits in [min, max]; otherwise clamp.
+	var lo := rest_skip_min_days
+	var hi := rest_skip_max_days
+	if hi < lo:
+		hi = lo
+	if lo <= 0:
+		return 0
+	var need := 0
+	for raw in events:
+		if not raw is Dictionary:
+			continue
+		var row: Dictionary = raw
+		var eid := str(row.get("id", ""))
+		if eid.is_empty() or eid in fired:
+			continue
+		var day := int(row.get("day", 0))
+		if day > siege_day:
+			need = day - siege_day
+			break
+	if need <= 0:
+		return lo
+	if need < lo:
+		return lo
+	if need > hi:
+		return hi
+	return need
 
 
 func event_count() -> int:

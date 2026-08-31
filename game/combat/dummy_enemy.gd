@@ -17,6 +17,7 @@ func _ready() -> void:
 	floor_snap_length = 0.25
 	if mesh != null:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_stash_live()
 	if character_id != &"":
 		add_to_group(String(character_id))
 		_apply_character()
@@ -31,6 +32,34 @@ func _ready() -> void:
 		_load_hp()
 	if hurt_box != null and not hurt_box.died.is_connected(_on_died):
 		hurt_box.died.connect(_on_died)
+
+
+func revive() -> void:
+	# Second (and later) sallies need a living Host; death greys the mesh and zeros layers.
+	if unkillable:
+		return
+	_stash_live()
+	collision_layer = int(get_meta("live_layer"))
+	if hurt_box != null:
+		if hurt_box.max_hp <= 0.0:
+			_load_hp()
+		hurt_box.hp = hurt_box.max_hp
+		hurt_box.stagger_left = 0.0
+		hurt_box._apply_collision()
+	if mesh != null and has_meta("live_albedo"):
+		var mat := mesh.get_active_material(0)
+		if mat is StandardMaterial3D:
+			(mat as StandardMaterial3D).albedo_color = get_meta("live_albedo")
+
+
+func _stash_live() -> void:
+	if not has_meta("live_layer"):
+		set_meta("live_layer", collision_layer)
+	if mesh == null or has_meta("live_albedo"):
+		return
+	var mat := mesh.get_active_material(0)
+	if mat is StandardMaterial3D:
+		set_meta("live_albedo", (mat as StandardMaterial3D).albedo_color)
 
 
 func _apply_character() -> void:
@@ -77,10 +106,13 @@ func _load_hp() -> void:
 
 
 func _on_died() -> void:
+	_stash_live()
 	collision_layer = 0
 	if hurt_box != null:
 		hurt_box.set_deferred("monitorable", false)
 	if mesh != null:
 		var mat := mesh.get_active_material(0)
 		if mat is StandardMaterial3D:
-			(mat as StandardMaterial3D).albedo_color = Color(0.28, 0.26, 0.24)
+			var local := mat.duplicate() as StandardMaterial3D
+			local.albedo_color = Color(0.28, 0.26, 0.24)
+			mesh.set_surface_override_material(0, local)
