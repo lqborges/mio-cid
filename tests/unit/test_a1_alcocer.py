@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for PR-15 a1_castejon dawn take + forced sell.
+"""Structural tests for PR-16 a1_alcocer occupy / wait / dawn sortie.
 
-Run: python3 tests/unit/test_a1_castejon.py
+Run: python3 tests/unit/test_a1_alcocer.py
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ DENY = (
     "holy_war",
 )
 
-CHAPTER = "content/chapters/a1_castejon"
+CHAPTER = "content/chapters/a1_alcocer"
 
 
 def _read(rel: str) -> str:
@@ -91,22 +91,36 @@ def _aabb_overlap(
     )
 
 
-class TestA1CastejonDawnTake(unittest.TestCase):
+def _zone_aabb(
+    scene: str, node_name: str, shape_id: str
+) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    origin = _origin(scene, node_name)
+    size = _subresource_size(scene, shape_id)
+    half = (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0)
+    return (
+        (origin[0] - half[0], origin[1] - half[1], origin[2] - half[2]),
+        (origin[0] + half[0], origin[1] + half[1], origin[2] + half[2]),
+    )
+
+
+class TestA1AlcocerDawnSortie(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/castejon.dialogue",
+            f"{CHAPTER}/alcocer.dialogue",
             f"{CHAPTER}/beats.json",
-            "data/towns/castejon.json",
+            "data/towns/alcocer.json",
             "data/honor_events/towns.json",
+            "data/characters/fariz.json",
+            "data/characters/galve.json",
             "content/art/characters/cid/cid.tscn",
             "content/art/characters/horse/horse.tscn",
             "content/art/characters/dummy/dummy.tscn",
-            "game/ui/keep_or_sell.tscn",
-            "game/systems/travel/town_holding.gd",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
+        self.assertFalse((ROOT / "content/chapters/a1_embassy1/world.tscn").is_file())
+        self.assertFalse((ROOT / "game/ui/booty_divide.tscn").is_file())
 
     def test_scene_is_cheap_greybox_dawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -114,10 +128,11 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         self.assertIn("horse.tscn", scene)
         self.assertIn("dummy.tscn", scene)
         self.assertIn("captain.tscn", scene)
-        self.assertIn("keep_or_sell.tscn", scene)
         self.assertIn("hall_whisper.tscn", scene)
         self.assertIn("honor_meters.tscn", scene)
         self.assertIn("mesura_hud.tscn", scene)
+        self.assertNotIn("keep_or_sell.tscn", scene)
+        self.assertNotIn("booty_divide", scene)
         self.assertIn('type="DirectionalLight3D"', scene)
         self.assertEqual(scene.count('type="DirectionalLight3D"'), 1)
         self.assertNotIn("OmniLight3D", scene)
@@ -128,94 +143,123 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         self.assertIn('type="CSGCombiner3D"', scene)
         self.assertIn('type="CSGCylinder3D"', scene)
         self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
-        self.assertIn("TakeZone", scene)
+        self.assertIn("OccupyZone", scene)
+        self.assertIn("WaitZone", scene)
+        self.assertIn("WaitCamp", scene)
+        self.assertIn("TentA", scene)
         self.assertIn("Garrison", scene)
+        self.assertIn("Host", scene)
+        self.assertIn("Fariz", scene)
+        self.assertIn("Galve", scene)
         self.assertIn("Mesnada", scene)
         self.assertIn("Horse", scene)
-        self.assertIn("AlvarReport", scene)
-        self.assertIn("KeepOrSell", scene)
-        self.assertIn("River", scene)
         self.assertIn("Keep", scene)
-        self.assertIn("LootPile", scene)
+        self.assertIn('character_id = &"fariz"', scene)
+        self.assertIn('character_id = &"galve"', scene)
         self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
         self.assertNotIn("AlvarFanez", scene)
-        self.assertNotIn('member_id = &"alvar_fanez"', scene)
+        self.assertNotIn("KeepOrSell", scene)
 
-    def test_take_zone_does_not_overlap_spawn(self) -> None:
+    def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         cid = _origin(scene, "Cid")
-        zone = _origin(scene, "TakeZone")
-        size = _subresource_size(scene, "Box_take")
-        half = (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0)
-        zone_min = (zone[0] - half[0], zone[1] - half[1], zone[2] - half[2])
-        zone_max = (zone[0] + half[0], zone[1] + half[1], zone[2] + half[2])
+        horse = _origin(scene, "Horse")
         cid_radius = 0.4
         cid_height = 1.8
         cid_min = (cid[0] - cid_radius, cid[1], cid[2] - cid_radius)
         cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
-        self.assertFalse(
-            _aabb_overlap(cid_min, cid_max, zone_min, zone_max),
-            f"TakeZone {zone} size {size} overlaps Cid spawn {cid}",
-        )
-        self.assertGreater(abs(cid[2] - zone[2]), half[2] + cid_radius)
-        horse = _origin(scene, "Horse")
         horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
         horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
+        occupy_min, occupy_max = _zone_aabb(scene, "OccupyZone", "Box_occupy")
+        wait_min, wait_max = _zone_aabb(scene, "WaitZone", "Box_wait")
+        occupy_size = _subresource_size(scene, "Box_occupy")
+        wait_size = _subresource_size(scene, "Box_wait")
+        occupy = _origin(scene, "OccupyZone")
+        wait = _origin(scene, "WaitZone")
         self.assertFalse(
-            _aabb_overlap(horse_min, horse_max, zone_min, zone_max),
-            f"TakeZone overlaps Horse spawn {horse}",
+            _aabb_overlap(cid_min, cid_max, occupy_min, occupy_max),
+            f"OccupyZone {occupy} size {occupy_size} overlaps Cid spawn {cid}",
         )
+        self.assertFalse(
+            _aabb_overlap(horse_min, horse_max, occupy_min, occupy_max),
+            f"OccupyZone overlaps Horse spawn {horse}",
+        )
+        self.assertFalse(
+            _aabb_overlap(cid_min, cid_max, wait_min, wait_max),
+            f"WaitZone {wait} size {wait_size} overlaps Cid spawn {cid}",
+        )
+        self.assertFalse(
+            _aabb_overlap(horse_min, horse_max, wait_min, wait_max),
+            f"WaitZone overlaps Horse spawn {horse}",
+        )
+        self.assertGreater(abs(cid[2] - occupy[2]), occupy_size[2] / 2.0 + cid_radius)
+        self.assertGreater(abs(cid[2] - wait[2]), wait_size[2] / 2.0 + cid_radius)
 
-    def test_world_script_take_loot_sell_keep_fail(self) -> None:
+    def test_world_script_occupy_wait_sortie(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("func start_take", source)
-        self.assertIn("func run_take", source)
-        self.assertIn("func complete_take", source)
-        self.assertIn("func choose_keep", source)
-        self.assertIn("func choose_sell", source)
-        self.assertIn("castejon_keep", source)
-        self.assertIn("castejon_take", source)
-        self.assertIn("castejon_sell", source)
-        self.assertIn("a1_alcocer", source)
+        self.assertIn("func start_occupy", source)
+        self.assertIn("func run_occupy", source)
+        self.assertIn("func complete_occupy", source)
+        self.assertIn("func start_wait", source)
+        self.assertIn("func run_wait", source)
+        self.assertIn("func complete_wait", source)
+        self.assertIn("func start_sortie", source)
+        self.assertIn("func run_sortie", source)
+        self.assertIn("func complete_sortie", source)
+        self.assertIn("alcocer_sortie_win", source)
+        self.assertIn("a1_embassy1", source)
         self.assertIn("hub_lock_cardena", source)
         self.assertIn("horse_companion", source)
+        self.assertIn("rest_camp", source)
         self.assertIn("can_travel", source)
         self.assertIn("ChapterRunner.travel", source)
         self.assertIn("autosave", source)
         self.assertIn("current_scene != self", source)
         self.assertIn("func _ready", source)
-        self.assertNotIn("func _enter_tree", source)
-        self.assertNotIn("camp_night(", source)
-        self.assertNotIn("rest_camp(", source)
-        self.assertNotIn("12", source)
         self.assertIn("lanza_body_limit", source)
-        self.assertIn("AlvarReport", source)
+        self.assertIn("fariz", source)
+        self.assertIn("galve", source)
+        self.assertIn("MesnadaMember.from_id", source)
+        self.assertNotIn("func _enter_tree", source)
+        self.assertNotIn("advance_plazo", source)
+        self.assertNotIn("camp_night(", source)
+        self.assertNotIn("keep_or_sell", source)
+        self.assertNotIn("booty_divide", source)
+        self.assertNotIn("alcocer_sell", source)
+        self.assertNotIn("alcocer_keep", source)
+        self.assertNotIn("12", source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a1_castejon/world.tscn", runner)
-        self.assertIn('&"a1_castejon"', runner)
-        self.assertIn("KEEP_EVENT", source)
-        self.assertIn("apply_id", source)
+        self.assertIn("res://content/chapters/a1_alcocer/world.tscn", runner)
+        self.assertIn('&"a1_alcocer"', runner)
+        dummy = _read("game/combat/dummy_enemy.gd")
+        self.assertIn("character_id", dummy)
+        self.assertIn("MesnadaMember.from_id", dummy)
 
-    def test_keep_is_hard_fail_not_flavor(self) -> None:
-        source = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("castejon_keep", source)
-        self.assertIn("KEEP_KEY", source)
-        self.assertIn("a1_castejon.keep_fail", source)
+    def test_fariz_galve_json_killable_captains(self) -> None:
+        fariz = json.loads(_read("data/characters/fariz.json"))
+        galve = json.loads(_read("data/characters/galve.json"))
+        self.assertEqual(fariz["id"], "fariz")
+        self.assertEqual(galve["id"], "galve")
+        self.assertEqual(fariz["display_name_key"], "char.fariz")
+        self.assertEqual(galve["display_name_key"], "char.galve")
+        self.assertEqual(fariz["role"], "taifa_captain")
+        self.assertEqual(galve["role"], "taifa_captain")
+        self.assertFalse(fariz["unkillable"])
+        self.assertFalse(galve["unkillable"])
+        self.assertGreater(fariz["combat"], 0)
+        self.assertGreater(galve["combat"], 0)
+        alfonso = json.loads(_read("data/characters/alfonso.json"))
+        self.assertTrue(alfonso["unkillable"])
+        self.assertNotEqual(fariz["unkillable"], alfonso["unkillable"])
         towns = json.loads(_read("data/honor_events/towns.json"))
         events = {row["id"]: row for row in towns["events"]}
-        keep = events["castejon_keep"]
-        self.assertTrue(keep["hard_fail"])
-        self.assertEqual(keep["hard_fail_reason"], "alfonso_wrath")
-        self.assertEqual(keep["deltas"]["honor"], -40)
-        self.assertIn("alfonso_wrath", keep["tags"])
-        castejon = json.loads(_read("data/towns/castejon.json"))
-        self.assertTrue(castejon["alfonso_protectorate"])
-        self.assertTrue(castejon["keep_past_deadline_fail"])
-        self.assertEqual(castejon["sell_deadline_days"], 0)
-        fail = _read("game/ui/fail_copy.gd")
-        self.assertIn('&"alfonso_wrath"', fail)
+        win = events["alcocer_sortie_win"]
+        self.assertEqual(win["deltas"]["onores"], 18)
+        self.assertIn("battle", win["tags"])
+        self.assertEqual(win["beat"], "a1_alcocer")
+        self.assertNotIn("alcocer_sell", _read(f"{CHAPTER}/world.gd"))
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -223,67 +267,78 @@ class TestA1CastejonDawnTake(unittest.TestCase):
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "a1_castejon.dawn",
-            "a1_castejon.take",
-            "a1_castejon.alvar_henares",
-            "a1_castejon.sell_done",
-            "a1_castejon.keep_fail",
-            "location.castejon",
-            "char.alvar_fanez",
+            "a1_alcocer.occupy",
+            "a1_alcocer.wait",
+            "a1_alcocer.dawn",
+            "a1_alcocer.sortie_win",
+            "location.alcocer",
+            "char.fariz",
+            "char.galve",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        self.assertIn("alba", rows["a1_castejon.dawn"]["es"].lower())
-        self.assertIn("henares", rows["a1_castejon.alvar_henares"]["es"].lower())
-        self.assertIn("alfonso", rows["a1_castejon.keep_fail"]["es"].lower())
-        self.assertIn("Álvar", rows["char.alvar_fanez"]["es"])
+        self.assertIn("Alcocer", rows["a1_alcocer.occupy"]["es"])
+        self.assertIn("alba", rows["a1_alcocer.dawn"]["es"].lower())
+        self.assertIn("Fáriz", rows["a1_alcocer.dawn"]["es"])
+        self.assertIn("Galve", rows["a1_alcocer.dawn"]["es"])
+        self.assertIn("Fáriz", rows["char.fariz"]["es"])
+        wait_es = rows["a1_alcocer.wait"]["es"].lower()
+        self.assertTrue("reloj" in wait_es or "velamos" in wait_es or "real" in wait_es)
 
-    def test_dialogue_alvar_off_map(self) -> None:
-        text = _read(f"{CHAPTER}/castejon.dialogue")
+    def test_dialogue_occupy_wait_sortie(self) -> None:
+        text = _read(f"{CHAPTER}/alcocer.dialogue")
+        self.assertIn("~ occupy", text)
+        self.assertIn("~ wait", text)
         self.assertIn("~ dawn", text)
-        self.assertIn("~ alvar_report", text)
-        self.assertIn("a1_castejon.alvar_henares", text)
-        self.assertIn("Alvar:", text)
-        self.assertIn("off-map", text.lower())
+        self.assertIn("~ win", text)
+        self.assertIn("a1_alcocer.occupy", text)
+        self.assertIn("a1_alcocer.wait", text)
+        self.assertIn("a1_alcocer.dawn", text)
+        self.assertIn("a1_alcocer.sortie_win", text)
         self.assertNotIn("{{", text)
+        self.assertNotIn("booty", text.lower())
         lowered = text.lower()
         for banned in DENY:
             self.assertNotIn(banned, lowered, banned)
 
-    def test_beats_sell_to_alcocer_keep_fail(self) -> None:
+    def test_beats_wait_clock_then_embassy(self) -> None:
         payload = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(payload["id"], "a1_castejon")
+        self.assertEqual(payload["id"], "a1_alcocer")
         nexts = [step.get("next") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("a1_alcocer", nexts)
+        self.assertIn("a1_embassy1", nexts)
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("keep_or_sell", types)
-        self.assertIn("fail_copy", types)
+        self.assertIn("clock_segment", types)
+        self.assertIn("honor_event", types)
         self.assertIn("travel_spawn", types)
-        reasons = [
-            step.get("reason") for step in payload["steps"] if isinstance(step, dict)
+        self.assertNotIn("keep_or_sell", types)
+        segments = [
+            step.get("segment") for step in payload["steps"] if isinstance(step, dict)
         ]
-        self.assertIn("alfonso_wrath", reasons)
+        self.assertIn("camp_night", segments)
+        ids = [step.get("id") for step in payload["steps"] if isinstance(step, dict)]
+        self.assertIn("alcocer_sortie_win", ids)
 
     def test_destierro_spine_and_hub_lock(self) -> None:
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a1_navapalos", "a1_castejon"), pairs)
         self.assertIn(("a1_castejon", "a1_alcocer"), pairs)
+        self.assertIn(("a1_alcocer", "a1_embassy1"), pairs)
         locked = ["hub_lock_cardena"]
-        self.assertTrue(can_travel(graph, "a1_navapalos", "a1_castejon", locked))
         self.assertTrue(can_travel(graph, "a1_castejon", "a1_alcocer", locked))
-        self.assertFalse(can_travel(graph, "a1_castejon", "a1_cardena", locked))
-        self.assertFalse(can_travel(graph, "a1_castejon", "a1_navapalos", locked))
-        self.assertFalse(can_travel(graph, "a1_castejon", "a1_vivar", locked))
+        self.assertTrue(can_travel(graph, "a1_alcocer", "a1_embassy1", locked))
+        self.assertFalse(can_travel(graph, "a1_alcocer", "a1_cardena", locked))
+        self.assertFalse(can_travel(graph, "a1_alcocer", "a1_castejon", locked))
+        self.assertFalse(can_travel(graph, "a1_alcocer", "a1_navapalos", locked))
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/castejon.dialogue",
+            f"{CHAPTER}/alcocer.dialogue",
             f"{CHAPTER}/beats.json",
-            "data/towns/castejon.json",
+            "data/characters/fariz.json",
+            "data/characters/galve.json",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
@@ -303,9 +358,13 @@ class TestA1CastejonDawnTake(unittest.TestCase):
                 godot = found.stdout.strip()
                 break
         if godot is None:
-            local = Path("/home/lqborges/.local/bin/godot")
-            if local.is_file():
-                godot = str(local)
+            for local in (
+                Path("/home/lqborges/.local/bin/godot"),
+                Path.home() / ".local/bin/godot",
+            ):
+                if local.is_file():
+                    godot = str(local)
+                    break
         if godot is None:
             self.skipTest("Godot binary not on PATH")
         if not (ROOT / ".godot").is_dir():
@@ -319,7 +378,7 @@ class TestA1CastejonDawnTake(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a1_castejon.gd",
+                "res://tests/unit/test_a1_alcocer.gd",
             ],
             check=False,
             capture_output=True,

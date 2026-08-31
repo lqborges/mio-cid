@@ -1,0 +1,357 @@
+[gd_scene load_steps=25 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_alcocer/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="PackedScene" path="res://game/ui/mesura_hud.tscn" id="6_mesura"]
+[ext_resource type="PackedScene" path="res://content/art/characters/dummy/dummy.tscn" id="7_dummy"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="8_captain"]
+[ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="9_horse"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="10_ai"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="11_bridge"]
+
+[sub_resource type="Environment" id="Environment_alcocer"]
+background_mode = 1
+background_color = Color(0.52, 0.34, 0.24, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.60, 0.42, 0.30, 1)
+ambient_light_energy = 0.34
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.48, 0.38, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.40, 0.34, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_house"]
+albedo_color = Color(0.44, 0.34, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_keep"]
+albedo_color = Color(0.36, 0.32, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_river"]
+albedo_color = Color(0.18, 0.30, 0.36, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_path"]
+albedo_color = Color(0.42, 0.34, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_rock"]
+albedo_color = Color(0.34, 0.32, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_tent"]
+albedo_color = Color(0.40, 0.32, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ember"]
+albedo_color = Color(0.55, 0.28, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_banner"]
+albedo_color = Color(0.52, 0.22, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="Box_occupy"]
+size = Vector3(10, 2, 5)
+
+[sub_resource type="BoxShape3D" id="Box_wait"]
+size = Vector3(4, 2, 4)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_alcocer"]
+vertices = PackedVector3Array(-20, 0.05, -20, 20, 0.05, -20, 20, 0.05, 20, -20, 0.05, 20)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[node name="Alcocer" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_alcocer")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.422618, -0.647772, 0.633583, 0, 0.699131, 0.715026, -0.906308, -0.302191, 0.29552, 8, 14, 4)
+light_color = Color(1.0, 0.62, 0.38, 1)
+light_energy = 0.68
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(42, 1, 42)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -12.4)
+size = Vector3(18, 3.2, 1.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallEast" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.8, 1.4, -6)
+size = Vector3(1.2, 2.8, 14)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.8, 1.4, -6)
+size = Vector3(1.2, 2.8, 14)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallSouthL" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 1.2, 0.8)
+size = Vector3(6.8, 2.4, 1.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallSouthR" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 1.2, 0.8)
+size = Vector3(6.8, 2.4, 1.2)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="HouseA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 1.0, -8.2)
+size = Vector3(3.4, 2.0, 3.0)
+material = SubResource("Mat_house")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="HouseB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 1.0, -7.6)
+size = Vector3(3.0, 2.0, 2.8)
+material = SubResource("Mat_house")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="HouseC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 0.9, -4.2)
+size = Vector3(2.6, 1.8, 2.4)
+material = SubResource("Mat_house")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Keep" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="Keep"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+size = Vector3(4.6, 3.2, 3.8)
+material = SubResource("Mat_keep")
+
+[node name="Door" type="CSGBox3D" parent="Keep"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 1.9)
+operation = 2
+size = Vector3(1.4, 1.8, 0.6)
+material = SubResource("Mat_keep")
+
+[node name="Tower" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 2.4, -11.2)
+radius = 0.85
+height = 4.8
+sides = 8
+material = SubResource("Mat_keep")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="River" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.6, 0.02, 0)
+size = Vector3(4.4, 0.12, 36)
+material = SubResource("Mat_river")
+
+[node name="Path" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 6)
+size = Vector3(3.4, 0.08, 16)
+material = SubResource("Mat_path")
+
+[node name="RockA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 0.32, 6.4)
+size = Vector3(1.3, 0.64, 1.1)
+material = SubResource("Mat_rock")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RockB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.4, 0.28, 7.2)
+size = Vector3(1.1, 0.56, 0.9)
+material = SubResource("Mat_rock")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WaitCamp" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8)
+
+[node name="TentA" type="CSGBox3D" parent="WaitCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.9, 0.4)
+size = Vector3(2.4, 1.8, 2.2)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentB" type="CSGBox3D" parent="WaitCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0.85, 0.6)
+size = Vector3(2.2, 1.7, 2.0)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="CloakBed" type="CSGBox3D" parent="WaitCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 0.14, 1.6)
+size = Vector3(1.6, 0.28, 0.8)
+material = SubResource("Mat_tent")
+
+[node name="EmberPit" type="CSGCylinder3D" parent="WaitCamp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.12, 1.2)
+radius = 0.5
+height = 0.24
+sides = 8
+material = SubResource("Mat_ember")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_alcocer")
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 16)
+
+[node name="Horse" parent="." instance=ExtResource("9_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, 16.6)
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("10_ai")
+leader_path = NodePath("../Cid")
+spawn_lanza_bodies = true
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 18.2)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 18.2)
+member_id = &"pero_bermudez"
+
+[node name="MunoGustioz" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.05, 19.2)
+member_id = &"muno_gustioz"
+
+[node name="FelezMunoz" parent="Mesnada" instance=ExtResource("8_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.05, 19.2)
+member_id = &"felez_munoz"
+
+[node name="Garrison" type="Node3D" parent="."]
+
+[node name="Dummy1" parent="Garrison" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -6.8)
+
+[node name="Dummy2" parent="Garrison" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.05, -5.4)
+
+[node name="Dummy3" parent="Garrison" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, -5.4)
+
+[node name="Dummy4" parent="Garrison" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.4, 0.05, -8.6)
+
+[node name="Host" type="Node3D" parent="."]
+visible = false
+
+[node name="Fariz" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.0, 0.05, -8.0)
+character_id = &"fariz"
+
+[node name="Galve" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.4, 0.05, -6.6)
+character_id = &"galve"
+
+[node name="Dummy1" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.2, 0.05, -4.8)
+
+[node name="Dummy2" parent="Host" instance=ExtResource("7_dummy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.2, 0.05, -8.8)
+
+[node name="OccupyZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -2)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="OccupyZone"]
+shape = SubResource("Box_occupy")
+
+[node name="WaitZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 8)
+collision_layer = 0
+collision_mask = 2
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WaitZone"]
+shape = SubResource("Box_wait")
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("11_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="MesuraHud" parent="HUD" instance=ExtResource("6_mesura")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]

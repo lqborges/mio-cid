@@ -6,6 +6,7 @@ extends CharacterBody3D
 const TUNABLES_PATH := "res://data/combat/tunables.json"
 
 @export var unkillable: bool = false
+@export var character_id: StringName = &""
 
 @onready var hurt_box: HurtBox = $HurtBox
 @onready var mesh: MeshInstance3D = $Visual/MeshInstance3D
@@ -16,6 +17,9 @@ func _ready() -> void:
 	floor_snap_length = 0.25
 	if mesh != null:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	if character_id != &"":
+		add_to_group(String(character_id))
+		_apply_character()
 	if unkillable:
 		# Alfonso-class bodies are not valid hurtboxes.
 		if hurt_box != null:
@@ -23,9 +27,28 @@ func _ready() -> void:
 			hurt_box.queue_free()
 			hurt_box = null
 		return
-	_load_hp()
+	if character_id == &"":
+		_load_hp()
 	if hurt_box != null and not hurt_box.died.is_connected(_on_died):
 		hurt_box.died.connect(_on_died)
+
+
+func _apply_character() -> void:
+	var member := MesnadaMember.from_id(character_id)
+	if member == null:
+		_load_hp()
+		return
+	unkillable = member.unkillable
+	if member.role == &"taifa_captain":
+		add_to_group("taifa_captain")
+	if unkillable or hurt_box == null:
+		return
+	var hp := float(member.combat)
+	if hp <= 0.0:
+		_load_hp()
+		return
+	hurt_box.max_hp = hp
+	hurt_box.hp = hp
 
 
 func _physics_process(delta: float) -> void:

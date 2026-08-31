@@ -61,3 +61,9 @@ a1_castejon.take,Castejón cae. El botín es nuestro.,Castejón falls. The booty
 a1_castejon.alvar_henares,Álvar saquea el Henares. No hay segundo campo.,Álvar sacks the Henares. There is no second field.
 a1_castejon.sell_done,Vendemos y partimos. Alfonso no nos halla aquí.,We sell and ride. Alfonso does not find us here.
 a1_castejon.keep_fail,Toledo es suya. Quedarse es la ira de Alfonso.,Toledo is his. To stay is Alfonso's wrath.
+char.fariz,Fáriz,Fáriz
+char.galve,Galve,Galve
+a1_alcocer.occupy,Ocupamos Alcocer y nos hacemos fuertes.,We occupy Alcocer and make it strong.
+a1_alcocer.wait,Velamos en el real. El reloj de campaña cuenta la noche.,We keep watch in camp. The campaign clock counts the night.
+a1_alcocer.dawn,Al alba salimos contra Fáriz y Galve.,At dawn we sortie against Fáriz and Galve.
+a1_alcocer.sortie_win,Vencemos. Fáriz y Galve caen. Alcocer es nuestro.,We win. Fáriz and Galve fall. Alcocer is ours.

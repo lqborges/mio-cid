@@ -1,0 +1,20 @@
+# Spoken lines are CSV keys. Occupy, wait, dawn sortie. Combat only.
+
+~ start
+=> occupy
+
+~ occupy
+Cid: a1_alcocer.occupy
+=> END
+
+~ wait
+Cid: a1_alcocer.wait
+=> END
+
+~ dawn
+Cid: a1_alcocer.dawn
+=> END
+
+~ win
+Cid: a1_alcocer.sortie_win
+=> END

@@ -1,0 +1,31 @@
+{
+  "id": "a1_alcocer",
+  "steps": [
+    {
+      "id": "occupy",
+      "type": "blocking"
+    },
+    {
+      "id": "wait",
+      "type": "clock_segment",
+      "segment": "camp_night"
+    },
+    {
+      "id": "dawn",
+      "type": "cinematic"
+    },
+    {
+      "id": "sortie",
+      "type": "blocking"
+    },
+    {
+      "id": "alcocer_sortie_win",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a1_embassy1"
+    }
+  ]
+}

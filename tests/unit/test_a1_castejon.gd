@@ -299,12 +299,6 @@ func _check_sell_advances_to_alcocer() -> PackedStringArray:
 				failures.append("hub_lock_cardena still blocks cardena")
 			if bool(_runner.can_travel(&"a1_castejon", &"a1_cardena", flags)):
 				failures.append("hub_lock_cardena still blocks cardena from castejon")
-		if _runner.has_method("goto"):
-			_runner.goto(&"a1_alcocer")
-			if current_scene != scene_before:
-				failures.append("goto a1_alcocer must no-op missing scene")
-	if ResourceLoader.exists("res://content/chapters/a1_alcocer/world.tscn"):
-		failures.append("PR-15 must not ship a1_alcocer/world.tscn")
 	world.free()
 	return failures
 

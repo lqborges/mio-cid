@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dpgydeenn8oqx"
+path="res://.godot/imported/alcocer.dialogue-d5520335fc4f65ef2d4665c2e3f8afa0.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_alcocer/alcocer.dialogue"
+dest_files=["res://.godot/imported/alcocer.dialogue-d5520335fc4f65ef2d4665c2e3f8afa0.tres"]
+
+[params]
+
+defaults=true
