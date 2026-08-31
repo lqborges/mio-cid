@@ -15,6 +15,11 @@ func _initialize() -> void:
 	failures.append_array(_test_follow_when_dismounted())
 	failures.append_array(_test_panic_throws())
 	failures.append_array(_test_couch_lance_wedge())
+	failures.append_array(_test_last_tick_gallop())
+	failures.append_array(_test_lance_follows_facing())
+	failures.append_array(_test_couch_owns_xz())
+	failures.append_array(_test_follow_leash())
+	failures.append_array(_test_rider_faces_horse())
 	failures.append_array(_test_scenes_cheap_camera_on_cid())
 	_finish(failures)
 
@@ -96,6 +101,10 @@ func _test_follow_when_dismounted() -> PackedStringArray:
 	var wish := horse.follow_wish()
 	if wish.x <= 0.0:
 		failures.append("follow wish must point at rider")
+	rider.position = Vector3(3.0, 0.0, 0.0)
+	wish = horse.follow_wish()
+	if wish.x <= 0.0:
+		failures.append("hysteresis must keep following until stop distance")
 	rider.position = Vector3(0.4, 0.0, 0.0)
 	wish = horse.follow_wish()
 	if wish.length_squared() > 0.0001:
@@ -184,8 +193,8 @@ func _test_scenes_cheap_camera_on_cid() -> PackedStringArray:
 		failures.append("Horse missing Visual")
 	if horse_node.get_node_or_null("CavalryCharge") == null:
 		failures.append("Horse missing CavalryCharge")
-	if horse_node.get_node_or_null("LanceHitBox") == null:
-		failures.append("Horse missing LanceHitBox")
+	if horse_node.get_node_or_null("Visual/LanceHitBox") == null:
+		failures.append("Horse missing Visual/LanceHitBox")
 	if horse_node.find_children("*", "Camera3D", true, false).size() != 0:
 		failures.append("camera must stay on Cid, not the horse")
 	if horse_node.find_children("*", "CSGBox3D", true, false).is_empty():
@@ -230,6 +239,143 @@ func _test_scenes_cheap_camera_on_cid() -> PackedStringArray:
 	if arena.get_node_or_null("Cid") == null:
 		failures.append("arena missing Cid")
 	arena.free()
+	return failures
+
+
+func _test_last_tick_gallop() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var horse: HorseCompanion = HORSE.new()
+	var delta := 1.0 / 60.0
+	var cost := float(horse.tunables.get("gallop_stamina_per_sec", 0.0)) * delta
+	if cost <= 0.0:
+		failures.append("gallop_stamina_per_sec missing")
+		horse.free()
+		return failures
+	horse.stamina = cost
+	if not horse.try_gallop(delta):
+		failures.append("last stamina sliver must still gallop")
+	if horse.stamina > 0.0001:
+		failures.append("last gallop tick must spend the sliver, left %s" % horse.stamina)
+	if horse.try_gallop(delta):
+		failures.append("empty stamina must refuse gallop")
+	horse.free()
+	return failures
+
+
+func _test_lance_follows_facing() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/horse/horse.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("horse.tscn failed to load for lance facing")
+		return failures
+	var horse: HorseCompanion = (packed as PackedScene).instantiate() as HorseCompanion
+	var rider := CharacterBody3D.new()
+	var charge: Node = horse.get_node_or_null("CavalryCharge")
+	if charge == null:
+		failures.append("scene missing CavalryCharge")
+		horse.free()
+		rider.free()
+		return failures
+	horse.cavalry = charge
+	if charge.has_method("bind_horse"):
+		charge.call("bind_horse", horse)
+	horse.set_facing(Vector3.RIGHT)
+	if not horse.mount(rider):
+		failures.append("mount for lance facing failed")
+	if not horse.couch():
+		failures.append("couch for lance facing failed")
+	horse._orient_visual()
+	horse._ridden_move(0.016)
+	var visual: Node3D = horse.get_node_or_null("Visual") as Node3D
+	var lance: Node3D = horse.get_node_or_null("Visual/LanceHitBox") as Node3D
+	if visual == null or lance == null:
+		failures.append("Visual/LanceHitBox missing after instantiate")
+	else:
+		if lance.get_parent() != visual:
+			failures.append("LanceHitBox must be parented under Visual")
+		var fwd := -visual.basis.z
+		fwd.y = 0.0
+		if fwd.length_squared() < 0.0001:
+			failures.append("visual forward is zero")
+		else:
+			fwd = fwd.normalized()
+			if fwd.dot(Vector3.RIGHT) < 0.9:
+				failures.append("lance/visual must follow +X facing, got %s" % fwd)
+			if fwd.dot(Vector3(0.0, 0.0, -1.0)) > 0.5:
+				failures.append("lance still world -Z after facing +X")
+	var gallop := float(horse.tunables.get("gallop_speed", 0.0))
+	if absf(horse.velocity.x - gallop) > 0.05 or absf(horse.velocity.z) > 0.05:
+		failures.append("couch velocity want +X gallop got %s" % horse.velocity)
+	horse.free()
+	rider.free()
+	return failures
+
+
+func _test_couch_owns_xz() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var horse: HorseCompanion = HORSE.new()
+	var charge: CavalryCharge = CHARGE.new()
+	var rider := CharacterBody3D.new()
+	horse.cavalry = charge
+	charge.horse = horse
+	horse.set_facing(Vector3.RIGHT)
+	if not horse.mount(rider):
+		failures.append("mount for couch XZ failed")
+	if not horse.couch():
+		failures.append("couch for XZ lock failed")
+	horse.velocity = Vector3(0.0, 0.0, -20.0)
+	horse._ridden_move(0.016)
+	var gallop := float(horse.tunables.get("gallop_speed", 0.0))
+	if absf(horse.velocity.x - gallop) > 0.05:
+		failures.append("couch must keep gallop along facing, vx=%s" % horse.velocity.x)
+	if absf(horse.velocity.z) > 0.05:
+		failures.append("couch must ignore stick/-Z clobber, vz=%s" % horse.velocity.z)
+	rider.free()
+	charge.free()
+	horse.free()
+	return failures
+
+
+func _test_follow_leash() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var horse: HorseCompanion = HORSE.new()
+	var rider := CharacterBody3D.new()
+	horse.bind_rider(rider)
+	horse.position = Vector3.ZERO
+	rider.position = Vector3(3.0, 0.0, 0.0)
+	var wish := horse.follow_wish()
+	if wish.length_squared() > 0.0001:
+		failures.append("inside follow_distance must not start follow")
+	rider.position = Vector3(12.0, 0.0, 0.0)
+	wish = horse.follow_wish()
+	if wish.x <= 0.0:
+		failures.append("beyond follow_distance must start follow")
+	rider.free()
+	horse.free()
+	return failures
+
+
+func _test_rider_faces_horse() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("cid.tscn failed to load for rider facing")
+		return failures
+	var cid: Node3D = (packed as PackedScene).instantiate() as Node3D
+	var horse: HorseCompanion = HORSE.new()
+	horse.set_facing(Vector3.RIGHT)
+	if not horse.mount(cid):
+		failures.append("mount for rider facing failed")
+	horse._snap_rider()
+	if not cid.has_method("facing_dir"):
+		failures.append("Cid missing facing_dir")
+	else:
+		var face: Vector3 = cid.call("facing_dir")
+		face.y = 0.0
+		if face.length_squared() < 0.0001 or face.normalized().dot(Vector3.RIGHT) < 0.9:
+			failures.append("mounted Cid facing want +X got %s" % face)
+	horse.free()
+	cid.free()
 	return failures
 
 

@@ -56,6 +56,13 @@ func facing_dir() -> Vector3:
 	return _facing
 
 
+func set_facing(dir: Vector3) -> void:
+	var xz := Vector3(dir.x, 0.0, dir.z)
+	if xz.length_squared() < 0.0001:
+		return
+	_facing = xz.normalized()
+
+
 func is_dodging() -> bool:
 	return _dodge_left > 0.0
 

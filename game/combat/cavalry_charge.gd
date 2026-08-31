@@ -22,17 +22,28 @@ func _init() -> void:
 func _ready() -> void:
 	if horse == null:
 		horse = get_parent()
-	if hit_box == null and horse != null:
-		hit_box = horse.get_node_or_null("LanceHitBox") as HitBox
+	if hit_box == null:
+		hit_box = _find_lance(horse)
 	apply_wedge_layers()
 	set_physics_process(true)
 
 
 func bind_horse(body: Node) -> void:
 	horse = body
-	if horse != null:
-		hit_box = horse.get_node_or_null("LanceHitBox") as HitBox
+	hit_box = _find_lance(horse)
 	apply_wedge_layers()
+
+
+func _find_lance(body: Node) -> HitBox:
+	if body == null:
+		return null
+	var under_visual: Node = body.get_node_or_null("Visual/LanceHitBox")
+	if under_visual is HitBox:
+		return under_visual as HitBox
+	var root_box: Node = body.get_node_or_null("LanceHitBox")
+	if root_box is HitBox:
+		return root_box as HitBox
+	return null
 
 
 func apply_wedge_layers() -> void:

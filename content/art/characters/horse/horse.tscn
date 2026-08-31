@@ -55,7 +55,7 @@ size = Vector3(0.28, 0.26, 0.48)
 cast_shadow = 0
 material = SubResource("Mat_head")
 
-[node name="LanceHitBox" type="Area3D" parent="."]
+[node name="LanceHitBox" type="Area3D" parent="Visual"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -1.15)
 collision_layer = 8
 collision_mask = 4
@@ -63,7 +63,7 @@ monitoring = false
 monitorable = false
 script = ExtResource("3_hit")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="LanceHitBox"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Visual/LanceHitBox"]
 shape = SubResource("BoxShape_lance")
 
 [node name="CavalryCharge" type="Node" parent="."]

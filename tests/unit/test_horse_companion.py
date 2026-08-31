@@ -87,13 +87,18 @@ class TestHorseCompanion(unittest.TestCase):
             "func couch(",
             "func is_mounted(",
             "func feature_enabled(",
+            "func try_gallop(",
+            "func set_facing(",
+            "func interact_prompt_key(",
         ):
             self.assertIn(method, source)
         self.assertIn('&"walk"', source)
         self.assertIn('&"trot"', source)
         self.assertIn('&"gallop"', source)
+        self.assertIn("follow_distance", source)
         self.assertIn("LAYER_HORSE := 128", source)
         self.assertIn("hold", source.lower())
+        self.assertIn("Visual", source)
         controller = _read("game/actors/player/cid_controller.gd")
         self.assertIn("func is_mounted(", controller)
         self.assertIn("_consume_mounted_queues", controller)
@@ -128,9 +133,14 @@ class TestHorseCompanion(unittest.TestCase):
         self.assertLess(horse["trot_min_speed"], horse["gallop_min_speed"])
         self.assertEqual(horse["straight_couch_m"], 8.0)
         self.assertEqual(horse["display_name_key"], "horse.companion")
+        self.assertEqual(horse["mount_prompt_key"], "horse.mount")
+        self.assertEqual(horse["dismount_prompt_key"], "horse.dismount")
         schema = _load_json("data/schema/horse.json")
         self.assertIn("walk_speed", schema["required"])
         self.assertIn("gallop_speed", schema["required"])
+        gallop_desc = schema["properties"]["gallop_speed"].get("description", "")
+        self.assertIn("canter", gallop_desc.lower())
+        self.assertIn("leash", schema["properties"]["follow_distance"].get("description", "").lower())
         source = _read("game/actors/player/horse_companion.gd")
         self.assertIn("data/combat/horse.json", source)
         self.assertNotIn("walk_speed: float =", source)
@@ -144,6 +154,8 @@ class TestHorseCompanion(unittest.TestCase):
         self.assertIn("CSGBox3D", scene)
         self.assertIn("horse_companion.gd", scene)
         self.assertIn("cavalry_charge.gd", scene)
+        self.assertIn('parent="Visual"', scene)
+        self.assertIn("LanceHitBox", scene)
         self.assertIn("collision_layer = 128", scene)
         self.assertIn("collision_layer = 8", scene)
         self.assertNotIn("Camera3D", scene)
@@ -172,6 +184,9 @@ class TestHorseCompanion(unittest.TestCase):
         horse_gd = _read("game/actors/player/horse_companion.gd")
         self.assertIn("el caballo", horse_gd)
         self.assertIn('debug_id", "horse"', horse_gd)
+        self.assertIn("horse.mount", horse_gd)
+        self.assertIn("horse.dismount", horse_gd)
+        self.assertIn("func set_facing(", _read("game/actors/player/cid_controller.gd"))
 
     def test_denylist_tokens_absent(self) -> None:
         for rel in HORSE_FILES + (

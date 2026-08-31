@@ -31,11 +31,25 @@
     "gallop_stamina_per_sec": { "type": "number" },
     "walk_speed": { "type": "number", "minimum": 0 },
     "trot_speed": { "type": "number", "minimum": 0 },
-    "gallop_speed": { "type": "number", "minimum": 0 },
+    "gallop_speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Top gait band. DESIGN canter; runtime id is gallop. Couch is a charge, not a gait."
+    },
     "trot_min_speed": { "type": "number", "minimum": 0 },
-    "gallop_min_speed": { "type": "number", "minimum": 0 },
+    "gallop_min_speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Speed at which the gait becomes gallop (DESIGN canter)."
+    },
     "follow_stop_distance": { "type": "number", "minimum": 0 },
-    "follow_distance": { "type": "number", "minimum": 0 },
+    "follow_distance": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Start-follow leash. Follow begins beyond this, stops at follow_stop_distance."
+    },
+    "mount_prompt_key": { "type": "string" },
+    "dismount_prompt_key": { "type": "string" },
     "follow_trot_distance": { "type": "number" },
     "follow_gallop_distance": { "type": "number" },
     "mount_distance": { "type": "number", "minimum": 0 },

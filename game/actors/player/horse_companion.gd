@@ -1,8 +1,8 @@
 class_name HorseCompanion
 extends CharacterBody3D
 
-## Unnamed greybox mount (debug id horse / destrier). Gaits are speed bands.
-## Camera stays on Cid. Not a motorcycle: gallop spends stamina; panic throws.
+## Unnamed greybox mount (debug id horse / destrier). Gaits are speed bands
+## (gallop ≡ DESIGN canter). Camera stays on Cid. Gallop spends stamina.
 
 const TUNABLES_PATH := "res://data/combat/horse.json"
 const FLAG_ID := "horse_companion"
@@ -26,6 +26,7 @@ var _rider_layer: int = 2
 var _rider_mask: int = 5
 var _last_facing: Vector3 = Vector3(0.0, 0.0, -1.0)
 var _spent_stamina: bool = false
+var _following: bool = false
 
 
 func _init() -> void:
@@ -34,6 +35,8 @@ func _init() -> void:
 
 func _ready() -> void:
 	add_to_group("horse_companion")
+	# Snap rider facing before Cid orients the child camera.
+	process_priority = -1
 	floor_snap_length = 0.25
 	collision_layer = LAYER_HORSE
 	if collision_mask == 0:
@@ -59,6 +62,17 @@ func debug_id() -> StringName:
 
 func current_gait() -> StringName:
 	return _gait
+
+
+func facing_dir() -> Vector3:
+	return _facing()
+
+
+func set_facing(dir: Vector3) -> void:
+	var xz := Vector3(dir.x, 0.0, dir.z)
+	if xz.length_squared() < 0.0001:
+		return
+	_last_facing = xz.normalized()
 
 
 func is_mounted() -> bool:
@@ -117,6 +131,7 @@ func mount(rider: Node3D) -> bool:
 		return false
 	_rider = rider
 	_mounted = true
+	_following = false
 	_mount_hold = 0.0
 	_store_rider_collision()
 	_apply_rider_collision(false)
@@ -173,10 +188,15 @@ func follow_wish() -> Vector3:
 		return Vector3.ZERO
 	var to := _world_pos(_rider) - _world_pos(self)
 	to.y = 0.0
-	if to.length() <= float(tunables.get("follow_stop_distance", 0.0)):
+	var distance := to.length()
+	if distance <= float(tunables.get("follow_stop_distance", 0.0)):
+		_following = false
+		return Vector3.ZERO
+	if not _following and distance < float(tunables.get("follow_distance", 0.0)):
 		return Vector3.ZERO
 	if to.length_squared() < 0.0001:
 		return Vector3.ZERO
+	_following = true
 	return to.normalized()
 
 
@@ -196,8 +216,22 @@ func spend_stamina(cost: float) -> bool:
 	return true
 
 
+func try_gallop(delta: float) -> bool:
+	var cost := float(tunables.get("gallop_stamina_per_sec", 0.0)) * delta
+	if cost <= 0.0:
+		return stamina > 0.0
+	return spend_stamina(cost)
+
+
+func interact_prompt_key() -> String:
+	if _mounted:
+		return str(tunables.get("dismount_prompt_key", "horse.dismount"))
+	return str(tunables.get("mount_prompt_key", "horse.mount"))
+
+
 func _physics_process(delta: float) -> void:
-	# Yaw on the body would orbit a child rider/camera — keep rotation on Visual.
+	# Body yaw stays identity: rider is a sibling snap, camera is on Cid.
+	# Lance lives under Visual, which look_ats travel.
 	rotation = Vector3.ZERO
 	_spent_stamina = false
 	_tick_panic(delta)
@@ -210,7 +244,7 @@ func _physics_process(delta: float) -> void:
 		_ridden_move(delta)
 	else:
 		_tick_dismounted_input(delta)
-		_follow_move()
+		_follow_move(delta)
 	_gait = gait_for_speed(Vector3(velocity.x, 0.0, velocity.z).length())
 	_orient_visual()
 	move_and_slide()
@@ -240,14 +274,14 @@ func _ridden_move(delta: float) -> void:
 	var speed := float(tunables.get("walk_speed", 0.0))
 	if stick.length() > 0.55:
 		speed = float(tunables.get("trot_speed", 0.0))
-	if Input.is_action_pressed("run") and _try_gallop(delta):
+	if Input.is_action_pressed("run") and try_gallop(delta):
 		speed = float(tunables.get("gallop_speed", 0.0))
 	velocity.x = wish.x * speed
 	velocity.z = wish.z * speed
 	_last_facing = wish
 
 
-func _follow_move() -> void:
+func _follow_move(delta: float) -> void:
 	_bind_rider()
 	var wish := follow_wish()
 	if wish.length_squared() < 0.0001:
@@ -263,7 +297,8 @@ func _follow_move() -> void:
 	if distance >= float(tunables.get("follow_trot_distance", 0.0)):
 		speed = float(tunables.get("trot_speed", 0.0))
 	if distance >= float(tunables.get("follow_gallop_distance", 0.0)):
-		speed = float(tunables.get("gallop_speed", 0.0))
+		if try_gallop(delta):
+			speed = float(tunables.get("gallop_speed", 0.0))
 	velocity.x = wish.x * speed
 	velocity.z = wish.z * speed
 	_last_facing = wish
@@ -283,15 +318,6 @@ func _tick_dismounted_input(delta: float) -> void:
 		_mount_hold = 0.0
 
 
-func _try_gallop(delta: float) -> bool:
-	var cost := float(tunables.get("gallop_stamina_per_sec", 0.0)) * delta
-	if cost <= 0.0:
-		return stamina > 0.0
-	if not spend_stamina(cost):
-		return false
-	return stamina > 0.0
-
-
 func _tick_panic(delta: float) -> void:
 	if _panic_left <= 0.0:
 		return
@@ -309,6 +335,13 @@ func _snap_rider() -> void:
 	_set_world_pos(_rider, _world_pos(self) + offset)
 	if _rider is CharacterBody3D:
 		(_rider as CharacterBody3D).velocity = Vector3.ZERO
+	if _rider.has_method("set_facing"):
+		_rider.call("set_facing", _facing())
+	var vis := _rider.get_node_or_null("Visual") as Node3D
+	if vis != null and _rider.is_inside_tree():
+		var look := _world_pos(_rider) + Vector3(_facing().x, 0.0, _facing().z)
+		if not look.is_equal_approx(_world_pos(_rider)):
+			vis.look_at(look, Vector3.UP)
 
 
 func _store_rider_collision() -> void:
@@ -370,10 +403,10 @@ func _orient_visual() -> void:
 	var visual := get_node_or_null("Visual") as Node3D
 	if visual == null:
 		return
-	var pt := global_position + Vector3(_facing().x, 0.0, _facing().z)
-	if pt.distance_squared_to(global_position) < 0.0001:
+	var dir := _facing()
+	if dir.length_squared() < 0.0001:
 		return
-	visual.look_at(pt, Vector3.UP)
+	visual.basis = Basis.looking_at(dir, Vector3.UP)
 
 
 func _stick() -> Vector2:

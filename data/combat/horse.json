@@ -3,6 +3,8 @@
   "debug_id": "horse",
   "debug_id_alt": "destrier",
   "display_name_key": "horse.companion",
+  "mount_prompt_key": "horse.mount",
+  "dismount_prompt_key": "horse.dismount",
   "hp": 80,
   "stamina": 100,
   "stamina_regen_per_sec": 14,
