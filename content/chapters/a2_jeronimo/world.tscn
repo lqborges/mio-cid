@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene load_steps=32 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a2_jeronimo/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="9_ai"]
 [ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="10_bridge"]
 [ext_resource type="Script" path="res://content/chapters/a2_jeronimo/bishop.gd" id="11_bishop"]
+[ext_resource type="Script" path="res://content/chapters/a2_jeronimo/cage_lock.gd" id="12_cage"]
 
 [sub_resource type="Environment" id="Environment_hub"]
 background_mode = 1
@@ -90,14 +91,18 @@ height = 1.75
 size = Vector3(2.6, 2.4, 3.0)
 
 [sub_resource type="BoxShape3D" id="Box_cage"]
-size = Vector3(4.0, 2.4, 4.0)
+size = Vector3(2.6, 2.4, 1.6)
 
 [sub_resource type="BoxShape3D" id="Box_embassy"]
-size = Vector3(6, 2.4, 3.2)
+size = Vector3(3.2, 2.4, 2.4)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_lion"]
+radius = 0.42
+height = 1.4
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_hub"]
-vertices = PackedVector3Array(-24, 0.05, -24, 24, 0.05, -24, 24, 0.05, 24, -24, 0.05, 24)
-polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+vertices = PackedVector3Array(-10, 0.05, -10, 10, 0.05, -10, 10, 0.05, 11.5, -10, 0.05, 11.5, -6, 0.05, -19.5, 6, 0.05, -19.5, 6, 0.05, -11.5, -6, 0.05, -11.5, 12.2, 0.05, -7.5, 19.5, 0.05, -7.5, 19.5, 0.05, 0, 12.2, 0.05, 0, -19.5, 0.05, -7.5, -12.2, 0.05, -7.5, -12.2, 0.05, 0, -19.5, 0.05, 0, 13, 0.05, 7, 19, 0.05, 7, 19, 0.05, 13, 13, 0.05, 13, -19, 0.05, 7, -13, 0.05, 7, -13, 0.05, 13, -19, 0.05, 13)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3), PackedInt32Array(4, 5, 6), PackedInt32Array(4, 6, 7), PackedInt32Array(8, 9, 10), PackedInt32Array(8, 10, 11), PackedInt32Array(12, 13, 14), PackedInt32Array(12, 14, 15), PackedInt32Array(16, 17, 18), PackedInt32Array(16, 18, 19), PackedInt32Array(20, 21, 22), PackedInt32Array(20, 22, 23)]
 
 [node name="ValenciaHub" type="Node3D"]
 script = ExtResource("1_world")
@@ -332,6 +337,12 @@ operation = 2
 size = Vector3(5.6, 2.8, 5.6)
 material = SubResource("Mat_iron")
 
+[node name="Door" type="CSGBox3D" parent="LionCage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -3.2)
+operation = 2
+size = Vector3(2.2, 2.4, 0.5)
+material = SubResource("Mat_iron")
+
 [node name="CageGate" type="CSGBox3D" parent="LionCage"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -3.15)
 size = Vector3(2.2, 2.4, 0.18)
@@ -352,17 +363,27 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 16)
 collision_layer = 1
 collision_mask = 0
 
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LionProp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape_lion")
+
 [node name="Body" type="CSGCylinder3D" parent="LionProp"]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0.55, 0)
 radius = 0.42
 height = 1.4
 sides = 8
 material = SubResource("Mat_tawny")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
 
 [node name="Head" type="CSGBox3D" parent="LionProp"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -0.7)
 size = Vector3(0.5, 0.45, 0.4)
 material = SubResource("Mat_tawny")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
 
 [node name="WallWalk" type="CSGBox3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -22)
@@ -373,8 +394,8 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="Stairs" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 2.1, -19.2)
-size = Vector3(2.4, 4.2, 2.4)
+transform = Transform3D(1, 0, 0, 0, 0.927183, -0.374607, 0, 0.374607, 0.927183, -10.5, 2.1, -15.2)
+size = Vector3(2.4, 0.4, 11.22)
 material = SubResource("Mat_stone")
 use_collision = true
 collision_layer = 1
@@ -504,8 +525,18 @@ monitorable = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AppointZone"]
 shape = SubResource("Box_appoint")
 
+[node name="CageLock" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.7)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("12_cage")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CageLock"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+shape = SubResource("Box_cage")
+
 [node name="CageZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 16)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 11.8)
 collision_layer = 0
 collision_mask = 130
 monitoring = true
@@ -515,7 +546,7 @@ monitorable = false
 shape = SubResource("Box_cage")
 
 [node name="EmbassyExit" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 24.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.2, 6)
 collision_layer = 0
 collision_mask = 130
 monitoring = true
@@ -523,6 +554,23 @@ monitorable = false
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="EmbassyExit"]
 shape = SubResource("Box_embassy")
+
+[node name="Name" type="Label3D" parent="EmbassyExit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+
+[node name="ExitArch" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.5, 7.3)
+size = Vector3(2.6, 3.0, 0.3)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
 
 [node name="DialogueBridge" type="Node" parent="."]
 script = ExtResource("10_bridge")

@@ -42,7 +42,7 @@ def _read(rel: str) -> str:
     return (ROOT / rel).read_text(encoding="utf-8")
 
 
-def _origin(scene: str, node_name: str) -> tuple[float, float, float]:
+def _transform(scene: str, node_name: str) -> list[float]:
     marker = f'[node name="{node_name}"'
     start = scene.find(marker)
     if start < 0:
@@ -57,6 +57,11 @@ def _origin(scene: str, node_name: str) -> tuple[float, float, float]:
     nums = [float(part.strip()) for part in match.group(1).split(",")]
     if len(nums) != 12:
         raise AssertionError(f"{node_name} transform want 12 floats, got {len(nums)}")
+    return nums
+
+
+def _origin(scene: str, node_name: str) -> tuple[float, float, float]:
+    nums = _transform(scene, node_name)
     return nums[9], nums[10], nums[11]
 
 
@@ -144,7 +149,9 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         self.assertIn("Jeronimo", scene)
         self.assertIn("AppointZone", scene)
         self.assertIn("CageZone", scene)
+        self.assertIn("CageLock", scene)
         self.assertIn("EmbassyExit", scene)
+        self.assertIn("ExitArch", scene)
         self.assertIn("Altar", scene)
         self.assertIn("Anvil", scene)
         self.assertIn("SolarBed", scene)
@@ -187,6 +194,45 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
                 _aabb_overlap(horse_min, horse_max, zmin, zmax),
                 f"{node_name} overlaps Horse spawn {horse}",
             )
+
+    def test_playable_layout(self) -> None:
+        scene = _read(f"{CHAPTER}/world.tscn")
+        cage = _origin(scene, "LionCage")
+        cage_half_z = 3.2
+        cage_south = cage[2] - cage_half_z
+        zone = _origin(scene, "CageZone")
+        zmin, zmax = _zone_aabb(scene, "CageZone", "Box_cage")
+        self.assertLess(zmax[2], cage_south + 0.05)
+        self.assertLess(zone[2], cage[2])
+        cage_block = scene[scene.find('[node name="LionCage"') : scene.find('[node name="LionProp"')]
+        self.assertIn('operation = 2', cage_block)
+        self.assertIn('[node name="Door"', cage_block)
+        self.assertIn("CageGate", cage_block)
+        stairs = _transform(scene, "Stairs")
+        self.assertNotEqual(stairs[:9], [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0])
+        self.assertLess(stairs[9], -8.0)
+        hall = _origin(scene, "Hall")
+        self.assertLess(stairs[9] + 1.2, hall[0] - 7.5)
+        walk = _origin(scene, "WallWalk")
+        self.assertLess(abs(stairs[11] - 5.2 - walk[2]), 8.0)
+        exit_o = _origin(scene, "EmbassyExit")
+        self.assertLess(exit_o[2], cage_south)
+        self.assertIn('[node name="Name" type="Label3D" parent="EmbassyExit"]', scene)
+        verts = scene[scene.find("vertices = PackedVector3Array(") : scene.find("polygons =")]
+        numbers = [float(part.strip()) for part in verts.split("(")[-1].split(")")[0].split(",")]
+        self.assertGreaterEqual(len(numbers) // 3, 8)
+        for i in range(0, len(numbers), 3):
+            x_v, z_v = numbers[i], numbers[i + 2]
+            inside_cage = abs(x_v) < 3.4 and 12.6 <= z_v <= 19.4
+            self.assertFalse(
+                inside_cage,
+                f"nav vertex ({x_v}, {z_v}) must omit the cage interior",
+            )
+        self.assertIn("CollisionShape3D", scene[scene.find('[node name="LionProp"') : scene.find('[node name="WallWalk"')])
+        source = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("DEST_SCENE", source)
+        self.assertIn("ResourceLoader.exists", source)
+        self.assertIn("EXIT_KEY", source)
 
     def test_honor_and_character_json(self) -> None:
         payload = json.loads(_read("data/honor_events/jeronimo.json"))

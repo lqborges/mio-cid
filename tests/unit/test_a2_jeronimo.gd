@@ -57,6 +57,7 @@ func _run() -> void:
 		failures.append_array(_check_cage_closed())
 		failures.append_array(_check_spanish_copy())
 		failures.append_array(_check_zones_accept_horse())
+		failures.append_array(_check_playable_layout())
 		failures.append_array(await _check_spawn_does_not_auto_flow())
 		_world.free()
 		_world = null
@@ -96,8 +97,12 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("world missing AppointZone")
 	if _world.get_node_or_null("CageZone") == null:
 		failures.append("world missing CageZone")
+	if _world.get_node_or_null("CageLock") == null:
+		failures.append("world missing CageLock")
 	if _world.get_node_or_null("EmbassyExit") == null:
 		failures.append("world missing EmbassyExit")
+	if _world.get_node_or_null("EmbassyExit/Name") == null:
+		failures.append("EmbassyExit missing Name label")
 	if _world.get_node_or_null("Jimena") != null:
 		failures.append("Jimena must still be at Cardeña, not in this hub")
 	if _world.find_child("HallWhisper", true, false) == null:
@@ -249,6 +254,45 @@ func _check_zones_accept_horse() -> PackedStringArray:
 	return failures
 
 
+func _check_playable_layout() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var cage: Node3D = _world.get_node_or_null("LionCage") as Node3D
+	var zone: Area3D = _world.get_node_or_null("CageZone") as Area3D
+	if cage == null or zone == null:
+		failures.append("LionCage or CageZone missing for layout")
+		return failures
+	var cage_south := cage.global_position.z - 3.2
+	if zone.global_position.z >= cage.global_position.z:
+		failures.append("CageZone must sit in front of LionCage, z %s" % zone.global_position.z)
+	if zone.global_position.z > cage_south:
+		failures.append("CageZone must be outside the sealed cage, z %s cage_south %s" % [zone.global_position.z, cage_south])
+	if _world.get_node_or_null("LionCage/Door") == null:
+		failures.append("LionCage missing subtracted Door opening")
+	var stairs: Node3D = _world.get_node_or_null("Stairs") as Node3D
+	if stairs == null:
+		failures.append("Stairs missing")
+	else:
+		var basis := stairs.global_transform.basis
+		if basis.y.dot(Vector3.UP) > 0.99:
+			failures.append("Stairs must be a ramp, not a vertical pillar")
+		if stairs.global_position.x > -8.0:
+			failures.append("Stairs ramp must stay west of the hall, x %s" % stairs.global_position.x)
+	var exit_zone: Area3D = _world.get_node_or_null("EmbassyExit") as Area3D
+	if exit_zone == null:
+		failures.append("EmbassyExit missing")
+	elif exit_zone.global_position.z > cage_south:
+		failures.append("EmbassyExit must not sit behind the cage, z %s" % exit_zone.global_position.z)
+	var exit_name: Label3D = _world.get_node_or_null("EmbassyExit/Name") as Label3D
+	if exit_name and str(exit_name.text).is_empty():
+		failures.append("EmbassyExit/Name must show a2_jeronimo.to_embassy")
+	var lion: CollisionObject3D = _world.get_node_or_null("LionProp") as CollisionObject3D
+	if lion == null:
+		failures.append("LionProp missing")
+	elif lion.get_node_or_null("CollisionShape3D") == null:
+		failures.append("LionProp missing CollisionShape3D")
+	return failures
+
+
 func _check_spawn_does_not_auto_flow() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	for _i in range(4):
@@ -378,13 +422,15 @@ func _check_appoint_jeronimo() -> PackedStringArray:
 		if "babieca_named" not in flags:
 			failures.append("hub must keep babieca_named")
 	if not bool(world.call("can_leave_to_embassy2")):
-		failures.append("after appointment embassy2 exit should open")
-	if not bool(world.call("travel_to_embassy2")):
-		failures.append("travel_to_embassy2 must succeed after appointment")
-	if _runner and String(_runner.current_id) != "a2_embassy2":
-		failures.append("hub exit must land on a2_embassy2, got %s" % _runner.current_id)
+		failures.append("after appointment embassy2 graph exit should open")
+	if bool(world.call("travel_to_embassy2")):
+		failures.append("travel_to_embassy2 must not leave while a2_embassy2 is missing")
+	if bool(world.get("_left")):
+		failures.append("missing embassy2 must not set _left or autosave the hop")
+	if _runner and String(_runner.current_id) != "a2_jeronimo":
+		failures.append("hub must stay on a2_jeronimo until embassy2 ships, got %s" % _runner.current_id)
 	if current_scene != scene_before:
-		failures.append("goto must no-op when embassy2 is missing")
+		failures.append("missing embassy2 must not change_scene")
 	world.free()
 	return failures
 

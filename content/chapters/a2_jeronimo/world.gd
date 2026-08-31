@@ -15,6 +15,8 @@ const ARRIVE_KEY := "a2_jeronimo.arrive"
 const APPOINT_KEY := "a2_jeronimo.appoint"
 const CAGE_KEY := "a2_jeronimo.cage_locked"
 const PLACE_KEY := "a2_jeronimo.place_name"
+const EXIT_KEY := "a2_jeronimo.to_embassy"
+const DEST_SCENE := "res://content/chapters/a2_embassy2/world.tscn"
 const DIALOGUE_PATH := "res://content/chapters/a2_jeronimo/jeronimo.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 const DATA_PATH := "res://data/honor_events/jeronimo.json"
@@ -48,6 +50,7 @@ func _ready() -> void:
 	_show_place_name()
 	_name_horse()
 	_label_npc()
+	_label_exit()
 	_whisper(ARRIVE_KEY)
 	intro_played = true
 
@@ -130,6 +133,10 @@ func travel_to_embassy2() -> bool:
 	if not _appointed and not _has_flag(APPOINT_FLAG):
 		_whisper("a2_jeronimo.appoint_first")
 		return false
+	# Keep exploring the hub until embassy 2 ships (PR-26).
+	if not ResourceLoader.exists(DEST_SCENE):
+		_whisper(EXIT_KEY)
+		return false
 	return _travel(DEST)
 
 
@@ -165,6 +172,13 @@ func _label_npc() -> void:
 	var label: Label3D = get_node_or_null("Jeronimo/Name") as Label3D
 	if label:
 		label.text = _loc("char.jeronimo")
+
+
+func _label_exit() -> void:
+	var label: Label3D = get_node_or_null("EmbassyExit/Name") as Label3D
+	if label:
+		label.text = _loc(EXIT_KEY)
+		label.visible = true
 
 
 func _recruit_jeronimo() -> void:
