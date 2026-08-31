@@ -1,0 +1,30 @@
+# Godot 4+
+.godot/
+.import/
+.nomedia
+export.cfg
+export_credentials.cfg
+*.tmp
+
+# Export output and local caches
+.export/
+build/
+.godot-ci/
+
+# Runtime user data (never commit)
+user://
+
+# Compiled translation binaries generated from CSV
+*.translation
+
+# Mono / C# (this project is GDScript-only in game/)
+.mono/
+data_*/
+mono_crash.*.json
+~*.dll
+
+# OS / editor
+.DS_Store
+*~
+*.swp
+*.swo

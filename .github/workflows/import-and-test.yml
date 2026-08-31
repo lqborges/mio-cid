@@ -1,0 +1,103 @@
+name: Import and test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  import-and-test:
+    name: Headless import + gdUnit4
+    runs-on: ubuntu-24.04
+    env:
+      GODOT_VERSION: "4.7.2"
+      GODOT_CACHE_DIR: ${{ github.workspace }}/.godot-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Godot cache
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GODOT_CACHE_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-linux.x86_64
+
+      - name: Resolve Godot 4.7.2
+        id: godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${GODOT_CACHE_DIR}"
+
+          mark_found() {
+            local candidate="$1"
+            echo "godot_bin=${candidate}" >> "${GITHUB_OUTPUT}"
+            echo "found=true" >> "${GITHUB_OUTPUT}"
+            echo "Using Godot at ${candidate}"
+            "${candidate}" --version || true
+          }
+
+          if [ -x "${GODOT_CACHE_DIR}/godot" ]; then
+            mark_found "${GODOT_CACHE_DIR}/godot"
+            exit 0
+          fi
+
+          if command -v godot >/dev/null 2>&1; then
+            mark_found "$(command -v godot)"
+            exit 0
+          fi
+
+          if command -v godot4 >/dev/null 2>&1; then
+            mark_found "$(command -v godot4)"
+            exit 0
+          fi
+
+          echo "Godot ${GODOT_VERSION} missing from CI cache and PATH; attempting download."
+          archive="${GODOT_CACHE_DIR}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          if curl -fsSL -o "${archive}" "${url}"; then
+            unzip -qo "${archive}" -d "${GODOT_CACHE_DIR}"
+            bin="$(find "${GODOT_CACHE_DIR}" -maxdepth 2 -type f -name 'Godot_v*-linux.x86_64' | head -n 1)"
+            if [ -n "${bin}" ]; then
+              chmod +x "${bin}"
+              ln -sfn "${bin}" "${GODOT_CACHE_DIR}/godot"
+              mark_found "${GODOT_CACHE_DIR}/godot"
+              exit 0
+            fi
+          else
+            echo "Download failed."
+          fi
+
+          echo "Godot binary missing in CI cache; skipping import and tests."
+          echo "found=false" >> "${GITHUB_OUTPUT}"
+
+      - name: Import project
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --import
+
+      - name: Run gdUnit4
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          if [ ! -f addons/gdUnit4/plugin.cfg ]; then
+            echo "gdUnit4 not vendored yet; skipping tests."
+            exit 0
+          fi
+          cmd=""
+          for candidate in \
+            addons/gdUnit4/bin/GdUnitCmdTool.gd \
+            addons/gdUnit4/bin/GdUnitCmdLineTool.gd; do
+            if [ -f "${candidate}" ]; then
+              cmd="${candidate}"
+              break
+            fi
+          done
+          if [ -z "${cmd}" ]; then
+            echo "gdUnit4 command tool missing; skipping tests."
+            exit 0
+          fi
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s "${cmd}" -- --add res://tests --continue
+
+      - name: Skip notice
+        if: steps.godot.outputs.found != 'true'
+        run: echo "Godot binary missing in CI cache; import and gdUnit4 skipped."
