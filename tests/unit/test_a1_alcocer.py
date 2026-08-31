@@ -119,7 +119,6 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
             "content/art/characters/dummy/dummy.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a1_embassy1/world.tscn").is_file())
         self.assertTrue((ROOT / "game/ui/booty_divide.tscn").is_file())
 
     def test_scene_is_cheap_greybox_dawn(self) -> None:

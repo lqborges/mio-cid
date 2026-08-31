@@ -233,7 +233,7 @@ func _test_alcocer_embassy_waits_for_divide() -> PackedStringArray:
 		failures.append("BootyDivide must show after sell")
 	world.confirm_divide()
 	if current_scene != scene_before:
-		failures.append("divide must not change_scene when embassy tscn is missing")
+		failures.append("divide must not change_scene when current_scene != world")
 	if not bool(world.get("_divided")):
 		failures.append("confirm_divide must resolve the split")
 	if String(_runner.current_id) != "a1_embassy1":
@@ -243,8 +243,6 @@ func _test_alcocer_embassy_waits_for_divide() -> PackedStringArray:
 		failures.append("divide must set alcocer_booty_divided")
 	if _completed.count("a1_alcocer") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
-	if ResourceLoader.exists("res://content/chapters/a1_embassy1/world.tscn"):
-		failures.append("must not ship a1_embassy1/world.tscn")
 	world.free()
 	return failures
 

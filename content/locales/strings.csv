@@ -80,3 +80,16 @@ ui.booty_divide.gift_alvar,Dar a Álvar Fáñez,Gift to Álvar Fáñez
 ui.booty_divide.gift_note,De la mesnada:,From the mesnada:
 ui.booty_divide.confirm,Confirmar,Confirm
 ui.booty_divide.done,El botín está partido.,The booty is divided.
+ui.embassy_ledger.title,Presente al rey,Gift to the king
+ui.embassy_ledger.confirm,Enviar con Álvar,Send with Álvar
+ui.embassy_ledger.blocked,No hay caballos suficientes para ese presente.,There are not enough horses for that gift.
+ui.embassy_ledger.horses,caballos,horses
+ui.embassy_ledger.marks,marcos,marks
+ui.gift.thirty_horses,Treinta caballos,Thirty horses
+ui.gift.thirty_horses_and_swords,Treinta caballos y dos espadas,Thirty horses and two swords
+ui.gift.ten_horses,Diez caballos,Ten horses
+ui.gift.empty_hands,Manos vacías,Empty hands
+a1_embassy1.prompt,Álvar llevará el presente a Alfonso.,Álvar will take the gift to Alfonso.
+a1_embassy1.alvar_leave,Álvar Fáñez parte con el presente. El rey está lejos.,Álvar Fáñez rides with the gift. The king is far off.
+a1_embassy1.alvar_return,Álvar vuelve. Minaya recobra sus tierras.,Álvar returns. Minaya's lands are restored.
+a1_embassy1.lands_restored,Alfonso restituye las tierras de Minaya. A vos no os perdona aún. Ya pueden juntarse más lanzas.,Alfonso restores Minaya's lands. He does not pardon you yet. More lanzas may gather.

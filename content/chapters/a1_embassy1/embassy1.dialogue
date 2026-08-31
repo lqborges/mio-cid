@@ -1,0 +1,17 @@
+# Spoken lines are CSV keys. Álvar bears the gift; Alfonso restores Minaya, not the Cid.
+
+~ start
+=> gift
+
+~ gift
+Cid: a1_embassy1.prompt
+=> END
+
+~ leave
+Alvar: a1_embassy1.alvar_leave
+=> END
+
+~ return
+Alvar: a1_embassy1.alvar_return
+Cid: a1_embassy1.lands_restored
+=> END

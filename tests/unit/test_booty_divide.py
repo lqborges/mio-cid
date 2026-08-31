@@ -71,9 +71,6 @@ class TestBootyDivide(unittest.TestCase):
             "content/chapters/a1_castejon/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a1_embassy1/world.tscn").is_file())
-        self.assertFalse((ROOT / "game/systems/gifts/gift_to_king.gd").is_file())
-        self.assertFalse((ROOT / "game/ui/embassy_ledger.tscn").is_file())
 
     def test_ui_reads_fractions_via_treasury(self) -> None:
         ui = _read("game/ui/booty_divide.gd")

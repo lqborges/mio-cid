@@ -1,0 +1,35 @@
+{
+  "id": "a1_embassy1",
+  "steps": [
+    {
+      "id": "prompt",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_embassy1/embassy1.dialogue",
+      "start": "gift"
+    },
+    {
+      "id": "ledger",
+      "type": "embassy_ledger"
+    },
+    {
+      "id": "alvar_leave",
+      "type": "cinematic"
+    },
+    {
+      "id": "alvar_return",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_embassy1/embassy1.dialogue",
+      "start": "return"
+    },
+    {
+      "id": "lands",
+      "type": "whisper",
+      "set_flags": ["embassy1_done", "minaya_lands_restored", "recruitment_flood"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a1_poyo"
+    }
+  ]
+}

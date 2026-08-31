@@ -1,0 +1,12 @@
+{
+  "id": "embassy_1_minaya",
+  "beat": "a1_embassy1",
+  "bearer": "alvar_fanez",
+  "player_options": [
+    { "id": "thirty_horses", "horses": 30, "marks": 0, "honor_delta": 12, "blocked_if_horses_lt": 30 },
+    { "id": "thirty_horses_and_swords", "horses": 30, "marks": 200, "honor_delta": 18, "blocked_if_horses_lt": 30 },
+    { "id": "ten_horses", "horses": 10, "marks": 0, "honor_delta": 8, "blocked_if_horses_lt": 10 },
+    { "id": "empty_hands", "horses": 0, "marks": 0, "honor_delta": -6, "blocked_if_onores_gt": 20 }
+  ],
+  "alfonso_response": "lands_to_minaya_not_pardon"
+}

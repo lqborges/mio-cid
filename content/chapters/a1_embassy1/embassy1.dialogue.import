@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://ccbmxy2x4okvo"
+path="res://.godot/imported/embassy1.dialogue-ee0e370a5c5935fb31c2148fcbf77965.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_embassy1/embassy1.dialogue"
+dest_files=["res://.godot/imported/embassy1.dialogue-ee0e370a5c5935fb31c2148fcbf77965.tres"]
+
+[params]
+
+defaults=true

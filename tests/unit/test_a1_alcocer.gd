@@ -266,8 +266,6 @@ func _check_booty_ui_hidden_until_win() -> PackedStringArray:
 		failures.append("BootyDivide must stay hidden until sell")
 	if not ResourceLoader.exists("res://game/ui/booty_divide.tscn"):
 		failures.append("booty_divide.tscn missing")
-	if ResourceLoader.exists("res://content/chapters/a1_embassy1/world.tscn"):
-		failures.append("must not ship a1_embassy1/world.tscn")
 	return failures
 
 
@@ -491,7 +489,7 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 	_completed.clear()
 	world.run_divide()
 	if current_scene != scene_before:
-		failures.append("divide must not change_scene when embassy tscn is missing")
+		failures.append("divide must not change_scene when current_scene != world")
 	if "alcocer_sell" not in _logged:
 		failures.append("divide path must apply alcocer_sell, logged %s" % str(_logged))
 	if not bool(world.get("_divided")):
@@ -509,12 +507,6 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 				failures.append("hub_lock_cardena still blocks cardena")
 			if bool(_runner.can_travel(&"a1_embassy1", &"a1_cardena", flags)):
 				failures.append("hub_lock_cardena still blocks cardena from embassy")
-		if _runner.has_method("goto"):
-			_runner.goto(&"a1_embassy1")
-			if current_scene != scene_before:
-				failures.append("goto a1_embassy1 must no-op missing scene")
-	if ResourceLoader.exists("res://content/chapters/a1_embassy1/world.tscn"):
-		failures.append("must not ship a1_embassy1/world.tscn")
 	world.free()
 	return failures
 

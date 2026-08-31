@@ -116,6 +116,9 @@ jobs:
       - name: Run Python booty-divide tests
         run: python3 tests/unit/test_booty_divide.py
 
+      - name: Run Python embassy1 tests
+        run: python3 tests/unit/test_embassy1.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -196,6 +199,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_booty_divide.gd
+
+      - name: Run embassy1 GiftToKing headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy1.gd
 
       - name: Run combat headless test
         if: steps.godot.outputs.found == 'true'

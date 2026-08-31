@@ -89,6 +89,12 @@
       "tags": ["gift_down", "loyalty"]
     },
     {
+      "id": "embassy1_gift",
+      "deltas": { "honor": 8 },
+      "tags": ["gift_up"],
+      "beat": "a1_embassy1"
+    },
+    {
       "id": "captain_deserted",
       "deltas": { "onores": -4, "honra": -4 },
       "tags": ["desertion"]
