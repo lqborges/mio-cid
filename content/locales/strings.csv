@@ -2,3 +2,8 @@ key,es,en
 _dev.smoke.child,"Las puertas de Burgos se cierran.","The gates of Burgos are shutting."
 _dev.smoke.alvar,"La mesnada está lista, mio Cid.","The warband is ready, my Cid."
 _dev.smoke.cid,"Campamos junto al río.","We camp by the river."
+speech.ui.retry,"Este tribunal no es una taberna.","This court is not a tavern."
+speech.ui.skip_blocked,"Saltarse al riepto es falta de mesura.","Skipping to the riepto is a failure of mesura."
+speech.ui.steel,"En esta corte no se desenvaina.","Steel is not drawn in this hall."
+speech.ui.won,"La corte os da la razón.","The court finds in your favor."
+speech.ui.failed,"La corte no os da la razón.","The court does not find in your favor."
