@@ -324,11 +324,11 @@ class TestA2YusufDay1(unittest.TestCase):
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
         self.assertIn(("a2_embassy2", "a2_yusuf"), pairs)
         self.assertIn(("a2_yusuf", "a2_embassy3"), pairs)
-        self.assertNotIn(("a2_jeronimo", "a2_yusuf"), pairs)
         locked = ["hub_lock_cardena"]
         self.assertTrue(can_travel(graph, "a2_embassy2", "a2_yusuf", locked))
         self.assertTrue(can_travel(graph, "a2_yusuf", "a2_embassy3", locked))
         self.assertFalse(can_travel(graph, "a2_jeronimo", "a2_yusuf", locked))
+        self.assertTrue(can_travel(graph, "a2_jeronimo", "a2_yusuf", locked + ["embassy2_done"]))
         node = next(n for n in graph["nodes"] if n["id"] == "a2_yusuf")
         self.assertEqual(node["scene"], "res://content/chapters/a2_yusuf/world.tscn")
         world_scene = _read(f"{CHAPTER}/world.tscn")

@@ -483,8 +483,8 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):
-		failures.append("a2_yusuf must not ship in this PR")
+	if not ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):
+		failures.append("a2_yusuf must ship in this slice")
 	if ResourceLoader.exists("res://content/chapters/a2_embassy3/world.tscn"):
 		failures.append("a2_embassy3 must not ship in this PR")
 	if ResourceLoader.exists("res://data/gifts/embassy_3.json"):

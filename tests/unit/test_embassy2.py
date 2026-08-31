@@ -111,7 +111,7 @@ class TestEmbassy2EscortAndGift(unittest.TestCase):
             "content/chapters/a2_jeronimo/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_yusuf/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a2_yusuf/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
         self.assertFalse((ROOT / "data/gifts/embassy_3.json").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_leon/world.tscn").is_file())
