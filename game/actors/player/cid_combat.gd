@@ -78,6 +78,20 @@ func is_winded() -> bool:
 	return stamina <= 0.0
 
 
+func is_attacking() -> bool:
+	return _attack_left > 0.0
+
+
+func lower_weapon() -> void:
+	_attack_left = 0.0
+	combo_step = 0
+	_combo_left = 0.0
+	if hit_box != null:
+		hit_box.disarm()
+	if shout_ring != null:
+		shout_ring.disarm()
+
+
 func try_sprint(delta: float) -> bool:
 	var cost := float(tunables.get("sprint_stamina_per_sec", 0.0)) * delta
 	if stamina <= 0.0:
@@ -130,6 +144,7 @@ func leap() -> void:
 	var move := moveset.move(&"leap")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	last_move = &"leap"
 	_arm_hit(move, &"leap")
 	_play_sfx(&"leap")
@@ -149,11 +164,30 @@ func shout() -> void:
 	var move := moveset.move(&"shout")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	last_move = &"shout"
 	if hit_box != null:
 		hit_box.disarm()
 	_arm_shout(move)
 	_play_sfx(&"shout")
+
+
+func dump_strike() -> bool:
+	if _dead:
+		return false
+	var move := {}
+	var mes := _mesura()
+	if mes != null and mes.has_method("dump_move"):
+		move = mes.dump_move()
+	if not _spend(float(move.get("stamina", 0.0))):
+		return false
+	_note_strike()
+	last_move = &"dump"
+	if hit_box != null:
+		hit_box.disarm()
+	_arm_shout(move)
+	_play_sfx(&"shout")
+	return true
 
 
 func weapon_swap() -> void:
@@ -169,6 +203,11 @@ func weapon_swap() -> void:
 func take_damage(amount: float, damage_type: StringName = &"slash", stagger: float = 0.0, source: Node = null) -> void:
 	if _dead:
 		return
+	var mes := _mesura()
+	if mes != null and mes.has_method("try_parry") and mes.try_parry():
+		return
+	if mes != null and mes.has_method("note_hit_taken"):
+		mes.note_hit_taken()
 	if player_hurt != null and is_instance_valid(player_hurt):
 		player_hurt.apply_hit(amount, damage_type, stagger, source)
 		return
@@ -190,6 +229,7 @@ func _try_melee_combo() -> void:
 	var move := moveset.move(move_id)
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_note_strike()
 	combo_step += 1
 	_combo_left = float(tunables.get("combo_window", 0.0))
 	last_move = move_id
@@ -263,6 +303,9 @@ func _regen(delta: float) -> void:
 		return
 	var rate := float(tunables.get("stamina_regen_per_sec", 0.0))
 	rate *= float(difficulty.get("stamina_regen", 1.0))
+	var mes := _mesura()
+	if mes != null and mes.has_method("stamina_regen_mult"):
+		rate *= float(mes.stamina_regen_mult())
 	stamina = minf(max_stamina, stamina + rate * delta)
 
 
@@ -290,6 +333,9 @@ func _on_player_died() -> void:
 		hit_box.disarm()
 	if shout_ring != null:
 		shout_ring.disarm()
+	var mes := _mesura()
+	if mes != null and mes.has_method("set_holding"):
+		mes.set_holding(false)
 	_emit_you_fell()
 	if not allow_death_reload:
 		return
@@ -393,3 +439,22 @@ func _load_json(path: String) -> Dictionary:
 
 func _body() -> CharacterBody3D:
 	return get_parent() as CharacterBody3D
+
+
+func _mesura() -> Node:
+	var body := get_parent()
+	if body == null:
+		return null
+	var named := body.get_node_or_null("Mesura")
+	if named != null:
+		return named
+	for child in body.get_children():
+		if child.has_method("try_parry") and child.has_method("dump_move"):
+			return child
+	return null
+
+
+func _note_strike() -> void:
+	var mes := _mesura()
+	if mes != null and mes.has_method("note_strike"):
+		mes.note_strike()

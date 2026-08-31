@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/mesura_traits",
+  "title": "MesuraTraits",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mesura_max",
+    "mesura_start",
+    "mesura_regen_per_sec",
+    "hold_time_scale",
+    "hold_stamina_regen_mult",
+    "hold_move_mult",
+    "hold_parry_window_ms",
+    "ira_max",
+    "dump_ira_min",
+    "dump_damage",
+    "dump_honra",
+    "trait_cap",
+    "traits"
+  ],
+  "properties": {
+    "mesura_max": { "type": "number" },
+    "mesura_start": { "type": "number" },
+    "mesura_regen_per_sec": { "type": "number" },
+    "mesura_pause_after_strike_sec": { "type": "number" },
+    "parry_mesura": { "type": "number" },
+    "hold_time_scale": { "type": "number" },
+    "hold_stamina_regen_mult": { "type": "number" },
+    "hold_move_mult": { "type": "number" },
+    "hold_parry_window_ms": { "type": "number" },
+    "hold_fight_min_sec": { "type": "number" },
+    "rotate_in_cooldown_sec": { "type": "number" },
+    "rotate_in_cooldown_mult": { "type": "number" },
+    "ira_max": { "type": "number" },
+    "ira_start": { "type": "number" },
+    "ira_on_hit": { "type": "number" },
+    "ira_on_mesura_fail": { "type": "number" },
+    "dump_ira_min": { "type": "number" },
+    "dump_damage": { "type": "number" },
+    "dump_stagger": { "type": "number" },
+    "dump_duration": { "type": "number" },
+    "dump_radius": { "type": "number" },
+    "dump_stamina": { "type": "number" },
+    "dump_honra": { "type": "number", "maximum": 0 },
+    "dump_honra_min": { "type": "number", "maximum": 0 },
+    "dump_honra_max": { "type": "number", "maximum": 0 },
+    "trait_cap": { "type": "integer", "minimum": 1, "maximum": 6 },
+    "traits": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "unlocks_at": { "type": "object" },
+          "rotate_in_cooldown_mult": { "type": "number" }
+        }
+      }
+    }
+  }
+}

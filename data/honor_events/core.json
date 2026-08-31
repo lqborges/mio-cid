@@ -94,6 +94,11 @@
       "tags": ["desertion"]
     },
     {
+      "id": "rage_dump",
+      "deltas": { "honra": -12 },
+      "tags": ["mesura_fail"]
+    },
+    {
       "id": "tevar_feed_count",
       "deltas": { "honra": 10 },
       "tags": ["mesura", "table"],
