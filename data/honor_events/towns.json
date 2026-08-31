@@ -1,0 +1,44 @@
+{
+  "events": [
+    {
+      "id": "castejon_take",
+      "deltas": { "onores": 14 },
+      "tags": ["raid"],
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "castejon_sell",
+      "deltas": { "onores": 10 },
+      "tags": ["sell", "mobility"],
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "castejon_keep",
+      "deltas": { "honor": -40 },
+      "tags": ["alfonso_wrath"],
+      "hard_fail": true,
+      "hard_fail_reason": "alfonso_wrath",
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "alcocer_sortie_win",
+      "deltas": { "onores": 18 },
+      "tags": ["battle"],
+      "beat": "a1_alcocer"
+    },
+    {
+      "id": "alcocer_sell",
+      "deltas": { "onores": 10 },
+      "tags": ["sell"],
+      "beat": "a1_alcocer"
+    },
+    {
+      "id": "alcocer_keep",
+      "deltas": { "honor": -25 },
+      "tags": ["alfonso_wrath"],
+      "hard_fail": true,
+      "hard_fail_reason": "alfonso_host",
+      "beat": "a1_alcocer"
+    }
+  ]
+}

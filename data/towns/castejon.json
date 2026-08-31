@@ -1,0 +1,18 @@
+{
+  "id": "castejon",
+  "display_name_key": "location.castejon",
+  "beat": "a1_castejon",
+  "alfonso_protectorate": true,
+  "keep_or_sell": true,
+  "keep_past_deadline_fail": true,
+  "sell_deadline_days": 0,
+  "booty": {
+    "marks": 800,
+    "horses": 40,
+    "cloth": 0,
+    "arms": 0
+  },
+  "take_event_id": "castejon_take",
+  "sell_event_id": "castejon_sell",
+  "keep_event_id": "castejon_keep"
+}
