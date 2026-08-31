@@ -1,0 +1,15 @@
+{
+  "repay_marks": 600,
+  "events": [
+    {
+      "id": "repay_raquel",
+      "deltas": { "honra": 8 },
+      "tags": ["kept_word"],
+      "clear_stain": "arcas_cheat",
+      "flags_set": ["repay_done"],
+      "beat": "a2_repay_raquel",
+      "once": true,
+      "ui_whisper_key": "a2_repay_raquel.paid"
+    }
+  ]
+}
