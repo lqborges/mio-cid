@@ -1,0 +1,9 @@
+{
+  "id": "infanzon",
+  "hp_regen_camp_night": 8,
+  "hp_regen_beat_start": 15,
+  "stamina_regen": 1.4,
+  "incoming": 0.7,
+  "parry_window_ms": 80,
+  "meter_sinks": 0.7
+}

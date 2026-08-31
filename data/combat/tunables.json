@@ -1,0 +1,10 @@
+{
+  "player_hp": 80,
+  "player_stamina": 100,
+  "stamina_regen_per_sec": 22,
+  "sprint_stamina_per_sec": 16,
+  "combo_window": 0.9,
+  "dummy_hp": 38,
+  "ignite_damage_mult": 1.2,
+  "default_difficulty": "mesura"
+}

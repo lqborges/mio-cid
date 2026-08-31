@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/difficulty",
+  "title": "Difficulty",
+  "type": "object",
+  "required": [
+    "id",
+    "hp_regen_camp_night",
+    "hp_regen_beat_start",
+    "stamina_regen",
+    "incoming",
+    "parry_window_ms",
+    "meter_sinks"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "enum": ["infanzon", "mesura", "campeador"] },
+    "hp_regen_camp_night": { "type": "number" },
+    "hp_regen_beat_start": { "type": "number" },
+    "stamina_regen": { "type": "number" },
+    "incoming": { "type": "number" },
+    "parry_window_ms": { "type": "number" },
+    "meter_sinks": { "type": "number" }
+  }
+}
