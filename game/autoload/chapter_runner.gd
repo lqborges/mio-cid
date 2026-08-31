@@ -4,6 +4,7 @@ extends Node
 
 const VIVAR_SCENE := "res://content/chapters/a1_vivar/world.tscn"
 const BURGOS_SCENE := "res://content/chapters/a1_burgos/world.tscn"
+const ARCAS_SCENE := "res://content/chapters/a1_arcas/world.tscn"
 
 var current_id: StringName = &""
 var flags: PackedStringArray = PackedStringArray()
@@ -35,4 +36,6 @@ func _scene_path(beat_id: StringName) -> String:
 		return VIVAR_SCENE
 	if beat_id == &"a1_burgos":
 		return BURGOS_SCENE
+	if beat_id == &"a1_arcas":
+		return ARCAS_SCENE
 	return ""

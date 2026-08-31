@@ -114,6 +114,15 @@ func camp_on_river() -> void:
 	_apply_honor(CAMP_RIVER_EVENT)
 	if EventBus and EventBus.has_signal("beat_completed"):
 		EventBus.beat_completed.emit(BEAT_ID)
+	_travel_to_arcas()
+
+
+func _travel_to_arcas() -> void:
+	var tree := get_tree()
+	if tree == null or tree.current_scene != self:
+		return
+	if ChapterRunner and ChapterRunner.has_method("goto"):
+		ChapterRunner.goto(&"a1_arcas")
 
 
 func draw_steel_on_burgaleses() -> void:

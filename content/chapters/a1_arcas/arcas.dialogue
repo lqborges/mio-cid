@@ -1,0 +1,18 @@
+# Spoken lines are CSV keys. Raquel and Vidas speak as separate people.
+
+~ start
+=> offer
+
+~ offer
+Martín: a1_arcas.martin_offer
+Raquel: a1_arcas.raquel_ask
+Vidas: a1_arcas.vidas_ask
+=> END
+
+~ cheat
+Cid: a1_arcas.cheat_done
+=> END
+
+~ refuse
+Cid: a1_arcas.refuse_done
+=> END

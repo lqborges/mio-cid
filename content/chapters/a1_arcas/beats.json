@@ -1,0 +1,19 @@
+{
+  "id": "a1_arcas",
+  "cheat_marks": 600,
+  "martin_loyalty_delta": 0.08,
+  "steps": [
+    {
+      "id": "offer",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_arcas/arcas.dialogue",
+      "start": "offer"
+    },
+    {
+      "id": "choice",
+      "type": "choice",
+      "cheat": "arcas_cheat",
+      "refuse": "arcas_refuse"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "cheat_marks": 600,
+  "martin_loyalty_delta": 0.08,
+  "events": [
+    {
+      "id": "arcas_cheat",
+      "deltas": { "onores": 22, "honra": -6 },
+      "tags": ["allowed_crime"],
+      "stain_id": "arcas_cheat",
+      "flags_set": ["arcas_cheated"],
+      "beat": "a1_arcas"
+    },
+    {
+      "id": "arcas_refuse",
+      "deltas": { "honra": 3 },
+      "tags": ["kept_word", "poverty"],
+      "beat": "a1_arcas"
+    }
+  ]
+}

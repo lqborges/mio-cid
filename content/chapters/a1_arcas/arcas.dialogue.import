@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://ceu4i1rij7cpc"
+path="res://.godot/imported/arcas.dialogue-aa0d0212d10c22dc93eb044d497a52e4.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_arcas/arcas.dialogue"
+dest_files=["res://.godot/imported/arcas.dialogue-aa0d0212d10c22dc93eb044d497a52e4.tres"]
+
+[params]
+
+defaults=true

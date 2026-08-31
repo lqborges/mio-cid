@@ -1,0 +1,267 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_arcas/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="5_bridge"]
+[ext_resource type="Script" path="res://content/chapters/a1_arcas/lenders.gd" id="6_lend"]
+[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/choice_ui.tscn" id="7_choice"]
+[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/desertion_ticker.tscn" id="8_ticker"]
+
+[sub_resource type="Environment" id="Environment_arcas"]
+background_mode = 1
+background_color = Color(0.38, 0.36, 0.32, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.52, 0.48, 0.40, 1)
+ambient_light_energy = 0.40
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.50, 0.44, 0.32, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_river"]
+albedo_color = Color(0.22, 0.34, 0.40, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_camp"]
+albedo_color = Color(0.50, 0.44, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_chest"]
+albedo_color = Color(0.42, 0.32, 0.18, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_bank"]
+albedo_color = Color(0.36, 0.32, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_martin"]
+albedo_color = Color(0.28, 0.30, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_raquel"]
+albedo_color = Color(0.40, 0.28, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_vidas"]
+albedo_color = Color(0.26, 0.28, 0.34, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_martin"]
+radius = 0.4
+height = 1.8
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_martin")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_martin"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_raquel"]
+radius = 0.38
+height = 1.7
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_raquel")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_raquel"]
+radius = 0.38
+height = 1.7
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_vidas"]
+radius = 0.4
+height = 1.75
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_vidas")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_vidas"]
+radius = 0.4
+height = 1.75
+
+[sub_resource type="BoxShape3D" id="Box_offer"]
+size = Vector3(10, 2.4, 8)
+
+[node name="Arcas" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_arcas")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1, 0.92, 0.78, 1)
+light_energy = 0.95
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(36, 1, 32)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="River" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 14.5)
+size = Vector3(36, 0.5, 7)
+material = SubResource("Mat_river")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="SandBar" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 8.5)
+size = Vector3(16, 0.2, 6)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 0.7, 4.6)
+size = Vector3(2.6, 1.4, 2.6)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, 0.55, 4.8)
+size = Vector3(2.2, 1.1, 2.2)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Bank" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 7.2)
+size = Vector3(4.4, 0.9, 1.2)
+material = SubResource("Mat_bank")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="SandChestA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 0.55, 6.35)
+size = Vector3(1.1, 0.7, 0.7)
+material = SubResource("Mat_chest")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="SandChestB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.9, 0.55, 6.35)
+size = Vector3(1.1, 0.7, 0.7)
+material = SubResource("Mat_chest")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 2.2)
+
+[node name="Martin" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0, 6.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("6_lend")
+character_id = &"martin_antolinez"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Martin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_martin")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Martin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_martin")
+
+[node name="Name" type="Label3D" parent="Martin"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Martín"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="Raquel" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 8.2)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("6_lend")
+character_id = &"raquel"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Raquel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("CapsuleMesh_raquel")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Raquel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("CapsuleShape_raquel")
+
+[node name="Name" type="Label3D" parent="Raquel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Raquel"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="Vidas" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 8.2)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("6_lend")
+character_id = &"vidas"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Vidas"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+mesh = SubResource("CapsuleMesh_vidas")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Vidas"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape_vidas")
+
+[node name="Name" type="Label3D" parent="Vidas"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Vidas"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="OfferZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 7.0)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="OfferZone"]
+shape = SubResource("Box_offer")
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("5_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="DesertionTicker" parent="HUD" instance=ExtResource("8_ticker")]
+
+[node name="ChoiceUI" parent="HUD" instance=ExtResource("7_choice")]

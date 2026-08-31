@@ -2,6 +2,8 @@ extends Node
 # Autoload HonorService extends this script. Do not add class_name (collides with the singleton).
 
 const EVENTS_PATH := "res://data/honor_events/core.json"
+const EVENTS_DIR := "res://data/honor_events"
+const ARCAS_PATH := "res://data/honor_events/arcas.json"
 const COMBAT_TAGS := ["battle", "raid", "combat"]
 const STAIN_UNCURABLE := &"uncurable_by_combat"
 
@@ -124,12 +126,29 @@ func consider_name_empty() -> void:
 
 func _load_catalog() -> void:
 	catalog.clear()
-	if not FileAccess.file_exists(EVENTS_PATH):
-		push_warning("HonorService: missing %s" % EVENTS_PATH)
+	_ingest_events_file(EVENTS_PATH)
+	_ingest_events_file(ARCAS_PATH)
+	var dir := DirAccess.open(EVENTS_DIR)
+	if dir == null:
 		return
-	var text := FileAccess.get_file_as_string(EVENTS_PATH)
+	dir.list_dir_begin()
+	var fname := dir.get_next()
+	while not fname.is_empty():
+		if not dir.current_is_dir() and fname.ends_with(".json"):
+			var path := "%s/%s" % [EVENTS_DIR, fname]
+			if path != EVENTS_PATH:
+				_ingest_events_file(path)
+		fname = dir.get_next()
+	dir.list_dir_end()
+
+
+func _ingest_events_file(path: String) -> void:
+	if not FileAccess.file_exists(path):
+		push_warning("HonorService: missing %s" % path)
+		return
+	var text := FileAccess.get_file_as_string(path)
 	if text.is_empty():
-		push_warning("HonorService: empty %s" % EVENTS_PATH)
+		push_warning("HonorService: empty %s" % path)
 		return
 	var parsed: Variant = JSON.parse_string(text)
 	var items: Array = []
