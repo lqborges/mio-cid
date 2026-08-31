@@ -1,2 +1,1 @@
-class_name TreasuryService
 extends Node

@@ -11,7 +11,6 @@ from __future__ import annotations
 import csv
 import re
 import subprocess
-import sys
 import unittest
 from pathlib import Path
 
@@ -86,17 +85,29 @@ class TestAutoloadsAndEventBus(unittest.TestCase):
     def test_event_bus_gd_test_parses(self) -> None:
         source = _read("tests/unit/test_event_bus.gd")
         self.assertIn("extends SceneTree", source)
-        self.assertIn("soft_warn", source)
-        self.assertIn("hard_fail", source)
+        self.assertIn("EventBus.soft_warn", source)
+        self.assertIn("EventBus.hard_fail", source)
         self.assertIn("cannot_feed", source)
         self.assertIn("name_empty", source)
+        self.assertNotIn("load(\"res://game/autoload/event_bus.gd\")", source)
 
-    def test_service_stubs_are_empty_nodes_with_class_name(self) -> None:
-        for class_name, rel in STUBS.items():
-            source = _read(rel).strip()
-            self.assertEqual(
-                source,
-                f"class_name {class_name}\nextends Node",
+    def test_service_stubs_are_empty_nodes(self) -> None:
+        for _name, rel in STUBS.items():
+            source = _read(rel)
+            self.assertRegex(source, re.compile(r"^extends Node\s*$", re.MULTILINE), rel)
+            self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE), rel)
+            statements = [
+                line.strip()
+                for line in source.splitlines()
+                if line.strip() and not line.strip().startswith("#")
+            ]
+            self.assertEqual(statements, ["extends Node"], rel)
+
+    def test_autoload_scripts_do_not_reuse_singleton_class_name(self) -> None:
+        for name, rel in AUTOLOAD_SCRIPTS.items():
+            source = _read(rel)
+            self.assertIsNone(
+                re.search(rf"^class_name\s+{re.escape(name)}\b", source, re.MULTILINE),
                 rel,
             )
 

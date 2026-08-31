@@ -6,36 +6,56 @@ extends SceneTree
 
 func _initialize() -> void:
 	var failures: PackedStringArray = []
-	var script: GDScript = load("res://game/autoload/event_bus.gd") as GDScript
-	if script == null:
-		failures.append("could not load event_bus.gd")
-		_finish(failures)
-		return
+	failures.append_array(_check_autoloads_are_nodes())
+	failures.append_array(_check_soft_warn_and_hard_fail())
+	_finish(failures)
 
-	var bus: Node = script.new()
+
+func _check_autoloads_are_nodes() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var names: PackedStringArray = PackedStringArray([
+		"EventBus",
+		"HonorService",
+		"SaveService",
+		"ChapterRunner",
+		"CampaignClock",
+		"TreasuryService",
+		"GameState",
+		"Loc",
+	])
+	for name in names:
+		var node: Node = get_root().get_node_or_null(NodePath(name))
+		if node == null:
+			failures.append("%s autoload missing or not a Node" % name)
+	var clock: Node = GameState.clock()
+	if clock == null or clock != CampaignClock:
+		failures.append("GameState.clock() did not return the CampaignClock autoload")
+	return failures
+
+
+func _check_soft_warn_and_hard_fail() -> PackedStringArray:
+	var failures: PackedStringArray = []
 	var warned: Array[StringName] = []
 	var failed: Array[StringName] = []
-	bus.soft_warn.connect(func(reason: StringName) -> void:
+	EventBus.soft_warn.connect(func(reason: StringName) -> void:
 		warned.append(reason)
 	)
-	bus.hard_fail.connect(func(reason: StringName) -> void:
+	EventBus.hard_fail.connect(func(reason: StringName) -> void:
 		failed.append(reason)
 	)
 
-	bus.soft_warn.emit(&"cannot_feed")
+	EventBus.soft_warn.emit(&"cannot_feed")
 	if warned.size() != 1 or warned[0] != &"cannot_feed":
 		failures.append("soft_warn did not emit cannot_feed")
 	if failed.size() != 0:
 		failures.append("soft_warn collapsed into hard_fail")
 
-	bus.hard_fail.emit(&"name_empty")
+	EventBus.hard_fail.emit(&"name_empty")
 	if failed.size() != 1 or failed[0] != &"name_empty":
 		failures.append("hard_fail did not emit name_empty")
 	if warned.size() != 1:
 		failures.append("hard_fail collapsed into soft_warn")
-
-	bus.free()
-	_finish(failures)
+	return failures
 
 
 func _finish(failures: PackedStringArray) -> void:
