@@ -1,0 +1,8 @@
+# Spoken lines are CSV keys in content/locales/strings.csv (es default, en column).
+# Line tags honor_event / flag_set are IDs; DialogueBridge maps them to HonorService / EventBus.
+
+~ start
+Niño: _dev.smoke.child [#flag_set=smoke_seen]
+Álvar: _dev.smoke.alvar
+Cid: _dev.smoke.cid [#honor_event=burgos_camp_river]
+=> END

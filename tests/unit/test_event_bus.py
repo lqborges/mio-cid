@@ -24,6 +24,7 @@ AUTOLOAD_ORDER = [
     "TreasuryService",
     "GameState",
     "Loc",
+    "DialogueManager",
 ]
 AUTOLOAD_SCRIPTS = {
     "EventBus": "game/autoload/event_bus.gd",
@@ -34,6 +35,7 @@ AUTOLOAD_SCRIPTS = {
     "TreasuryService": "game/autoload/treasury_service.gd",
     "GameState": "game/autoload/game_state.gd",
     "Loc": "game/autoload/loc.gd",
+    "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
 }
 STUBS = {
     "SaveService": "game/autoload/save_service.gd",
@@ -142,6 +144,7 @@ class TestAutoloadsAndEventBus(unittest.TestCase):
         source = _read("game/autoload/loc.gd")
         self.assertIn('DEFAULT_LOCALE := "es"', source)
         self.assertIn("poem_formulas.csv", source)
+        self.assertIn("strings.csv", source)
         self.assertIn("TranslationServer.set_locale(DEFAULT_LOCALE)", source)
 
     def test_godot_headless_event_bus_if_available(self) -> None:

@@ -72,7 +72,7 @@ jobs:
           echo "found=false" >> "${GITHUB_OUTPUT}"
 
       - name: Run Python autoload tests
-        run: python3 tests/unit/test_event_bus.py
+        run: python3 -m unittest discover -s tests/unit -p 'test_*.py'
 
       - name: Run Python honor-meter tests
         run: python3 tests/unit/test_honor_state.py
@@ -91,6 +91,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_honor_state.gd
+
+      - name: Run DialogueBridge headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_dialogue_bridge.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
