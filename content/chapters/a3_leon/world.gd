@@ -566,7 +566,6 @@ func _hide_choice() -> void:
 func _finish_beat() -> void:
 	if EventBus and EventBus.has_signal("beat_completed"):
 		EventBus.beat_completed.emit(BEAT_ID)
-	# Autosave this hall. Do not hop the graph into unshipped Búcar.
 	_checkpoint()
 	if not _dest_ready():
 		return

@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+      "id": "bucar_win",
+      "deltas": { "honor": 12 },
+      "tags": ["battle"],
+      "beat": "a3_bucar",
+      "once": true,
+      "ui_whisper_key": "a3_bucar.win"
+    }
+  ]
+}

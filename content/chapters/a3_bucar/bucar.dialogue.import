@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://c1qlaihdobpi6"
+path="res://.godot/imported/bucar.dialogue-a6b533ae0e3a07ae2502c25d0b4701c9.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_bucar/bucar.dialogue"
+dest_files=["res://.godot/imported/bucar.dialogue-a6b533ae0e3a07ae2502c25d0b4701c9.tres"]
+
+[params]
+
+defaults=true

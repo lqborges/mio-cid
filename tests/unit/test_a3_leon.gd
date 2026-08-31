@@ -337,7 +337,7 @@ func _check_mesura_path_returns_lion() -> PackedStringArray:
 		return failures
 	world.run_mesura()
 	if current_scene != scene_before:
-		failures.append("return must not change_scene when Búcar is missing")
+		failures.append("return must not change_scene when current_scene != world")
 	if "lion_mesura" not in _logged:
 		failures.append("mesura path must apply lion_mesura, logged %s" % str(_logged))
 	if "lion_rage" in _logged:
@@ -371,10 +371,10 @@ func _check_mesura_path_returns_lion() -> PackedStringArray:
 		for flag in HIDE_FLAGS:
 			if flag not in flags:
 				failures.append("cowardice flag dropped after return: %s" % flag)
-		if String(_runner.current_id) != "a3_leon":
-			failures.append("return must stay on a3_leon until Búcar ships, got %s" % _runner.current_id)
-		if bool(world.get("_left")):
-			failures.append("must not _left into missing a3_bucar")
+		if String(_runner.current_id) != "a3_bucar":
+			failures.append("return must travel to a3_bucar, got %s" % _runner.current_id)
+		if not bool(world.get("_left")):
+			failures.append("return must leave for a3_bucar")
 		if _runner.has_method("can_travel") and not bool(_runner.can_travel(&"a3_leon", &"a3_bucar", flags)):
 			failures.append("lion_returned must open leon -> bucar")
 	var cid: Node = world.get_node_or_null("Cid")
@@ -471,8 +471,8 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(BUCAR):
-		failures.append("a3_bucar must not ship in this PR")
+	if not ResourceLoader.exists(BUCAR):
+		failures.append("a3_bucar world must exist")
 	if ResourceLoader.exists(CORPES):
 		failures.append("a3_corpes must not ship in this PR")
 	return failures

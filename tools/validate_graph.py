@@ -441,6 +441,12 @@ def validate_graph(
     for edge in tevar_out:
         if "colada_acquired" not in _flag_list(edge, "set_flags"):
             errors.append(f"{label}: {edge.get('from')}->{edge.get('to')} must set colada_acquired")
+    bucar_out = [edge for edge in edges if str(edge.get("from")) == "a3_bucar"]
+    if not bucar_out:
+        errors.append(f"{label}: a3_bucar has no exit")
+    for edge in bucar_out:
+        if "tizona_acquired" not in _flag_list(edge, "set_flags"):
+            errors.append(f"{label}: {edge.get('from')}->{edge.get('to')} must set tizona_acquired")
     avengalvon = root / "data" / "characters" / "avengalvon.json"
     if avengalvon.is_file():
         person = _load_json(avengalvon)

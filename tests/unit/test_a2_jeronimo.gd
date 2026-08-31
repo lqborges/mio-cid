@@ -412,8 +412,6 @@ func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if ResourceLoader.exists(EMBASSY2):
 		failures.append("a2_embassy2 must not ship in this PR")
-	if ResourceLoader.exists(BUCAR):
-		failures.append("a3_bucar must not ship in this PR")
 	if ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):
 		failures.append("a2_yusuf must not ship in this PR")
 	return failures

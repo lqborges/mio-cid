@@ -123,7 +123,7 @@ class TestA3LeonLionScene(unittest.TestCase):
             "content/art/characters/cid/cid.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
 
     def test_scene_is_cheap_greybox_hall(self) -> None:

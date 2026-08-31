@@ -1,0 +1,28 @@
+{
+  "id": "a3_bucar",
+  "steps": [
+    {
+      "id": "battle",
+      "type": "blocking"
+    },
+    {
+      "id": "flee",
+      "type": "cinematic",
+      "set_flags": ["infantes_fled_bucar"]
+    },
+    {
+      "id": "cover",
+      "type": "cinematic",
+      "set_flags": ["captains_covered_bucar"]
+    },
+    {
+      "id": "bucar_win",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_despedida"
+    }
+  ]
+}
