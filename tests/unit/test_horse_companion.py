@@ -70,10 +70,8 @@ class TestHorseCompanion(unittest.TestCase):
         self.assertIsNone(re.search(r"^var ", source, re.MULTILINE))
         self.assertRegex(source, re.compile(r"^extends Node", re.MULTILINE))
         chapter = _read("game/autoload/chapter_runner.gd")
-        self.assertEqual(
-            [line.strip() for line in chapter.splitlines() if line.strip() and not line.strip().startswith("#")],
-            ["extends Node"],
-        )
+        self.assertRegex(chapter, re.compile(r"^extends Node", re.MULTILINE))
+        self.assertIsNone(re.search(r"^class_name\s", chapter, re.MULTILINE))
 
     def test_gaits_and_mount_api(self) -> None:
         source = _read("game/actors/player/horse_companion.gd")

@@ -254,8 +254,6 @@ func _check_hub_lock_and_castejon_travel() -> PackedStringArray:
 		failures.append("travel must land on a1_castejon, got %s" % _runner.current_id)
 	if current_scene != scene_before:
 		failures.append("travel() must not change_scene; goto is the scene swap")
-	if ResourceLoader.exists("res://content/chapters/a1_castejon/world.tscn"):
-		failures.append("PR-10a must not ship a1_castejon/world.tscn")
 	return failures
 
 

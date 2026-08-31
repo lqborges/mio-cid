@@ -1,0 +1,21 @@
+# Spoken lines are CSV keys. Álvar's Henares sack is off-map; no second field.
+
+~ start
+=> dawn
+
+~ dawn
+Cid: a1_castejon.dawn
+=> END
+
+~ alvar_report
+Alvar: a1_castejon.alvar_henares
+Cid: a1_castejon.take
+=> END
+
+~ sell
+Cid: a1_castejon.sell_done
+=> END
+
+~ keep
+Cid: a1_castejon.keep_fail
+=> END

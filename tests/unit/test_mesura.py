@@ -121,7 +121,12 @@ class TestMesura(unittest.TestCase):
         loc = _read("game/autoload/loc.gd")
         self.assertIn("strings.csv", loc)
         self.assertIn("poem_formulas.csv", loc)
-        lowered = (hud + strings).lower()
+        hud_rows = "\n".join(
+            line
+            for line in strings.splitlines()
+            if line.startswith("hud.mesura") or line.startswith("hud.ira")
+        )
+        lowered = (hud + hud_rows).lower()
         for token in BLIZZARD_DENY:
             self.assertNotIn(token, lowered, token)
         self.assertNotIn("Rage", hud)

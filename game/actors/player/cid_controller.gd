@@ -24,6 +24,7 @@ const HorseCompanionScript := preload("res://game/actors/player/horse_companion.
 @onready var camera_rig: Node3D = $CameraRig
 @onready var camera: Camera3D = $CameraRig/Camera3D
 @onready var combat: CidCombatScript = $CidCombat
+@onready var mesura: Node = get_node_or_null("Mesura")
 @onready var interact_ray: RayCast3D = $Visual/InteractRay
 
 var _facing: Vector3 = Vector3(0.0, 0.0, -1.0)
@@ -41,6 +42,7 @@ var _queued_leap: bool = false
 var _queued_shout: bool = false
 var _queued_swap: bool = false
 var _queued_interact: bool = false
+var _queued_dump: bool = false
 var _leap_airborne: bool = false
 var _horse: HorseCompanionScript = null
 
@@ -94,6 +96,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("interact"):
 		_queued_interact = true
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("rage_dump"):
+		_queued_dump = true
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("click_move"):
 		_queued_click_pos = get_viewport().get_mouse_position()
 		get_viewport().set_input_as_handled()
@@ -103,6 +108,7 @@ func _physics_process(delta: float) -> void:
 	# Yaw on the body would orbit the child camera — keep rotation on Visual only.
 	rotation = Vector3.ZERO
 	_tick_cooldowns(delta)
+	_update_mesura_hold()
 	if _horse == null or not is_instance_valid(_horse):
 		_horse = _find_horse()
 	if is_mounted():
@@ -130,6 +136,7 @@ func _physics_process(delta: float) -> void:
 		_queued_leap = false
 		_queued_shout = false
 		_queued_swap = false
+		_queued_dump = false
 	else:
 		_consume_queues(wish)
 		# Dodge/leap/slam own XZ this step — walk/run would clobber them.
@@ -143,8 +150,10 @@ func _physics_process(delta: float) -> void:
 		else:
 			var speed := walk_speed
 			if wish.length_squared() > 0.0001:
-				if Input.is_action_pressed("run") and _can_sprint(delta):
+				if not _is_waiting() and Input.is_action_pressed("run") and _can_sprint(delta):
 					speed = run_speed
+				if _is_waiting() and mesura != null and mesura.has_method("move_mult"):
+					speed *= float(mesura.move_mult())
 				velocity.x = wish.x * speed
 				velocity.z = wish.z * speed
 			else:
@@ -164,11 +173,17 @@ func _consume_queues(wish: Vector3) -> void:
 	if _dodge_left > 0.0:
 		_queued_slam = false
 		_queued_leap = false
+	if _is_waiting():
+		_queued_slam = false
+		_queued_leap = false
+		_queued_shout = false
+		_queued_dump = false
 	if combat == null:
 		_queued_slam = false
 		_queued_leap = false
 		_queued_shout = false
 		_queued_swap = false
+		_queued_dump = false
 	else:
 		if _queued_slam and _slam_cd <= 0.0:
 			combat.slam()
@@ -183,13 +198,29 @@ func _consume_queues(wish: Vector3) -> void:
 			_shout_cd = shout_cooldown
 		if _queued_swap:
 			combat.weapon_swap()
+		if _queued_dump and mesura != null and mesura.has_method("try_dump"):
+			mesura.try_dump()
 		_queued_slam = false
 		_queued_leap = false
 		_queued_shout = false
 		_queued_swap = false
+		_queued_dump = false
 	if _queued_interact:
 		_try_interact()
 	_queued_interact = false
+
+
+func _is_waiting() -> bool:
+	return mesura != null and mesura.has_method("is_holding") and bool(mesura.is_holding())
+
+
+func _update_mesura_hold() -> void:
+	if mesura == null or not mesura.has_method("set_holding"):
+		return
+	var want := Input.is_action_pressed("mesura")
+	if combat != null and combat.has_method("is_dead") and combat.is_dead():
+		want = false
+	mesura.set_holding(want)
 
 
 func _can_sprint(delta: float) -> bool:
@@ -374,6 +405,7 @@ func _consume_mounted_queues() -> void:
 	_queued_leap = false
 	_queued_shout = false
 	_queued_swap = false
+	_queued_dump = false
 
 
 func _find_horse() -> HorseCompanionScript:

@@ -52,3 +52,12 @@ ui.keep_or_sell.protectorate_warn,Toledo es protectorado de Alfonso. Quedarse es
 ui.keep_or_sell.deadline_warn,Hay que vender antes de que llegue el host del rey.,Sell before the king's host arrives.
 location.castejon,Castejón,Castejón
 location.alcocer,Alcocer,Alcocer
+char.alvar_fanez,Álvar Fáñez,Álvar Fáñez
+char.pero_bermudez,Pero Bermúdez,Pero Bermúdez
+char.muno_gustioz,Muño Gustioz,Muño Gustioz
+char.felez_munoz,Félez Muñoz,Félez Muñoz
+a1_castejon.dawn,Al alba tomamos Castejón.,At dawn we take Castejón.
+a1_castejon.take,Castejón cae. El botín es nuestro.,Castejón falls. The booty is ours.
+a1_castejon.alvar_henares,Álvar saquea el Henares. No hay segundo campo.,Álvar sacks the Henares. There is no second field.
+a1_castejon.sell_done,Vendemos y partimos. Alfonso no nos halla aquí.,We sell and ride. Alfonso does not find us here.
+a1_castejon.keep_fail,Toledo es suya. Quedarse es la ira de Alfonso.,Toledo is his. To stay is Alfonso's wrath.

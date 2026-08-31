@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://vgguk76sfkdm"
+path="res://.godot/imported/castejon.dialogue-0b0100e94bdd840efbfdd915159fc35c.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_castejon/castejon.dialogue"
+dest_files=["res://.godot/imported/castejon.dialogue-0b0100e94bdd840efbfdd915159fc35c.tres"]
+
+[params]
+
+defaults=true

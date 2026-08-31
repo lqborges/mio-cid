@@ -107,6 +107,9 @@ jobs:
       - name: Run Python a1_navapalos tests
         run: python3 tests/unit/test_a1_navapalos.py
 
+      - name: Run Python a1_castejon tests
+        run: python3 tests/unit/test_a1_castejon.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -172,6 +175,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_navapalos.gd
+
+      - name: Run a1_castejon dawn-take headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_castejon.gd
 
       - name: Run combat headless test
         if: steps.godot.outputs.found == 'true'

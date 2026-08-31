@@ -1,0 +1,37 @@
+{
+  "id": "a1_castejon",
+  "steps": [
+    {
+      "id": "dawn",
+      "type": "cinematic"
+    },
+    {
+      "id": "take",
+      "type": "blocking"
+    },
+    {
+      "id": "loot",
+      "type": "blocking"
+    },
+    {
+      "id": "alvar_henares",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_castejon/castejon.dialogue",
+      "start": "alvar_report"
+    },
+    {
+      "id": "keep_or_sell",
+      "type": "keep_or_sell"
+    },
+    {
+      "id": "sell",
+      "type": "travel_spawn",
+      "next": "a1_alcocer"
+    },
+    {
+      "id": "keep_fail",
+      "type": "fail_copy",
+      "reason": "alfonso_wrath"
+    }
+  ]
+}

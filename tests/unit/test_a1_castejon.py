@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for PR-10a a1_navapalos Gabriel dream.
+"""Structural tests for PR-15 a1_castejon dawn take + forced sell.
 
-Run: python3 tests/unit/test_a1_navapalos.py
+Run: python3 tests/unit/test_a1_castejon.py
 """
 
 from __future__ import annotations
@@ -30,9 +30,12 @@ DENY = (
     "jura",
     "heston",
     "corpse",
+    "reconquista",
+    "holy-war",
+    "holy_war",
 )
 
-CHAPTER = "content/chapters/a1_navapalos"
+CHAPTER = "content/chapters/a1_castejon"
 
 
 def _read(rel: str) -> str:
@@ -88,26 +91,34 @@ def _aabb_overlap(
     )
 
 
-class TestA1NavapalosGabriel(unittest.TestCase):
+class TestA1CastejonDawnTake(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/navapalos.dialogue",
+            f"{CHAPTER}/castejon.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/sleep_bed.gd",
-            f"{CHAPTER}/gabriel.gd",
-            "data/characters/gabriel.json",
+            "data/towns/castejon.json",
+            "data/honor_events/towns.json",
             "content/art/characters/cid/cid.tscn",
+            "content/art/characters/horse/horse.tscn",
+            "content/art/characters/dummy/dummy.tscn",
+            "game/ui/keep_or_sell.tscn",
+            "game/systems/travel/town_holding.gd",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
+        self.assertFalse((ROOT / "content/chapters/a1_alcocer/world.tscn").is_file())
 
-    def test_scene_is_cheap_greybox(self) -> None:
+    def test_scene_is_cheap_greybox_dawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         self.assertIn("cid.tscn", scene)
-        self.assertIn("plazo_bar.tscn", scene)
+        self.assertIn("horse.tscn", scene)
+        self.assertIn("dummy.tscn", scene)
+        self.assertIn("captain.tscn", scene)
+        self.assertIn("keep_or_sell.tscn", scene)
         self.assertIn("hall_whisper.tscn", scene)
         self.assertIn("honor_meters.tscn", scene)
+        self.assertIn("mesura_hud.tscn", scene)
         self.assertIn('type="DirectionalLight3D"', scene)
         self.assertEqual(scene.count('type="DirectionalLight3D"'), 1)
         self.assertNotIn("OmniLight3D", scene)
@@ -118,26 +129,24 @@ class TestA1NavapalosGabriel(unittest.TestCase):
         self.assertIn('type="CSGCombiner3D"', scene)
         self.assertIn('type="CSGCylinder3D"', scene)
         self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
-        self.assertIn("TentA", scene)
-        self.assertIn("CloakBed", scene)
-        self.assertIn("SleepZone", scene)
-        self.assertIn("Gabriel", scene)
-        self.assertIn("FigTree", scene)
-        self.assertIn("DreamCamera", scene)
-        self.assertIn("SleepCinematic", scene)
-        self.assertIn('type="AnimationPlayer"', scene)
-        self.assertIn("HallWhisper", scene)
-        self.assertIn('character_id = &"gabriel"', scene)
-        self.assertNotIn("HurtBox", scene)
-        self.assertNotIn("hurt_box", scene)
-        self.assertNotIn("cid_combat", scene)
-        self.assertNotIn("HitBox", scene)
+        self.assertIn("TakeZone", scene)
+        self.assertIn("Garrison", scene)
+        self.assertIn("Mesnada", scene)
+        self.assertIn("Horse", scene)
+        self.assertIn("AlvarReport", scene)
+        self.assertIn("KeepOrSell", scene)
+        self.assertIn("River", scene)
+        self.assertIn("Keep", scene)
+        self.assertIn("LootPile", scene)
+        self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
+        self.assertNotIn("AlvarFanez", scene)
+        self.assertNotIn('member_id = &"alvar_fanez"', scene)
 
-    def test_sleep_zone_does_not_overlap_spawn(self) -> None:
+    def test_take_zone_does_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         cid = _origin(scene, "Cid")
-        zone = _origin(scene, "SleepZone")
-        size = _subresource_size(scene, "Box_sleep")
+        zone = _origin(scene, "TakeZone")
+        size = _subresource_size(scene, "Box_take")
         half = (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0)
         zone_min = (zone[0] - half[0], zone[1] - half[1], zone[2] - half[2])
         zone_max = (zone[0] + half[0], zone[1] + half[1], zone[2] + half[2])
@@ -147,32 +156,30 @@ class TestA1NavapalosGabriel(unittest.TestCase):
         cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
         self.assertFalse(
             _aabb_overlap(cid_min, cid_max, zone_min, zone_max),
-            f"SleepZone {zone} size {size} overlaps Cid spawn {cid}",
+            f"TakeZone {zone} size {size} overlaps Cid spawn {cid}",
         )
         self.assertGreater(abs(cid[2] - zone[2]), half[2] + cid_radius)
+        horse = _origin(scene, "Horse")
+        horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
+        horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
+        self.assertFalse(
+            _aabb_overlap(horse_min, horse_max, zone_min, zone_max),
+            f"TakeZone overlaps Horse spawn {horse}",
+        )
 
-    def test_gabriel_json_unkillable_not_combatant(self) -> None:
-        person = json.loads(_read("data/characters/gabriel.json"))
-        self.assertEqual(person["id"], "gabriel")
-        self.assertEqual(person["display_name_key"], "char.gabriel")
-        self.assertEqual(person["combat"], 0)
-        self.assertFalse(person["essential"])
-        self.assertFalse(person["desertion_capable"])
-        self.assertTrue(person["unkillable"])
-        self.assertFalse(person["list_eligible"])
-        source = _read(f"{CHAPTER}/gabriel.gd")
-        self.assertNotIn("HurtBox", source)
-        self.assertNotIn("cid_combat", source)
-        self.assertNotIn("hit_box", source.lower())
-
-    def test_world_script_sleep_plazo_travel(self) -> None:
+    def test_world_script_take_loot_sell_keep_fail(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("func start_sleep", source)
-        self.assertIn("func run_sleep", source)
-        self.assertIn("func complete_dream", source)
+        self.assertIn("func start_take", source)
+        self.assertIn("func run_take", source)
+        self.assertIn("func complete_take", source)
+        self.assertIn("func choose_keep", source)
+        self.assertIn("func choose_sell", source)
+        self.assertIn("castejon_keep", source)
+        self.assertIn("castejon_take", source)
+        self.assertIn("castejon_sell", source)
+        self.assertIn("a1_alcocer", source)
         self.assertIn("hub_lock_cardena", source)
-        self.assertIn("a1_castejon", source)
-        self.assertIn("advance_plazo", source)
+        self.assertIn("horse_companion", source)
         self.assertIn("can_travel", source)
         self.assertIn("ChapterRunner.travel", source)
         self.assertIn("autosave", source)
@@ -181,92 +188,103 @@ class TestA1NavapalosGabriel(unittest.TestCase):
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("camp_night(", source)
         self.assertNotIn("rest_camp(", source)
-        self.assertNotRegex(source, re.compile(r"advance_plazo\s*\(\s*\d+\s*\)"))
-        self.assertNotRegex(source, re.compile(r"plazo_days_left\s*=\s*\d+"))
+        self.assertNotIn("12", source)
+        self.assertIn("lanza_body_limit", source)
+        self.assertIn("AlvarReport", source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a1_navapalos/world.tscn", runner)
-        self.assertIn('&"a1_navapalos"', runner)
+        self.assertIn("res://content/chapters/a1_castejon/world.tscn", runner)
+        self.assertIn('&"a1_castejon"', runner)
+        self.assertIn("KEEP_EVENT", source)
+        self.assertIn("apply_id", source)
 
-    def test_strings_csv_spanish_dream(self) -> None:
+    def test_keep_is_hard_fail_not_flavor(self) -> None:
+        source = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("castejon_keep", source)
+        self.assertIn("KEEP_KEY", source)
+        self.assertIn("a1_castejon.keep_fail", source)
+        towns = json.loads(_read("data/honor_events/towns.json"))
+        events = {row["id"]: row for row in towns["events"]}
+        keep = events["castejon_keep"]
+        self.assertTrue(keep["hard_fail"])
+        self.assertEqual(keep["hard_fail_reason"], "alfonso_wrath")
+        self.assertEqual(keep["deltas"]["honor"], -40)
+        self.assertIn("alfonso_wrath", keep["tags"])
+        castejon = json.loads(_read("data/towns/castejon.json"))
+        self.assertTrue(castejon["alfonso_protectorate"])
+        self.assertTrue(castejon["keep_past_deadline_fail"])
+        self.assertEqual(castejon["sell_deadline_days"], 0)
+        fail = _read("game/ui/fail_copy.gd")
+        self.assertIn('&"alfonso_wrath"', fail)
+
+    def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
             encoding="utf-8", newline=""
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "a1_navapalos.gabriel_dream",
-            "a1_navapalos.sleep",
-            "char.gabriel",
+            "a1_castejon.dawn",
+            "a1_castejon.take",
+            "a1_castejon.alvar_henares",
+            "a1_castejon.sell_done",
+            "a1_castejon.keep_fail",
+            "location.castejon",
+            "char.alvar_fanez",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        dream_es = rows["a1_navapalos.gabriel_dream"]["es"]
-        dream_en = rows["a1_navapalos.gabriel_dream"]["en"]
-        self.assertIn("viv", dream_es.lower())
-        self.assertIn("while you live", dream_en.lower())
-        self.assertIn("Gabriel", rows["char.gabriel"]["es"])
+        self.assertIn("alba", rows["a1_castejon.dawn"]["es"].lower())
+        self.assertIn("henares", rows["a1_castejon.alvar_henares"]["es"].lower())
+        self.assertIn("alfonso", rows["a1_castejon.keep_fail"]["es"].lower())
+        self.assertIn("Álvar", rows["char.alvar_fanez"]["es"])
 
-    def test_poem_formula_gabriel(self) -> None:
-        with (ROOT / "content/locales/poem_formulas.csv").open(
-            encoding="utf-8", newline=""
-        ) as handle:
-            rows = {row["key"]: row for row in csv.DictReader(handle)}
-        self.assertIn("poem.v406", rows)
-        self.assertIn("visquiéredes", rows["poem.v406"]["es"])
-        self.assertEqual(rows["poem.v406"]["montaner_verse"].strip(), "406")
-
-    def test_dialogue_separate_speakers(self) -> None:
-        text = _read(f"{CHAPTER}/navapalos.dialogue")
-        self.assertIn("~ dream", text)
-        self.assertIn("Gabriel:", text)
-        self.assertIn("Cid:", text)
-        self.assertIn("a1_navapalos.gabriel_dream", text)
-        self.assertIn("a1_navapalos.sleep", text)
-        gabriel_at = text.find("Gabriel:")
-        cid_at = text.find("Cid:")
-        self.assertGreaterEqual(gabriel_at, 0)
-        self.assertGreater(cid_at, gabriel_at)
-        self.assertNotIn("Gabriel y Cid:", text)
+    def test_dialogue_alvar_off_map(self) -> None:
+        text = _read(f"{CHAPTER}/castejon.dialogue")
+        self.assertIn("~ dawn", text)
+        self.assertIn("~ alvar_report", text)
+        self.assertIn("a1_castejon.alvar_henares", text)
+        self.assertIn("Alvar:", text)
+        self.assertIn("off-map", text.lower())
         self.assertNotIn("{{", text)
         lowered = text.lower()
         for banned in DENY:
             self.assertNotIn(banned, lowered, banned)
 
-    def test_beats_travel_to_castejon(self) -> None:
+    def test_beats_sell_to_alcocer_keep_fail(self) -> None:
         payload = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(payload["id"], "a1_navapalos")
+        self.assertEqual(payload["id"], "a1_castejon")
         nexts = [step.get("next") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("a1_castejon", nexts)
+        self.assertIn("a1_alcocer", nexts)
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("cinematic", types)
-        self.assertIn("dialogue", types)
+        self.assertIn("keep_or_sell", types)
+        self.assertIn("fail_copy", types)
+        self.assertIn("travel_spawn", types)
+        reasons = [
+            step.get("reason") for step in payload["steps"] if isinstance(step, dict)
+        ]
+        self.assertIn("alfonso_wrath", reasons)
 
     def test_destierro_spine_and_hub_lock(self) -> None:
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a1_vivar", "a1_burgos"), pairs)
-        self.assertIn(("a1_burgos", "a1_arcas"), pairs)
-        self.assertIn(("a1_arcas", "a1_cardena"), pairs)
-        self.assertIn(("a1_cardena", "a1_navapalos"), pairs)
         self.assertIn(("a1_navapalos", "a1_castejon"), pairs)
+        self.assertIn(("a1_castejon", "a1_alcocer"), pairs)
         locked = ["hub_lock_cardena"]
-        self.assertTrue(can_travel(graph, "a1_cardena", "a1_navapalos", []))
         self.assertTrue(can_travel(graph, "a1_navapalos", "a1_castejon", locked))
-        self.assertFalse(can_travel(graph, "a1_navapalos", "a1_cardena", locked))
-        self.assertFalse(can_travel(graph, "a1_navapalos", "a1_vivar", locked))
+        self.assertTrue(can_travel(graph, "a1_castejon", "a1_alcocer", locked))
+        self.assertFalse(can_travel(graph, "a1_castejon", "a1_cardena", locked))
         self.assertFalse(can_travel(graph, "a1_castejon", "a1_navapalos", locked))
+        self.assertFalse(can_travel(graph, "a1_castejon", "a1_vivar", locked))
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/navapalos.dialogue",
+            f"{CHAPTER}/castejon.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/sleep_bed.gd",
-            f"{CHAPTER}/gabriel.gd",
-            "data/characters/gabriel.json",
+            "data/towns/castejon.json",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
@@ -302,7 +320,7 @@ class TestA1NavapalosGabriel(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a1_navapalos.gd",
+                "res://tests/unit/test_a1_castejon.gd",
             ],
             check=False,
             capture_output=True,
