@@ -338,7 +338,7 @@ shape = SubResource("Box_occupy")
 [node name="WaitZone" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 8)
 collision_layer = 0
-collision_mask = 2
+collision_mask = 130
 monitoring = false
 monitorable = false
 
