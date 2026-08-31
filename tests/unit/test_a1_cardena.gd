@@ -170,6 +170,19 @@ func _check_farewell_walk() -> PackedStringArray:
 	if not _world.has_method("run_farewell"):
 		failures.append("world missing run_farewell")
 		return failures
+	var marks_before := 200
+	if _treasury:
+		_treasury.state.marks = marks_before
+	if _clock:
+		_clock.unfed_streak = 1
+		_clock.days_elapsed = 3
+		_clock.plazo_days_left = 9
+	if _runner:
+		if _runner.has_method("restore"):
+			_runner.restore(&"a1_cardena", PackedStringArray())
+		else:
+			_runner.current_id = &"a1_cardena"
+			_runner.flags = PackedStringArray()
 	var scene_before: Node = current_scene
 	await _world.run_farewell()
 	if current_scene != scene_before:
@@ -182,6 +195,27 @@ func _check_farewell_walk() -> PackedStringArray:
 			shown = str(label.get("text"))
 	if not shown.to_lower().contains("uña") and not shown.to_lower().contains("carne"):
 		failures.append("hall-whisper did not show the nail line, got %s" % shown)
+	if _clock == null:
+		failures.append("CampaignClock missing")
+	else:
+		if int(_clock.plazo_days_left) != 8:
+			failures.append("run_farewell should advance_plazo(1) to 8, got %s" % _clock.plazo_days_left)
+		if int(_clock.unfed_streak) != 1:
+			failures.append("advance_plazo must not touch unfed_streak")
+		if int(_clock.days_elapsed) != 3:
+			failures.append("advance_plazo must not advance days_elapsed")
+	if _treasury == null:
+		failures.append("TreasuryService missing")
+	elif int(_treasury.state.marks) != marks_before:
+		failures.append("advance_plazo must not spend marks, got %s" % _treasury.state.marks)
+	if _runner == null or "hub_lock_cardena" not in _runner.flags:
+		failures.append("run_farewell must set hub_lock_cardena, flags=%s" % (_runner.flags if _runner else "?"))
+	if _runner:
+		if _runner.has_method("restore"):
+			_runner.restore(&"a1_cardena", PackedStringArray())
+		else:
+			_runner.current_id = &"a1_cardena"
+			_runner.flags = PackedStringArray()
 	return failures
 
 
