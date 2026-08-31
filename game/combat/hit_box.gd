@@ -6,9 +6,11 @@ extends Area3D
 ## Friendly-fire-off swings live on street_melee and mask hurtbox_killable only.
 
 const LAYER_HURTBOX_KILLABLE := 4
+const LAYER_LANCE_WEDGE := 8
 const LAYER_STREET_MELEE := 16
 const LAYER_UNKILLABLE := 32
 const LAYER_SPECTATOR := 64
+const LAYER_HORSE := 128
 
 signal hit(hurt: HurtBox)
 

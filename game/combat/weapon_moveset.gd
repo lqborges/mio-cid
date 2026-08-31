@@ -1,7 +1,7 @@
 class_name WeaponMoveset
 extends Resource
 
-## Foot-melee kit. Combos are data (≤ 3). lance_couch / dismount_hook stay for PR-20.
+## Foot-melee kit. Combos are data (≤ 3). lance_couch / dismount_hook feed CavalryCharge.
 
 @export var id: StringName = &""
 @export var max_combo: int = 0

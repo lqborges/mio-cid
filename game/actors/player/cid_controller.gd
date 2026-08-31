@@ -18,6 +18,7 @@ extends CharacterBody3D
 @export var camera_fov: float = 34.0
 
 const CidCombatScript := preload("res://game/actors/player/cid_combat.gd")
+const HorseCompanionScript := preload("res://game/actors/player/horse_companion.gd")
 
 @onready var visual: Node3D = $Visual
 @onready var camera_rig: Node3D = $CameraRig
@@ -39,13 +40,16 @@ var _queued_leap: bool = false
 var _queued_shout: bool = false
 var _queued_swap: bool = false
 var _queued_interact: bool = false
+var _horse: HorseCompanionScript = null
 
 
 func _ready() -> void:
 	# Visible cursor: mouse is aim, not an orbit pivot (TPS is void).
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	floor_snap_length = 0.25
+	add_to_group("player")
 	_lock_isometric_camera()
+	_horse = _find_horse()
 
 
 func facing_dir() -> Vector3:
@@ -54,6 +58,10 @@ func facing_dir() -> Vector3:
 
 func is_dodging() -> bool:
 	return _dodge_left > 0.0
+
+
+func is_mounted() -> bool:
+	return _horse != null and is_instance_valid(_horse) and _horse.is_mounted()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -86,6 +94,16 @@ func _physics_process(delta: float) -> void:
 	# Yaw on the body would orbit the child camera — keep rotation on Visual only.
 	rotation = Vector3.ZERO
 	_tick_cooldowns(delta)
+	if _horse == null or not is_instance_valid(_horse):
+		_horse = _find_horse()
+	if is_mounted():
+		# Horse owns XZ; writing walk here would clobber couch/gallop.
+		_consume_mounted_queues()
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_orient_visual()
+		_lock_isometric_camera()
+		return
 	_apply_gravity(delta)
 	var wish := _movement_wish()
 	_update_facing(wish)
@@ -294,3 +312,35 @@ func _try_interact() -> void:
 	if interact_ray == null or not interact_ray.is_colliding():
 		return
 	# Chapter interactables (talk / gift / open) land here in later PRs.
+
+
+func _consume_mounted_queues() -> void:
+	if _queued_interact:
+		if _horse != null and _horse.has_method("dismount"):
+			_horse.dismount()
+		_queued_interact = false
+	if _queued_slam:
+		if _horse != null and _horse.has_method("couch"):
+			_horse.couch()
+		_queued_slam = false
+	_queued_dodge = false
+	_queued_leap = false
+	_queued_shout = false
+	_queued_swap = false
+
+
+func _find_horse() -> HorseCompanionScript:
+	var parent := get_parent()
+	if parent != null:
+		for child in parent.get_children():
+			if child is HorseCompanion:
+				return child as HorseCompanionScript
+	if not is_inside_tree():
+		return null
+	var tree := get_tree()
+	if tree == null:
+		return null
+	var nodes := tree.get_nodes_in_group("horse_companion")
+	if nodes.is_empty():
+		return null
+	return nodes[0] as HorseCompanionScript

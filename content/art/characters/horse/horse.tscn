@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/actors/player/horse_companion.gd" id="1_horse"]
+[ext_resource type="Script" path="res://game/combat/cavalry_charge.gd" id="2_charge"]
+[ext_resource type="Script" path="res://game/combat/hit_box.gd" id="3_hit"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_horse"]
+albedo_color = Color(0.36, 0.28, 0.2, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_horse"]
+radius = 0.42
+height = 1.4
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_horse")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_horse"]
+radius = 0.42
+height = 1.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_head"]
+albedo_color = Color(0.32, 0.24, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="BoxShape3D" id="BoxShape_lance"]
+size = Vector3(0.35, 0.35, 1.4)
+
+[node name="Horse" type="CharacterBody3D"]
+collision_layer = 128
+collision_mask = 1
+floor_snap_length = 0.25
+script = ExtResource("1_horse")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("CapsuleShape_horse")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+cast_shadow = 0
+mesh = SubResource("CapsuleMesh_horse")
+
+[node name="Body" type="CSGBox3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.72, 0.05)
+size = Vector3(0.5, 0.62, 1.55)
+cast_shadow = 0
+material = SubResource("Mat_horse")
+
+[node name="Head" type="CSGBox3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.12, -0.82)
+size = Vector3(0.28, 0.26, 0.48)
+cast_shadow = 0
+material = SubResource("Mat_head")
+
+[node name="LanceHitBox" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -1.15)
+collision_layer = 8
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("3_hit")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="LanceHitBox"]
+shape = SubResource("BoxShape_lance")
+
+[node name="CavalryCharge" type="Node" parent="."]
+script = ExtResource("2_charge")
