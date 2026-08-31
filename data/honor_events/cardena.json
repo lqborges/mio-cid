@@ -1,0 +1,11 @@
+{
+  "gift_marks": 40,
+  "events": [
+    {
+      "id": "cardena_gift_monastery",
+      "deltas": { "honra": 4 },
+      "tags": ["gift_down"],
+      "beat": "a1_cardena"
+    }
+  ]
+}

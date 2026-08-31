@@ -101,6 +101,9 @@ jobs:
       - name: Run Python chapter-graph tests
         run: python3 tests/unit/test_tagus_join.py
 
+      - name: Run Python a1_cardena tests
+        run: python3 tests/unit/test_a1_cardena.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -150,6 +153,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_tagus_join.gd
+
+      - name: Run a1_cardena farewell headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_cardena.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

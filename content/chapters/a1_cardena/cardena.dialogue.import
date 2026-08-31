@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://df1gryphrbehq"
+path="res://.godot/imported/cardena.dialogue-0a3cc0946734c57f94012808285ce67c.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_cardena/cardena.dialogue"
+dest_files=["res://.godot/imported/cardena.dialogue-0a3cc0946734c57f94012808285ce67c.tres"]
+
+[params]
+
+defaults=true

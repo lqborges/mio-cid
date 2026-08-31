@@ -269,6 +269,12 @@ def collect_real_producers(root: Path, graph: dict[str, Any]) -> set[str]:
                     produced.update(_as_str_list(step.get("set_flags", [])))
         for path in chapters.glob("**/*.dialogue"):
             text = path.read_text(encoding="utf-8")
+            for match in re.finditer(r"\[#flag_set=([^\]]+)\]", text):
+                produced.update(
+                    item.strip().strip("\"'")
+                    for item in match.group(1).split(",")
+                    if item.strip()
+                )
             for match in re.finditer(r"flag_set\s*[:=]\s*\[([^\]]*)\]", text):
                 inner = match.group(1)
                 produced.update(item.strip().strip("\"'") for item in inner.split(",") if item.strip())

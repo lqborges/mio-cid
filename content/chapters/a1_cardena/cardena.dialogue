@@ -1,0 +1,13 @@
+# Spoken lines are CSV keys. Jimena, Elvira, Sol, and Sisebuto speak apart.
+
+~ start
+=> farewell
+
+~ farewell
+Jimena: a1_cardena.jimena_nail
+Elvira: a1_cardena.elvira
+Sol: a1_cardena.sol
+Sisebuto: a1_cardena.abbot
+Cid: a1_cardena.gift
+Cid: a1_cardena.leave
+=> END

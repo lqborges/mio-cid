@@ -1,0 +1,20 @@
+{
+  "id": "a1_cardena",
+  "steps": [
+    {
+      "id": "farewell",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_cardena/cardena.dialogue",
+      "start": "farewell"
+    },
+    {
+      "id": "cardena_gift_monastery",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a1_navapalos"
+    }
+  ]
+}
