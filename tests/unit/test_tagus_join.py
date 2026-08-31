@@ -20,6 +20,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from validate_graph import (  # noqa: E402
     BIBLE_ACT1,
     BIBLE_IDS,
+    STAGED_PRODUCERS,
     can_travel,
     load_graph,
     load_schema,
@@ -80,15 +81,33 @@ class TestChapterGraph(unittest.TestCase):
         self.assertIsNone(re.search(r"^class_name\s", runner, re.MULTILINE))
         self.assertIn("func can_travel(", runner)
         self.assertIn("func travel(", runner)
+        self.assertIn("func restore(", runner)
+        self.assertIn("_emit_completed", runner)
+        self.assertIn("_start_director", runner)
         graph_src = _read("game/chapters/chapter_graph.gd")
         self.assertIn("func can_travel(", graph_src)
         self.assertIn("func _is_next_locked(", graph_src)
+        self.assertIn("src.reorderable", graph_src)
         edge_src = _read("game/chapters/chapter_edge.gd")
         self.assertIn("@export var forbid_flags: PackedStringArray = []", edge_src)
         director = _read("game/chapters/beat_director.gd")
         self.assertIn('"set_flags"', director)
         self.assertIn('"honor_event"', director)
         self.assertIn('"travel_spawn"', director)
+        self.assertIn('_apply_flags(step.get("set_flags"', director)
+        self.assertIn("step_index += 1", director)
+        advance = re.search(
+            r"func advance\(\) -> bool:\n(?P<body>.*?)(?=\nfunc |\Z)",
+            director,
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(advance)
+        body = advance.group("body")
+        self.assertLess(body.find("run_step"), body.find("step_index += 1"))
+        menu = _read("game/ui/main_menu.gd")
+        self.assertIn("ChapterRunner.reset()", menu)
+        save_src = _read("game/autoload/save_service.gd")
+        self.assertIn("ChapterRunner.restore(", save_src)
 
     def test_tagus_and_join_cheated_save(self) -> None:
         graph = _graph()
@@ -115,8 +134,9 @@ class TestChapterGraph(unittest.TestCase):
             can_travel(graph, "a1_vivar", "a1_arcas", ["vivar_seen", "burgos_shutters_seen"])
         )
         self.assertFalse(can_travel(graph, "a1_poyo", "a1_poyo_raid", []))
-        self.assertTrue(can_travel(graph, "a1_poyo", "a1_poyo_raid", ["v1_extra_raids"]))
+        self.assertTrue(can_travel(graph, "a1_poyo_raid", "a1_poyo", []))
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
+        self.assertIn(("a1_poyo_raid", "a1_poyo"), pairs)
         self.assertIn(("a1_cardena", "a1_navapalos"), pairs)
         cardena = next(
             edge
@@ -124,6 +144,22 @@ class TestChapterGraph(unittest.TestCase):
             if edge["from"] == "a1_cardena" and edge["to"] == "a1_navapalos"
         )
         self.assertEqual(cardena.get("set_flags"), ["hub_lock_cardena"])
+
+    def test_spine_and_staged_producers(self) -> None:
+        graph = _graph()
+        pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
+        self.assertIn(("a2_bodas", "a3_leon"), pairs)
+        self.assertIn(("a2_tagus", "a2_bodas"), pairs)
+        self.assertIn(("a1_tevar", "a2_murviedro"), pairs)
+        self.assertNotIn("v1_extra_raids", STAGED_PRODUCERS)
+        broken = json.loads(json.dumps(graph))
+        broken["edges"] = [
+            edge
+            for edge in broken["edges"]
+            if not (edge.get("from") == "a2_bodas" and edge.get("to") == "a3_leon")
+        ]
+        errors = validate_graph(broken, root=ROOT)
+        self.assertTrue(any("a2_bodas -> a3_leon" in err for err in errors), errors)
 
     def test_denylist_absent_from_graph(self) -> None:
         lowered = _read("data/chapters/graph.json").lower()

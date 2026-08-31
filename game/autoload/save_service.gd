@@ -373,14 +373,18 @@ func _apply_honor(honor: Variant) -> void:
 func _apply_chapter(payload: Dictionary) -> void:
 	if ChapterRunner == null:
 		return
+	var packed := PackedStringArray()
+	var raw: Variant = payload.get("flags", [])
+	if raw is Array or raw is PackedStringArray:
+		for item in raw:
+			packed.append(str(item))
+	var chapter_id := StringName(str(payload.get("chapter", "")))
+	if ChapterRunner.has_method("restore"):
+		ChapterRunner.restore(chapter_id, packed)
+		return
 	if "current_id" in ChapterRunner:
-		ChapterRunner.current_id = StringName(str(payload.get("chapter", "")))
+		ChapterRunner.current_id = chapter_id
 	if "flags" in ChapterRunner:
-		var packed := PackedStringArray()
-		var raw: Variant = payload.get("flags", [])
-		if raw is Array or raw is PackedStringArray:
-			for item in raw:
-				packed.append(str(item))
 		ChapterRunner.flags = packed
 
 

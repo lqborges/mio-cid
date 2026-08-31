@@ -222,6 +222,10 @@
       "req_flags": ["v1_extra_raids"]
     },
     {
+      "from": "a1_poyo_raid",
+      "to": "a1_poyo"
+    },
+    {
       "from": "a1_tevar",
       "to": "a2_murviedro",
       "set_flags": ["colada_acquired"]

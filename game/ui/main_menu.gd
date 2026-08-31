@@ -64,10 +64,13 @@ func _reset_campaign() -> void:
 		TreasuryService.reset()
 	if CampaignClock:
 		CampaignClock.reset()
-	if ChapterRunner and "current_id" in ChapterRunner:
-		ChapterRunner.current_id = &"a1_vivar"
-	if ChapterRunner and "flags" in ChapterRunner:
-		ChapterRunner.flags = PackedStringArray()
+	if ChapterRunner and ChapterRunner.has_method("reset"):
+		ChapterRunner.reset()
+	elif ChapterRunner:
+		if "current_id" in ChapterRunner:
+			ChapterRunner.current_id = &"a1_vivar"
+		if "flags" in ChapterRunner:
+			ChapterRunner.flags = PackedStringArray()
 
 
 func _first_empty_slot() -> int:

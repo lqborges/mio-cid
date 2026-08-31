@@ -32,28 +32,35 @@ func advance() -> bool:
 	if step_index < 0 or step_index >= steps.size():
 		return false
 	var raw: Variant = steps[step_index]
+	if not raw is Dictionary:
+		return false
+	if not run_step(raw):
+		return false
 	step_index += 1
-	if raw is Dictionary:
-		return run_step(raw)
-	return false
+	return true
 
 
 func run_step(step: Dictionary) -> bool:
 	var step_type := str(step.get("type", ""))
+	var ok := false
 	match step_type:
 		"set_flags":
-			_apply_flags(step.get("set_flags", []))
-			return true
+			ok = true
 		"honor_event":
-			return _run_honor(step)
+			ok = _run_honor(step)
 		"travel_spawn":
-			return _run_travel(step)
+			ok = _run_travel(step)
 		"clock_segment":
-			return _run_clock(step)
+			ok = _run_clock(step)
 		"fail_copy":
-			return _run_fail(step)
+			ok = _run_fail(step)
 		_:
-			return String(step_type) in STEP_TYPES
+			ok = String(step_type) in STEP_TYPES
+	if not ok:
+		return false
+	# GDD puts set_flags on cinematic/dialogue/etc., not only type set_flags.
+	_apply_flags(step.get("set_flags", []))
+	return true
 
 
 func _load_steps(id: StringName) -> Array:
@@ -132,7 +139,13 @@ func _run_fail(step: Dictionary) -> bool:
 
 
 func _autoload(name: String) -> Node:
-	var tree := get_tree()
-	if tree == null:
+	var loop := Engine.get_main_loop()
+	if loop is SceneTree:
+		return (loop as SceneTree).root.get_node_or_null(NodePath(name))
+	var parent := get_parent()
+	if parent == null:
 		return null
-	return tree.root.get_node_or_null(NodePath(name))
+	var root := parent.get_parent()
+	if root:
+		return root.get_node_or_null(NodePath(name))
+	return parent.get_node_or_null(NodePath(name))

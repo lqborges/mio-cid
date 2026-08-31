@@ -13,6 +13,7 @@ var director: Node
 
 func _ready() -> void:
 	_ensure_loaded()
+	_start_director()
 
 
 func _ensure_loaded() -> void:
@@ -26,8 +27,15 @@ func _ensure_loaded() -> void:
 
 
 func reset() -> void:
-	current_id = &"a1_vivar"
-	flags = PackedStringArray()
+	restore(&"a1_vivar", PackedStringArray())
+
+
+func restore(chapter_id: StringName, new_flags: PackedStringArray) -> void:
+	_ensure_loaded()
+	var text := String(chapter_id)
+	current_id = chapter_id if not text.is_empty() else &"a1_vivar"
+	flags = new_flags.duplicate()
+	_start_director()
 
 
 func can_travel(from_id: StringName, to_id: StringName, travel_flags: PackedStringArray) -> bool:
@@ -45,12 +53,9 @@ func add_flag(flag: String) -> void:
 
 func complete_current() -> void:
 	_ensure_loaded()
-	if graph == null or not graph.has_method("complete"):
-		return
-	flags = graph.complete(current_id, flags)
-	var bus := _bus()
-	if bus:
-		bus.beat_completed.emit(current_id)
+	if graph != null and graph.has_method("complete"):
+		flags = graph.complete(current_id, flags)
+	_emit_completed(current_id)
 
 
 func travel(to_id: StringName) -> bool:
@@ -62,20 +67,40 @@ func travel(to_id: StringName) -> bool:
 	var edge: Resource = null
 	if graph.has_method("find_open_edge"):
 		edge = graph.find_open_edge(current_id, to_id, flags)
+	var from_id := current_id
 	if edge != null and "set_flags" in edge:
 		for flag in edge.set_flags:
 			add_flag(String(flag))
+	_emit_completed(from_id)
 	current_id = to_id
-	var bus := _bus()
-	if bus:
-		bus.beat_started.emit(current_id)
-	if director != null and director.has_method("start"):
-		director.start(current_id)
+	_start_director()
 	return true
 
 
+func _start_director() -> void:
+	_ensure_loaded()
+	if director != null and director.has_method("start"):
+		director.start(current_id)
+	var bus := _bus()
+	if bus:
+		bus.beat_started.emit(current_id)
+
+
+func _emit_completed(beat_id: StringName) -> void:
+	var bus := _bus()
+	if bus:
+		bus.beat_completed.emit(beat_id)
+
+
 func _bus() -> Node:
-	var tree := get_tree()
-	if tree == null:
+	var root := _scene_root()
+	if root == null:
 		return null
-	return tree.root.get_node_or_null(NodePath("EventBus"))
+	return root.get_node_or_null(NodePath("EventBus"))
+
+
+func _scene_root() -> Node:
+	var loop := Engine.get_main_loop()
+	if loop is SceneTree:
+		return (loop as SceneTree).root
+	return get_parent()

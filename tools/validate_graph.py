@@ -53,13 +53,14 @@ BIBLE_ACT3 = [
 ]
 BIBLE_IDS = BIBLE_ACT1 + BIBLE_ACT2 + BIBLE_ACT3
 
-# Authored later in beats.json / dialogue; v1_extra_raids stays off.
-KNOWN_PRODUCERS = {
-    "vivar_seen",
-    "burgos_shutters_seen",
-    "embassy3_done",
-    "v1_extra_raids",
+# Allowed only while the beat folder is missing. Once content/chapters/<id>/
+# exists, the flag must be produced by beats.json, dialogue, or set_flags.
+STAGED_PRODUCERS = {
+    "vivar_seen": "a1_vivar",
+    "burgos_shutters_seen": "a1_burgos",
+    "embassy3_done": "a2_embassy3",
 }
+ACT2_BEFORE_JOIN = BIBLE_ACT2[:6]  # through a2_embassy3; Tagus is the only branch
 
 TAGUS_EDGES = [
     {
@@ -83,13 +84,13 @@ TAGUS_EDGES = [
 ]
 
 DENY_PATTERNS = [
-    re.compile(r"santa\s*gadea", re.IGNORECASE),
+    re.compile(r"santa[-\s_]*gadea", re.IGNORECASE),
     re.compile(r"jimena.{0,24}father", re.IGNORECASE),
     re.compile(r"father.{0,24}jimena", re.IGNORECASE),
     re.compile(r"corpse[-\s_]*horse", re.IGNORECASE),
     re.compile(r"corpse.{0,40}babieca", re.IGNORECASE),
     re.compile(r"dead\s+cid.{0,40}(horse|babieca)", re.IGNORECASE),
-    re.compile(r"puy\s*du\s*fou", re.IGNORECASE),
+    re.compile(r"puy[-\s_]*du[-\s_]*fou", re.IGNORECASE),
     re.compile(r"stornetta", re.IGNORECASE),
     re.compile(r"espadero", re.IGNORECASE),
     re.compile(r"flute.{0,20}babieca", re.IGNORECASE),
@@ -221,7 +222,10 @@ def _edge_open(graph: dict[str, Any], from_id: str, to_id: str, flags: Iterable[
 def can_travel(graph: dict[str, Any], from_id: str, to_id: str, flags: Iterable[str]) -> bool:
     nodes = _nodes_by_id(graph)
     dest = nodes.get(to_id)
+    src = nodes.get(from_id)
     if dest is not None and int(dest.get("act", 0)) == 1 and not bool(dest.get("reorderable", False)):
+        if src is not None and int(src.get("act", 0)) == 1 and bool(src.get("reorderable", False)):
+            return _edge_open(graph, from_id, to_id, flags)
         locked = _locked_act1_ids(graph)
         try:
             from_i = locked.index(from_id)
@@ -233,8 +237,8 @@ def can_travel(graph: dict[str, Any], from_id: str, to_id: str, flags: Iterable[
     return _edge_open(graph, from_id, to_id, flags)
 
 
-def collect_producers(root: Path, graph: dict[str, Any]) -> set[str]:
-    produced = set(KNOWN_PRODUCERS)
+def collect_real_producers(root: Path, graph: dict[str, Any]) -> set[str]:
+    produced: set[str] = set()
     for edge in graph.get("edges", []):
         if isinstance(edge, dict):
             produced.update(_flag_list(edge, "set_flags"))
@@ -269,6 +273,17 @@ def collect_producers(root: Path, graph: dict[str, Any]) -> set[str]:
                 inner = match.group(1)
                 produced.update(item.strip().strip("\"'") for item in inner.split(",") if item.strip())
     return {flag for flag in produced if flag}
+
+
+def collect_producers(root: Path, graph: dict[str, Any]) -> set[str]:
+    produced = collect_real_producers(root, graph)
+    chapters = root / "content" / "chapters"
+    for flag, beat_id in STAGED_PRODUCERS.items():
+        beat_dir = chapters / beat_id
+        if beat_dir.is_dir():
+            continue
+        produced.add(flag)
+    return produced
 
 
 def _denylist_hits(text: str) -> list[str]:
@@ -337,6 +352,19 @@ def validate_graph(
     for from_id, to_id in zip(BIBLE_ACT1, BIBLE_ACT1[1:]):
         if (from_id, to_id) not in edge_pairs:
             errors.append(f"{label}: missing Act I edge {from_id} -> {to_id}")
+    for from_id, to_id in zip(ACT2_BEFORE_JOIN, ACT2_BEFORE_JOIN[1:]):
+        if (from_id, to_id) not in edge_pairs:
+            errors.append(f"{label}: missing Act II spine {from_id} -> {to_id}")
+    for from_id, to_id in (
+        ("a1_tevar", "a2_murviedro"),
+        ("a2_tagus", "a2_bodas"),
+        ("a2_bodas", "a3_leon"),
+    ):
+        if (from_id, to_id) not in edge_pairs:
+            errors.append(f"{label}: missing spine {from_id} -> {to_id}")
+    for from_id, to_id in zip(BIBLE_ACT3, BIBLE_ACT3[1:]):
+        if (from_id, to_id) not in edge_pairs:
+            errors.append(f"{label}: missing Act III spine {from_id} -> {to_id}")
     locked_set = set(BIBLE_ACT1)
     for from_id, to_id in edge_pairs:
         if from_id in locked_set and to_id in locked_set:
@@ -374,7 +402,19 @@ def validate_graph(
     if repay_in != {("a2_embassy3", "a2_repay_raquel")}:
         errors.append(f"{label}: a2_repay_raquel incoming must be only from a2_embassy3")
     producers = collect_producers(root, graph)
+    real_producers = collect_real_producers(root, graph)
+    chapters = root / "content" / "chapters"
+    for flag, beat_id in STAGED_PRODUCERS.items():
+        if (chapters / beat_id).is_dir() and flag not in real_producers:
+            errors.append(f"{label}: staged req_flag {flag!r} missing producer in {beat_id}")
+    v1_cut_ids = {
+        str(node.get("id", ""))
+        for node in graph.get("nodes", [])
+        if isinstance(node, dict) and bool(node.get("v1_cut"))
+    }
     for edge in edges:
+        if str(edge.get("to", "")) in v1_cut_ids:
+            continue
         for flag in _flag_list(edge, "req_flags"):
             if flag not in producers:
                 errors.append(f"{label}: req_flag {flag!r} has no producer")

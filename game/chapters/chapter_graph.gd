@@ -54,6 +54,10 @@ func get_chapter(id: StringName) -> Resource:
 func can_travel(from_id: StringName, to_id: StringName, flags: PackedStringArray) -> bool:
 	var dest: Resource = get_chapter(to_id)
 	if dest != null and int(dest.act) == 1 and not bool(dest.reorderable):
+		var src: Resource = get_chapter(from_id)
+		# Reorderable Act I side-beats (v1-cut raids) rejoin through an open edge.
+		if src != null and int(src.act) == 1 and bool(src.reorderable):
+			return _edge_open(from_id, to_id, flags)
 		return _is_next_locked(from_id, to_id, flags)
 	return _edge_open(from_id, to_id, flags)
 

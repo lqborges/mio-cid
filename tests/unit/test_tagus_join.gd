@@ -7,11 +7,13 @@ const GRAPH := preload("res://game/chapters/chapter_graph.gd")
 
 var _runner: Node
 var _graph: Resource
+var _bus: Node
 
 
 func _initialize() -> void:
 	var failures: PackedStringArray = []
 	_runner = get_root().get_node_or_null(NodePath("ChapterRunner"))
+	_bus = get_root().get_node_or_null(NodePath("EventBus"))
 	if _runner == null:
 		failures.append("ChapterRunner autoload missing")
 		_finish(failures)
@@ -28,6 +30,10 @@ func _initialize() -> void:
 	failures.append_array(_test_repay_opens_tagus())
 	failures.append_array(_test_honest_path_skips_repay())
 	failures.append_array(_test_act_i_stays_locked())
+	failures.append_array(_test_cinematic_set_flags())
+	failures.append_array(_test_travel_completes_source())
+	failures.append_array(_test_reset_starts_director())
+	failures.append_array(_test_advance_retries_failed_travel())
 	failures.append_array(_test_runner_has_no_class_name_collision())
 	_finish(failures)
 
@@ -83,6 +89,93 @@ func _test_act_i_stays_locked() -> PackedStringArray:
 		failures.append("Act I must not skip Burgos")
 	if _can_travel(&"a1_poyo", &"a1_poyo_raid", PackedStringArray()):
 		failures.append("poyo extra raids must stay v1-cut / flag off")
+	if not _can_travel(&"a1_poyo_raid", &"a1_poyo", PackedStringArray()):
+		failures.append("v1-cut raid must rejoin a1_poyo")
+	return failures
+
+
+func _test_cinematic_set_flags() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null or not ("director" in _runner):
+		failures.append("BeatDirector missing for cinematic set_flags")
+		return failures
+	if _runner.has_method("reset"):
+		_runner.reset()
+	_runner.flags = PackedStringArray()
+	var director: Node = _runner.director
+	if director == null or not director.has_method("run_step"):
+		failures.append("BeatDirector.run_step missing")
+		return failures
+	var ok: bool = director.run_step({
+		"type": "cinematic",
+		"set_flags": PackedStringArray(["burgos_shutters_seen"]),
+	})
+	if not ok:
+		failures.append("cinematic step should succeed")
+	if "burgos_shutters_seen" not in _runner.flags:
+		failures.append("cinematic set_flags must apply burgos_shutters_seen")
+	return failures
+
+
+func _test_travel_completes_source() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null or not _runner.has_method("travel"):
+		failures.append("ChapterRunner.travel missing")
+		return failures
+	var completed: Array[StringName] = []
+	var on_done := func(id: StringName) -> void:
+		completed.append(id)
+	if _bus:
+		_bus.beat_completed.connect(on_done)
+	if _runner.has_method("restore"):
+		_runner.restore(&"a1_cardena", PackedStringArray())
+	else:
+		_runner.current_id = &"a1_cardena"
+		_runner.flags = PackedStringArray()
+	if not _runner.travel(&"a1_navapalos"):
+		failures.append("cardena -> navapalos should travel")
+	if completed.is_empty() or completed[completed.size() - 1] != &"a1_cardena":
+		failures.append("travel must emit beat_completed for the source beat")
+	if _runner.current_id != &"a1_navapalos":
+		failures.append("travel must land on a1_navapalos")
+	if "hub_lock_cardena" not in _runner.flags:
+		failures.append("travel must apply the taken edge set_flags")
+	if _bus:
+		_bus.beat_completed.disconnect(on_done)
+	return failures
+
+
+func _test_reset_starts_director() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null or not _runner.has_method("reset"):
+		failures.append("ChapterRunner.reset missing")
+		return failures
+	_runner.reset()
+	if _runner.current_id != &"a1_vivar":
+		failures.append("reset must return to a1_vivar")
+	if _runner.director == null:
+		failures.append("reset must keep BeatDirector")
+	elif "beat_id" in _runner.director and String(_runner.director.beat_id) != "a1_vivar":
+		failures.append("reset must start BeatDirector on a1_vivar")
+	return failures
+
+
+func _test_advance_retries_failed_travel() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null or _runner.director == null:
+		return failures
+	if _runner.has_method("restore"):
+		_runner.restore(&"a1_vivar", PackedStringArray())
+	var director: Node = _runner.director
+	director.steps = [{"type": "travel_spawn", "next": "a1_burgos"}]
+	director.step_index = 0
+	if director.advance():
+		failures.append("travel_spawn without vivar_seen must fail")
+	if int(director.step_index) != 0:
+		failures.append("failed travel_spawn must not consume the step")
+	_runner.add_flag("vivar_seen")
+	if not director.advance():
+		failures.append("travel_spawn should succeed after vivar_seen")
 	return failures
 
 
@@ -94,8 +187,10 @@ func _test_runner_has_no_class_name_collision() -> PackedStringArray:
 	var source := ""
 	if _runner.get_script() is GDScript:
 		source = (_runner.get_script() as GDScript).source_code
-	if source.begins_with("class_name"):
-		failures.append("ChapterRunner must not declare class_name")
+	for line in source.split("\n"):
+		if line.strip_edges().begins_with("class_name"):
+			failures.append("ChapterRunner must not declare class_name")
+			break
 	if "graph" not in _runner or _runner.graph == null:
 		failures.append("ChapterRunner must hold ChapterGraph")
 	if "director" in _runner and _runner.director == null:
