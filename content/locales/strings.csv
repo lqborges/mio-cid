@@ -83,6 +83,8 @@ ui.booty_divide.done,El botín está partido.,The booty is divided.
 ui.embassy_ledger.title,Presente al rey,Gift to the king
 ui.embassy_ledger.confirm,Enviar con Álvar,Send with Álvar
 ui.embassy_ledger.blocked,No hay caballos suficientes para ese presente.,There are not enough horses for that gift.
+ui.embassy_ledger.blocked_marks,No hay marcos suficientes para ese presente.,There are not enough marks for that gift.
+ui.embassy_ledger.blocked_onores,Ese presente no cabe con tantas onores.,That gift does not fit with so much onores.
 ui.embassy_ledger.horses,caballos,horses
 ui.embassy_ledger.marks,marcos,marks
 ui.gift.thirty_horses,Treinta caballos,Thirty horses

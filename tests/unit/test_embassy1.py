@@ -138,7 +138,7 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
         self.assertEqual(empty["horses"], 0)
         self.assertEqual(empty["marks"], 0)
         self.assertEqual(empty["honor_delta"], -6)
-        self.assertEqual(empty["blocked_if_onores_gt"], 20)
+        self.assertNotIn("blocked_if_onores_gt", empty)
         events = {
             row["id"]: row
             for row in json.loads(_read("data/honor_events/core.json"))["events"]
@@ -158,6 +158,7 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
         self.assertIn("HonorService", king)
         self.assertIn("embassy1_gift", king)
         self.assertIn("func affordable(", option)
+        self.assertIn("func block_reason(", option)
         self.assertIn("blocked_if_horses_lt", option)
         project = _read("project.godot")
         self.assertNotIn("GiftToKing=", project)
@@ -166,6 +167,8 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
         self.assertIn("GiftToKing.from_file", world)
         self.assertIn("func attempt_gift", world)
         self.assertIn("func run_gift", world)
+        self.assertIn("_skip_cinematic", world)
+        self.assertIn("animation_finished", world)
         self.assertIn("minaya_lands_restored", world)
         self.assertIn("recruitment_flood", world)
         self.assertIn("a1_poyo", world)
@@ -176,6 +179,7 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
         self.assertRegex(ledger, re.compile(r"^class_name EmbassyLedger$", re.MULTILINE))
         self.assertIn("blocked", ledger)
         self.assertIn("disabled", ledger)
+        self.assertNotIn("btn.disabled = blocked_now", ledger)
         scene = _read("game/ui/embassy_ledger.tscn")
         self.assertIn("anchor_right = 1.0", scene)
         self.assertIn("anchor_bottom = 1.0", scene)
@@ -246,6 +250,8 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
             "ui.embassy_ledger.title",
             "ui.embassy_ledger.confirm",
             "ui.embassy_ledger.blocked",
+            "ui.embassy_ledger.blocked_marks",
+            "ui.embassy_ledger.blocked_onores",
             "ui.embassy_ledger.horses",
             "ui.embassy_ledger.marks",
             "ui.gift.thirty_horses",
@@ -264,6 +270,8 @@ class TestEmbassy1GiftToKing(unittest.TestCase):
         self.assertIn("caballos", rows["ui.gift.thirty_horses"]["es"].lower())
         self.assertNotIn("marcos", rows["ui.gift.thirty_horses"]["es"].lower())
         self.assertEqual(rows["ui.embassy_ledger.horses"]["es"], "caballos")
+        self.assertIn("caballos", rows["ui.embassy_ledger.blocked"]["es"].lower())
+        self.assertIn("marcos", rows["ui.embassy_ledger.blocked_marks"]["es"].lower())
         self.assertIn("Álvar", rows["ui.embassy_ledger.confirm"]["es"])
         lands = rows["a1_embassy1.lands_restored"]["es"].lower()
         self.assertIn("minaya", lands)

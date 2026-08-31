@@ -4,7 +4,7 @@ extends Control
 ## Gift-up ledger. Blocked options stay listed and greyed; confirm refuses them.
 
 signal confirmed(choice_id: StringName, event: HonorEvent)
-signal blocked(choice_id: StringName)
+signal blocked(choice_id: StringName, reason: StringName)
 
 var gift: GiftToKing
 var selected_id: StringName = &""
@@ -47,7 +47,7 @@ func confirm() -> HonorEvent:
 	var treasury := _treasury_state()
 	last_event = gift.resolve(selected_id, honor, treasury)
 	if last_event == null or String(last_event.id).is_empty():
-		blocked.emit(selected_id)
+		blocked.emit(selected_id, _block_reason(opt, treasury, honor))
 		_refresh()
 		return last_event if last_event else HonorEvent.new()
 	_applied = true
@@ -56,13 +56,17 @@ func confirm() -> HonorEvent:
 
 
 func is_option_blocked(choice_id: StringName) -> bool:
+	return option_block_reason(choice_id) != &""
+
+
+func option_block_reason(choice_id: StringName) -> StringName:
 	_load_gift()
 	if gift == null:
-		return true
+		return &"horses"
 	var opt := gift.option(choice_id)
 	if opt == null:
-		return true
-	return not opt.affordable(_treasury_state(), _honor_state())
+		return &"horses"
+	return _block_reason(opt, _treasury_state(), _honor_state())
 
 
 func _on_confirm() -> void:
@@ -85,13 +89,13 @@ func _refresh() -> void:
 		confirm_btn.text = _loc("ui.embassy_ledger.confirm")
 	_rebuild_options()
 	var opt := _selected()
-	var blocked_now := opt != null and is_option_blocked(selected_id)
+	var reason := option_block_reason(selected_id) if opt else &""
 	if detail:
 		detail.text = _detail_line(opt) if opt else ""
 	if warn:
-		warn.text = _loc("ui.embassy_ledger.blocked") if blocked_now else ""
+		warn.text = _loc(_blocked_loc(reason)) if reason != &"" else ""
 	if confirm_btn:
-		confirm_btn.disabled = opt == null or blocked_now or _applied
+		confirm_btn.disabled = opt == null or _applied
 
 
 func _rebuild_options() -> void:
@@ -126,7 +130,7 @@ func _rebuild_options() -> void:
 			box.add_child(btn)
 		var blocked_now := not opt.affordable(_treasury_state(), _honor_state())
 		btn.text = _option_label(opt)
-		btn.disabled = blocked_now
+		btn.disabled = _applied
 		btn.modulate = Color(0.55, 0.52, 0.48, 1) if blocked_now else Color(1, 1, 1, 1)
 		if not bool(btn.get_meta("gift_bound", false)):
 			btn.pressed.connect(_on_option_pressed.bind(opt.id))
@@ -150,6 +154,24 @@ func _detail_line(opt: GiftOption) -> String:
 		str(opt.marks),
 		_loc("ui.embassy_ledger.marks"),
 	]
+
+
+func _block_reason(opt: GiftOption, treasury: Treasury, honor: HonorState) -> StringName:
+	if opt == null:
+		return &"horses"
+	if opt.has_method("block_reason"):
+		return opt.block_reason(treasury, honor)
+	if not opt.affordable(treasury, honor):
+		return &"horses"
+	return &""
+
+
+func _blocked_loc(reason: StringName) -> String:
+	if reason == &"marks":
+		return "ui.embassy_ledger.blocked_marks"
+	if reason == &"onores":
+		return "ui.embassy_ledger.blocked_onores"
+	return "ui.embassy_ledger.blocked"
 
 
 func _selected() -> GiftOption:

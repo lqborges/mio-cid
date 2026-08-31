@@ -24,6 +24,7 @@ var last_choice: StringName = &""
 var _gifted: bool = false
 var _alvar_gone: bool = false
 var _returned: bool = false
+var _skip_cinematic: bool = false
 
 
 func _ready() -> void:
@@ -52,7 +53,8 @@ func start_gift(_cue: String = "gift") -> void:
 
 
 func run_gift(choice_id: StringName) -> HonorEvent:
-	# Headless: open the ledger and confirm a bundle.
+	# Headless: skip the leave cinematic so tests stay green.
+	_skip_cinematic = true
 	if not _gifted:
 		start_gift()
 	return confirm_gift(choice_id)
@@ -60,6 +62,7 @@ func run_gift(choice_id: StringName) -> HonorEvent:
 
 func attempt_gift(choice_id: StringName) -> HonorEvent:
 	# Tests must call resolve even when the ledger greys the row.
+	_skip_cinematic = true
 	_load_gift()
 	var honor := _honor_state()
 	var treasury := _treasury_state()
@@ -67,7 +70,8 @@ func attempt_gift(choice_id: StringName) -> HonorEvent:
 		return HonorEvent.new()
 	var ev: HonorEvent = gift.resolve(choice_id, honor, treasury)
 	if ev == null or String(ev.id).is_empty():
-		_whisper(BLOCKED_KEY)
+		var opt: GiftOption = gift.option(choice_id)
+		_whisper(_blocked_loc(_block_reason(opt, treasury, honor)))
 		return ev if ev else HonorEvent.new()
 	_finish_gift(choice_id, ev)
 	return ev
@@ -110,9 +114,9 @@ func _on_ledger_confirmed(choice_id: StringName, event: HonorEvent) -> void:
 	_finish_gift(choice_id, event)
 
 
-func _on_ledger_blocked(choice_id: StringName) -> void:
+func _on_ledger_blocked(choice_id: StringName, reason: StringName = &"") -> void:
 	last_choice = choice_id
-	_whisper(BLOCKED_KEY)
+	_whisper(_blocked_loc(reason))
 
 
 func _finish_gift(choice_id: StringName, event: HonorEvent) -> void:
@@ -126,6 +130,25 @@ func _finish_gift(choice_id: StringName, event: HonorEvent) -> void:
 	last_event = event
 	_hide_ledger()
 	_alvar_leave()
+	_schedule_return()
+
+
+func _schedule_return() -> void:
+	if _skip_cinematic:
+		complete_return()
+		return
+	var player: AnimationPlayer = get_node_or_null("LeaveCinematic") as AnimationPlayer
+	if player == null or not player.is_playing():
+		complete_return()
+		return
+	if not player.animation_finished.is_connected(_on_leave_cinematic_finished):
+		player.animation_finished.connect(_on_leave_cinematic_finished)
+
+
+func _on_leave_cinematic_finished(_anim: StringName = &"") -> void:
+	var player: AnimationPlayer = get_node_or_null("LeaveCinematic") as AnimationPlayer
+	if player and player.animation_finished.is_connected(_on_leave_cinematic_finished):
+		player.animation_finished.disconnect(_on_leave_cinematic_finished)
 	complete_return()
 
 
@@ -134,6 +157,10 @@ func _alvar_leave() -> void:
 		return
 	_alvar_gone = true
 	_set_alvar_present(false)
+	if not _skip_cinematic:
+		var player: AnimationPlayer = get_node_or_null("LeaveCinematic") as AnimationPlayer
+		if player and not player.animation_finished.is_connected(_on_leave_cinematic_finished):
+			player.animation_finished.connect(_on_leave_cinematic_finished)
 	_play_cinematic()
 	_whisper(LEAVE_KEY)
 
@@ -320,6 +347,22 @@ func _treasury_state() -> Treasury:
 			if state is Treasury:
 				return state
 	return null
+
+
+func _block_reason(opt: GiftOption, treasury: Treasury, honor: HonorState) -> StringName:
+	if opt == null:
+		return &"horses"
+	if opt.has_method("block_reason"):
+		return opt.block_reason(treasury, honor)
+	return &"horses"
+
+
+func _blocked_loc(reason: StringName) -> String:
+	if reason == &"marks":
+		return "ui.embassy_ledger.blocked_marks"
+	if reason == &"onores":
+		return "ui.embassy_ledger.blocked_onores"
+	return BLOCKED_KEY
 
 
 func _whisper(key: String) -> void:
