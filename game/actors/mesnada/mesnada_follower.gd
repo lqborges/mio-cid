@@ -79,6 +79,9 @@ func desired_xz(from: Vector3, to: Vector3, speed: float, arrive: float, reverse
 	delta.y = 0.0
 	if reverse:
 		delta = -delta
+		if delta.length_squared() < 0.0001:
+			return Vector3.ZERO
+		return delta.normalized() * speed
 	if delta.length() <= arrive:
 		return Vector3.ZERO
 	return delta.normalized() * speed
@@ -101,12 +104,12 @@ func _physics_process(delta: float) -> void:
 
 func _wish_xz() -> Vector3:
 	var arrive := float(ai.tunables.get("arrive_distance", 0.0))
-	var speed: float = float(ai.order_speed())
+	var speed: float = float(ai.speed_for(self))
 	match ai.order:
 		&"hold":
 			return Vector3.ZERO
 		&"flee":
-			return desired_xz(global_position, ai.formation_origin(), speed, arrive, true)
+			return _steer_to(ai.flee_slot(ai.slot_index_for(self)), speed, arrive)
 		&"charge":
 			return _steer_to(ai.world_slot(ai.slot_index_for(self)) + ai.formation_facing() * float(ai.tunables.get("follow_distance", 0.0)), speed, arrive)
 		_:

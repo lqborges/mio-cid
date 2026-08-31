@@ -13,9 +13,10 @@ const FOLLOWER := preload("res://game/actors/mesnada/mesnada_follower.gd")
 @export var leader_path: NodePath = NodePath("../Cid")
 @export var spawn_missing_captains: bool = false
 @export var spawn_lanza_bodies: bool = true
+@export var lanza_body_limit: int = -1
 
 var tunables: Dictionary = {}
-var roster: MesnadaRoster
+var roster: MesnadaRoster = null
 var leader: Node3D
 var formation: StringName = &"follow"
 var order: StringName = &"follow"
@@ -26,13 +27,27 @@ var lanzas: Array = []
 
 var _banner: Node3D
 var _fallback_facing: Vector3 = Vector3(0.0, 0.0, -1.0)
+var _started: bool = false
 
 
 func _init() -> void:
 	load_tunables()
 
 
+func _enter_tree() -> void:
+	start_mesnada()
+
+
 func _ready() -> void:
+	start_mesnada()
+
+
+func start_mesnada() -> void:
+	if _started:
+		return
+	_started = true
+	if tunables.is_empty():
+		load_tunables()
 	add_to_group("mesnada_ai")
 	_banner = get_node_or_null("Banner")
 	if _banner != null:
@@ -126,7 +141,10 @@ func skinned_cap() -> int:
 
 
 func visible_lanza_body_cap() -> int:
-	return int(tunables.get("visible_lanza_bodies", 0))
+	var cap := int(tunables.get("visible_lanza_bodies", 0))
+	if lanza_body_limit >= 0:
+		return mini(cap, lanza_body_limit)
+	return cap
 
 
 func lanza_count() -> int:
@@ -210,6 +228,14 @@ func charge_point() -> Vector3:
 	return formation_origin() + formation_facing() * float(tunables.get("follow_distance", 0.0))
 
 
+func flee_origin() -> Vector3:
+	return formation_origin() - formation_facing() * float(tunables.get("flee_distance", 0.0))
+
+
+func flee_slot(index: int) -> Vector3:
+	return world_slot_from(index, flee_origin(), formation_facing())
+
+
 func order_speed() -> float:
 	match order:
 		&"charge":
@@ -220,34 +246,62 @@ func order_speed() -> float:
 			return float(tunables.get("walk_speed", 0.0))
 
 
+func follow_speed(error: float) -> float:
+	var threshold := float(tunables.get("catch_up_distance", 0.0))
+	if threshold > 0.0 and error > threshold:
+		return float(tunables.get("catch_up_speed", 0.0))
+	return float(tunables.get("walk_speed", 0.0))
+
+
+func speed_for(body: Node) -> float:
+	match order:
+		&"charge":
+			return float(tunables.get("charge_speed", 0.0))
+		&"flee":
+			return float(tunables.get("flee_speed", 0.0))
+		&"hold":
+			return float(tunables.get("walk_speed", 0.0))
+		_:
+			return follow_speed(_slot_error(body))
+
+
+func living_captains() -> Array:
+	return _living(captains)
+
+
+func living_lanzas() -> Array:
+	return _living(lanzas)
+
+
 func slot_index_for(body: Node) -> int:
 	if body == null:
 		return 0
-	if body.get("kind") == &"captain":
-		var cap_i := captains.find(body)
-		return cap_i if cap_i >= 0 else int(body.get("slot_index"))
-	var lan_i := lanzas.find(body)
-	if lan_i < 0:
-		return int(body.get("slot_index"))
-	return captains.size() + lan_i
+	var slot := 0
+	for cap in living_captains():
+		if cap == body:
+			return slot
+		slot += 1
+	for lan in living_lanzas():
+		if lan == body:
+			return slot
+		slot += 1
+	return int(body.get("slot_index"))
 
 
 func apply_lod() -> void:
 	var origin := _leader_position()
-	if leader is Node3D and is_instance_valid(leader):
-		origin = (leader as Node3D).global_position
 	var used := 0
 	for body in captains:
 		if body == null or not is_instance_valid(body) or body.gone:
 			continue
-		var level := lod_level(origin.distance_to(body.global_position), &"captain", used)
+		var level := lod_level(origin.distance_to(_body_position(body)), &"captain", used)
 		if level == &"skinned":
 			used += 1
 		body.set_lod(level)
 	for body in lanzas:
 		if body == null or not is_instance_valid(body) or body.gone:
 			continue
-		body.set_lod(lod_level(origin.distance_to(body.global_position), &"lanza", used))
+		body.set_lod(lod_level(origin.distance_to(_body_position(body)), &"lanza", used))
 
 
 func ensure_navigation_plane() -> void:
@@ -336,19 +390,28 @@ func _resolve_leader() -> void:
 
 
 func _resolve_roster() -> void:
-	if roster != null:
+	if _roster_usable(roster):
 		return
 	var existing: Variant = null
 	var state := _autoload("GameState")
 	if state != null and state.has_method("roster"):
 		existing = state.roster()
-	if existing is MesnadaRoster:
+	if _roster_usable(existing):
 		roster = existing as MesnadaRoster
 		return
 	roster = MesnadaRoster.from_starting_seed()
 	var honor := _autoload("HonorService")
-	if honor != null and honor.get("roster") == null:
+	if honor != null and not _roster_usable(honor.get("roster")):
 		honor.roster = roster
+
+
+func _roster_usable(value: Variant) -> bool:
+	if not (value is MesnadaRoster):
+		return false
+	var next: MesnadaRoster = value as MesnadaRoster
+	if next.members.size() > 0:
+		return true
+	return int(next.lanzas) > 0
 
 
 func _spawn_missing_captains() -> void:
@@ -391,20 +454,24 @@ func _sync_lanza_bodies() -> void:
 
 func _assign_slots() -> void:
 	_sort_captains_by_roster()
-	for i in captains.size():
-		var body: Variant = captains[i]
+	for body in captains:
 		if body == null:
 			continue
-		body.slot_index = i
 		if roster != null:
-			body.member = roster.member(body.member_id)
+			body.member = roster.member(body.get("member_id"))
 			if body.member != null and not body.member.alive:
 				body.mark_gone()
-	for i in lanzas.size():
-		var body: Variant = lanzas[i]
-		if body == null:
+	var slot := 0
+	for body in captains:
+		if not _is_live(body):
 			continue
-		body.slot_index = captains.size() + i
+		body.slot_index = slot
+		slot += 1
+	for body in lanzas:
+		if not _is_live(body):
+			continue
+		body.slot_index = slot
+		slot += 1
 
 
 func _sort_captains_by_roster() -> void:
@@ -449,6 +516,43 @@ func handle_desertion(character_id: StringName) -> void:
 			continue
 		if body.get("member_id") == character_id or str(body.get("member_id")) == String(character_id):
 			body.mark_gone()
+	_assign_slots()
+
+
+func _is_live(body: Variant) -> bool:
+	if body == null or not is_instance_valid(body):
+		return false
+	if bool(body.get("gone")):
+		return false
+	var member: Variant = body.get("member")
+	if member != null and member.get("alive") == false:
+		return false
+	return true
+
+
+func _living(bodies: Array) -> Array:
+	var out: Array = []
+	for body in bodies:
+		if _is_live(body):
+			out.append(body)
+	return out
+
+
+func _body_position(body: Variant) -> Vector3:
+	if body is Node3D and is_instance_valid(body):
+		var node := body as Node3D
+		if node.is_inside_tree():
+			return node.global_position
+		return node.position
+	return Vector3.ZERO
+
+
+func _slot_error(body: Node) -> float:
+	if body == null or not is_instance_valid(body):
+		return 0.0
+	var delta := world_slot(slot_index_for(body)) - _body_position(body)
+	delta.y = 0.0
+	return delta.length()
 
 
 func _connect_bus() -> void:

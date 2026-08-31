@@ -64,6 +64,9 @@ class TestMesnadaFollowAndWedge(unittest.TestCase):
         self.assertEqual(data["lod_distance"], 25)
         self.assertEqual(data["impostor_distance"], 40)
         self.assertEqual(data["visible_lanza_bodies"], 8)
+        self.assertIn("flee_distance", data)
+        self.assertIn("catch_up_distance", data)
+        self.assertIn("catch_up_speed", data)
         schema = _load_json("data/schema/mesnada_follow.json")
         for key in (
             "follow_distance",
@@ -71,6 +74,9 @@ class TestMesnadaFollowAndWedge(unittest.TestCase):
             "wedge_row_width",
             "skinned_cap",
             "visible_lanza_bodies",
+            "flee_distance",
+            "catch_up_distance",
+            "catch_up_speed",
         ):
             self.assertIn(key, schema["required"])
         self.assertEqual(schema["properties"]["skinned_cap"]["maximum"], 24)
@@ -79,6 +85,9 @@ class TestMesnadaFollowAndWedge(unittest.TestCase):
         self.assertIn("wedge_local_offset", source)
         self.assertIn("ensure_navigation_plane", source)
         self.assertIn("plant_banner_at", source)
+        self.assertIn("flee_slot", source)
+        self.assertIn("follow_speed", source)
+        self.assertIn("living_captains", source)
         self.assertNotIn("skinned_cap := 24", source)
 
     def test_lanzas_are_count_plus_cheap_bodies(self) -> None:
@@ -124,6 +133,7 @@ class TestMesnadaFollowAndWedge(unittest.TestCase):
         self.assertIn("MartinAntolinez", scene)
         self.assertIn("PeroBermudez", scene)
         self.assertIn('member_id = &"alvar_fanez"', scene)
+        self.assertIn("lanza_body_limit = 3", scene)
         self.assertEqual(len(re.findall(r'parent="Mesnada" instance=', scene)), 3)
         self.assertEqual(len(re.findall(r'\[node name="Dummy\d+"', scene)), 8)
         self.assertEqual(scene.count("type=\"DirectionalLight3D\""), 1)

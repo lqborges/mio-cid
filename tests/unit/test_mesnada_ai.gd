@@ -16,6 +16,7 @@ func _initialize() -> void:
 	failures.append_array(_test_lanzas_are_count())
 	failures.append_array(_test_lod_levels())
 	failures.append_array(_test_orders_and_steer())
+	failures.append_array(_test_catch_up_speed())
 	failures.append_array(_test_spawn_named_captains())
 	failures.append_array(_test_desertion_hides_captain())
 	failures.append_array(_test_loc_spanish())
@@ -145,6 +146,12 @@ func _test_orders_and_steer() -> PackedStringArray:
 	ai.set_order(&"flee")
 	if not is_equal_approx(ai.order_speed(), float(ai.tunables.get("flee_speed", 0.0))):
 		failures.append("flee speed must come from follow.json")
+	ai.plant_banner_at(Vector3.ZERO, Vector3(0.0, 0.0, -1.0))
+	var flee_tip: Vector3 = ai.flee_slot(0)
+	if flee_tip.is_equal_approx(Vector3.ZERO):
+		failures.append("flee dest for wedge tip must leave the formation origin")
+	if flee_tip.z <= 0.0:
+		failures.append("flee dest must sit behind facing -Z, got %s" % flee_tip)
 	var body: Node = FOLLOWER.new()
 	var arrive := float(ai.tunables.get("arrive_distance", 0.0))
 	var wish: Vector3 = body.desired_xz(Vector3(5.0, 0.0, 0.0), Vector3(0.0, 0.0, 0.0), 4.0, arrive, false)
@@ -156,7 +163,28 @@ func _test_orders_and_steer() -> PackedStringArray:
 	var away: Vector3 = body.desired_xz(Vector3(5.0, 0.0, 0.0), Vector3.ZERO, 4.0, arrive, true)
 	if away.x <= 0.0:
 		failures.append("flee reverse must point away from origin")
+	var tip_wish: Vector3 = body.desired_xz(Vector3.ZERO, flee_tip, float(ai.tunables.get("flee_speed", 0.0)), arrive, false)
+	if tip_wish.length() <= 0.0:
+		failures.append("wedge tip on origin must still flee")
+	var flee_stop: Vector3 = body.desired_xz(flee_tip, flee_tip, 5.5, arrive, false)
+	if not flee_stop.is_equal_approx(Vector3.ZERO):
+		failures.append("flee must stop at flee_distance, not run off the floor")
 	body.free()
+	ai.free()
+	return failures
+
+
+func _test_catch_up_speed() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var ai = AI.new()
+	var walk := float(ai.tunables.get("walk_speed", 0.0))
+	var catch_up := float(ai.tunables.get("catch_up_speed", 0.0))
+	if is_equal_approx(catch_up, walk) or catch_up <= walk:
+		failures.append("catch_up_speed must exceed walk_speed")
+	if not is_equal_approx(ai.follow_speed(0.4), walk):
+		failures.append("inside catch_up_distance must walk")
+	if not is_equal_approx(ai.follow_speed(3.0), catch_up):
+		failures.append("past catch_up_distance must use catch_up_speed, got %s" % ai.follow_speed(3.0))
 	ai.free()
 	return failures
 
@@ -211,6 +239,21 @@ func _test_desertion_hides_captain() -> PackedStringArray:
 		failures.append("deserted captain must hide, not stay in the wedge")
 	if (martin as CollisionObject3D).collision_layer != 0:
 		failures.append("deserted captain must leave collision")
+	if ai.captains.size() != 5:
+		failures.append("deserted captain grave must stay in captains, got %s" % ai.captains.size())
+	if ai.living_captains().size() != 4:
+		failures.append("living wedge must compact to 4, got %s" % ai.living_captains().size())
+	var pero: Node = null
+	var alvar: Node = null
+	for body in ai.captains:
+		if body.get("member_id") == &"pero_bermudez":
+			pero = body
+		elif body.get("member_id") == &"alvar_fanez":
+			alvar = body
+	if alvar != null and ai.slot_index_for(alvar) != 0:
+		failures.append("Álvar must keep slot 0 after Martín leaves")
+	if pero != null and ai.slot_index_for(pero) != 1:
+		failures.append("Pero must pack into slot 1 after Martín leaves, got %s" % ai.slot_index_for(pero))
 	ai.free()
 	return failures
 
@@ -281,6 +324,9 @@ func _test_arena_instances() -> PackedStringArray:
 	if arena.find_children("*", "SpotLight3D", true, false).size() != 0:
 		failures.append("arena gained SpotLight3D")
 	root.add_child(arena)
+	var live_start: Node = arena.get_node_or_null("Mesnada")
+	if live_start != null and live_start.has_method("start_mesnada"):
+		live_start.start_mesnada()
 	var region: Node = arena.get_node_or_null("NavigationRegion3D")
 	if region == null or not (region is NavigationRegion3D):
 		failures.append("arena nav region missing after enter tree")
@@ -291,8 +337,17 @@ func _test_arena_instances() -> PackedStringArray:
 	var live: Node = arena.get_node_or_null("Mesnada")
 	if live != null and live.get("lanzas") != null:
 		var bodies: Array = live.lanzas
+		if int(live.lanza_body_limit) != 3:
+			failures.append("arena sandbox must cap lanza bodies at 3")
+		if bodies.size() != 3:
+			failures.append("arena must spawn 3 lanza bodies, got %s" % bodies.size())
 		if bodies.size() > int(live.visible_lanza_body_cap()):
 			failures.append("arena spawned more lanza bodies than the cap")
+		var live_n: int = live.living_captains().size() + live.living_lanzas().size()
+		for i in live_n:
+			var slot: Vector3 = live.world_slot(i)
+			if absf(slot.x) <= 1.8 and slot.z >= 6.2 and slot.z <= 9.8:
+				failures.append("arena slot %s sits inside BoxC at %s" % [i, slot])
 		for lanza in bodies:
 			var mesh: MeshInstance3D = lanza.get_node_or_null("Visual/MeshInstance3D")
 			if mesh != null and mesh.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:

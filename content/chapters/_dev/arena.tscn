@@ -92,6 +92,7 @@ navigation_mesh = SubResource("NavigationMesh_arena")
 [node name="Mesnada" type="Node3D" parent="."]
 script = ExtResource("3_ai")
 leader_path = NodePath("../Cid")
+lanza_body_limit = 3
 
 [node name="Banner" type="Node3D" parent="Mesnada"]
 visible = false
