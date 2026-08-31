@@ -43,3 +43,12 @@ horse.mount,Montar,Mount
 horse.dismount,Desmontar,Dismount
 hud.mesura,Mesura,Mesura
 hud.ira,Ira,Ira
+ui.keep_or_sell.title,¿Guardar o vender?,Keep or sell?
+ui.keep_or_sell.keep,Guardar,Keep
+ui.keep_or_sell.sell,Vender,Sell
+ui.keep_or_sell.marks,marcos,marks
+ui.keep_or_sell.horses,caballos,horses
+ui.keep_or_sell.protectorate_warn,Toledo es protectorado de Alfonso. Quedarse es morir.,Toledo is Alfonso's protectorate. To stay is to die.
+ui.keep_or_sell.deadline_warn,Hay que vender antes de que llegue el host del rey.,Sell before the king's host arrives.
+location.castejon,Castejón,Castejón
+location.alcocer,Alcocer,Alcocer
