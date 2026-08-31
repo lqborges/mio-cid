@@ -33,6 +33,7 @@ func collect_payload() -> Dictionary:
 		"chapter": String(GameState.chapter_id()),
 		"flags": _flags_array(),
 		"honor": _honor_dict(),
+		"applied_once": _applied_once_ids(),
 	}
 	var roster: Variant = GameState.roster()
 	if roster != null:
@@ -56,11 +57,16 @@ func hmac_hex(payload: Dictionary) -> String:
 	return ctx.finish().hex_encode()
 
 
+func _canonical_json(data: Variant) -> String:
+	# indent "", sort_keys, full_precision — same flags for HMAC bytes and the file.
+	return JSON.stringify(data, "", true, true)
+
+
 func _stable_payload(payload: Dictionary) -> Dictionary:
 	# Round-trip through JSON so save HMAC matches load-time stringify of parsed numbers.
 	var body: Dictionary = payload.duplicate(true)
 	body.erase("hmac")
-	var parsed: Variant = JSON.parse_string(JSON.stringify(body, "", true, true))
+	var parsed: Variant = JSON.parse_string(_canonical_json(body))
 	if typeof(parsed) == TYPE_DICTIONARY:
 		return parsed
 	return body
@@ -126,10 +132,11 @@ func apply_payload(payload: Dictionary) -> void:
 	_apply_honor(body.get("honor", {}))
 	_apply_chapter(body)
 	_apply_roster(body)
+	_apply_applied_once(body)
 
 
 func _canonical_payload_bytes(payload: Dictionary) -> PackedByteArray:
-	return JSON.stringify(_stable_payload(payload), "", true, true).to_utf8_buffer()
+	return _canonical_json(_stable_payload(payload)).to_utf8_buffer()
 
 
 func _envelope(payload: Dictionary) -> Dictionary:
@@ -141,12 +148,13 @@ func _envelope(payload: Dictionary) -> Dictionary:
 
 
 func _write_payload(path: String, payload: Dictionary, keep_prev: bool) -> Error:
-	return _atomic_write(path, JSON.stringify(_envelope(payload), "", true), keep_prev)
+	return _atomic_write(path, _canonical_json(_envelope(payload)), keep_prev)
 
 
 func _verified_payload(path: String) -> Dictionary:
 	last_error = &""
-	if not FileAccess.file_exists(path):
+	path = _adopt_tmp_if_needed(path)
+	if path.is_empty() or not FileAccess.file_exists(path):
 		last_error = &"missing"
 		return {}
 	var envelope := _parse_envelope(path)
@@ -228,21 +236,48 @@ func _atomic_write(path: String, text: String, keep_prev: bool) -> Error:
 		err = dir.rename(dest_name, prev_name)
 		if err != OK:
 			last_error = &"io"
-			dir.remove(tmp_name)
 			return err
-	elif dir.file_exists(dest_name):
-		# Windows rename will not replace; drop dest after tmp is durable.
-		err = dir.remove(dest_name)
-		if err != OK:
-			last_error = &"io"
-			dir.remove(tmp_name)
-			return err
+	# Godot 4.7 DirAccess.rename overwrites dest; do not unlink first (POSIX replace).
 	err = dir.rename(tmp_name, dest_name)
 	if err != OK:
 		last_error = &"io"
 		return err
 	last_error = &""
 	return OK
+
+
+func _adopt_tmp_if_needed(path: String) -> String:
+	if FileAccess.file_exists(path):
+		return path
+	var tmp_path := "%s.tmp" % path
+	if not FileAccess.file_exists(tmp_path):
+		return ""
+	var dir := DirAccess.open(SAVE_DIR)
+	if dir == null:
+		return ""
+	if dir.rename(tmp_path.get_file(), path.get_file()) != OK:
+		return ""
+	return path
+
+
+func _applied_once_ids() -> Array:
+	var out: Array = []
+	if HonorService == null:
+		return out
+	for event_id in HonorService._applied_once:
+		out.append(str(event_id))
+	out.sort()
+	return out
+
+
+func _apply_applied_once(payload: Dictionary) -> void:
+	if HonorService == null:
+		return
+	HonorService._applied_once.clear()
+	var raw: Variant = payload.get("applied_once", [])
+	if raw is Array:
+		for item in raw:
+			HonorService._applied_once[str(item)] = true
 
 
 func _ensure_save_dir() -> Error:

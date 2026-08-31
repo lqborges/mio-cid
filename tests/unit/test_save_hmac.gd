@@ -29,6 +29,8 @@ func _initialize() -> void:
 	failures.append_array(_test_honor_roundtrip())
 	failures.append_array(_test_roster_loyalty_when_present())
 	failures.append_array(_test_tamper_does_not_apply())
+	failures.append_array(_test_full_precision_float_roundtrip())
+	failures.append_array(_test_applied_once_survives_load())
 	failures.append_array(_test_atomic_write_and_autosave())
 	failures.append_array(_test_payload_has_no_screenshot_or_pii())
 	_honor.reset_state()
@@ -165,7 +167,7 @@ func _test_tamper_does_not_apply() -> PackedStringArray:
 	honor["onores"] = 1.0
 	payload["honor"] = honor
 	envelope["payload"] = payload
-	if _save._atomic_write(_save.slot_path(4), JSON.stringify(envelope, "", true), false) != OK:
+	if _save._atomic_write(_save.slot_path(4), _save._canonical_json(envelope), false) != OK:
 		failures.append("tamper rewrite failed")
 		return failures
 	_honor.state.onores = 30.0
@@ -176,6 +178,71 @@ func _test_tamper_does_not_apply() -> PackedStringArray:
 		failures.append("tampered save last_error want save_damaged got %s" % _save.last_error)
 	if not is_equal_approx(_honor.state.onores, 30.0):
 		failures.append("tampered save must not apply honor, got %s" % _honor.state.onores)
+	return failures
+
+
+func _test_full_precision_float_roundtrip() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_honor.reset_state()
+	var messy: float = 0.1 + 0.2
+	_honor.state.honra = messy
+	var roster := MesnadaRoster.from_starting_seed()
+	_honor.roster = roster
+	var martin: MesnadaMember = roster.member(&"martin_antolinez")
+	martin.loyalty = messy
+	if _save.save(1) != OK:
+		failures.append("full-precision save failed: %s" % _save.last_error)
+		_honor.roster = null
+		return failures
+	_honor.state.honra = 40.0
+	martin.loyalty = 0.99
+	var loaded: Dictionary = _save.load(1)
+	if loaded.is_empty() or _save.last_error != &"":
+		failures.append("0.1+0.2 save came back %s" % _save.last_error)
+	if not is_equal_approx(_honor.state.honra, messy):
+		failures.append("honra 0.1+0.2 roundtrip want %s got %s" % [messy, _honor.state.honra])
+	if not is_equal_approx(martin.loyalty, messy):
+		failures.append("loyalty 0.1+0.2 roundtrip want %s got %s" % [messy, martin.loyalty])
+	_honor.roster = null
+	return failures
+
+
+func _test_applied_once_survives_load() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_honor.reset_state()
+	var cheat: HonorEvent = _honor.event_by_id(&"arcas_cheat")
+	if cheat == null:
+		failures.append("arcas_cheat missing from catalog")
+		return failures
+	cheat.once = true
+	var first: Dictionary = _honor.apply_id(&"arcas_cheat")
+	if first.is_empty() and not _honor.state.has_stain(&"arcas_cheat"):
+		failures.append("arcas_cheat did not apply before save")
+		return failures
+	var onores: float = _honor.state.onores
+	var honra: float = _honor.state.honra
+	if _save.save(5) != OK:
+		failures.append("applied_once save failed: %s" % _save.last_error)
+		return failures
+	_honor.reset_state()
+	if _honor._applied_once.has("arcas_cheat"):
+		failures.append("reset_state must clear _applied_once")
+	var loaded: Dictionary = _save.load(5)
+	if loaded.is_empty() or _save.last_error != &"":
+		failures.append("applied_once load failed: %s" % _save.last_error)
+		return failures
+	if not loaded.has("applied_once"):
+		failures.append("payload omitted applied_once")
+	var again: Dictionary = _honor.apply_id(&"arcas_cheat")
+	if not again.is_empty():
+		failures.append("arcas_cheat must be a no-op after load, got %s" % str(again))
+	if not is_equal_approx(_honor.state.onores, onores):
+		failures.append("re-apply stacked onores, want %s got %s" % [onores, _honor.state.onores])
+	if not is_equal_approx(_honor.state.honra, honra):
+		failures.append("re-apply stacked honra, want %s got %s" % [honra, _honor.state.honra])
+	if not _honor.state.has_stain(&"arcas_cheat"):
+		failures.append("loaded stains missing arcas_cheat")
+	cheat.once = false
 	return failures
 
 

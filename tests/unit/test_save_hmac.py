@@ -41,6 +41,10 @@ class TestSaveHmac(unittest.TestCase):
         self.assertIn("dir.rename", source)
         self.assertIn("func autosave_chapter(", source)
         self.assertIn("func migrate(", source)
+        self.assertIn('JSON.stringify(data, "", true, true)', source)
+        self.assertIn("_canonical_json(_envelope(payload))", source)
+        self.assertNotIn("Windows rename will not replace", source)
+        self.assertIn("do not unlink first", source)
 
     def test_hmac_is_outside_payload(self) -> None:
         source = _read("game/autoload/save_service.gd")
