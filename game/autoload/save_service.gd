@@ -27,6 +27,12 @@ func chapter_path(chapter_id: String) -> String:
 	return "%s/autosave.chapter.%s.json.gz" % [SAVE_DIR, chapter_id.validate_filename()]
 
 
+func slot_exists(slot: int) -> bool:
+	if slot < SLOT_MIN or slot > SLOT_MAX:
+		return false
+	return FileAccess.file_exists(slot_path(slot))
+
+
 func collect_payload() -> Dictionary:
 	var payload := {
 		"version": CURRENT_VERSION,
@@ -41,6 +47,8 @@ func collect_payload() -> Dictionary:
 			payload["mesnada"] = roster.to_save()
 		if "lanzas" in roster:
 			payload["lanzas"] = int(roster.lanzas)
+	payload["treasury"] = _treasury_dict()
+	payload["clock"] = _clock_dict()
 	return payload
 
 
@@ -89,6 +97,22 @@ func migrate(payload: Dictionary) -> Dictionary:
 				"honra": 40.0,
 				"stains": [],
 			}
+	if not out.has("treasury"):
+		out["treasury"] = {
+			"marks": 0,
+			"horses": 2,
+			"cloth": 0,
+			"arms": 0,
+			"royal_escrow_marks": 0,
+			"royal_escrow_horses": 0,
+		}
+	if not out.has("clock"):
+		out["clock"] = {
+			"segment": "paused",
+			"days_elapsed": 0,
+			"unfed_streak": 0,
+			"plazo_days_left": 9,
+		}
 	return out
 
 
@@ -133,6 +157,8 @@ func apply_payload(payload: Dictionary) -> void:
 	_apply_chapter(body)
 	_apply_roster(body)
 	_apply_applied_once(body)
+	_apply_treasury(body.get("treasury", {}))
+	_apply_clock(body.get("clock", {}))
 
 
 func _canonical_payload_bytes(payload: Dictionary) -> PackedByteArray:
@@ -347,19 +373,69 @@ func _apply_honor(honor: Variant) -> void:
 func _apply_chapter(payload: Dictionary) -> void:
 	if ChapterRunner == null:
 		return
+	var packed := PackedStringArray()
+	var raw: Variant = payload.get("flags", [])
+	if raw is Array or raw is PackedStringArray:
+		for item in raw:
+			packed.append(str(item))
+	var chapter_id := StringName(str(payload.get("chapter", "")))
+	if ChapterRunner.has_method("restore"):
+		ChapterRunner.restore(chapter_id, packed)
+		return
 	if "current_id" in ChapterRunner:
-		ChapterRunner.current_id = StringName(str(payload.get("chapter", "")))
+		ChapterRunner.current_id = chapter_id
 	if "flags" in ChapterRunner:
-		var packed := PackedStringArray()
-		var raw: Variant = payload.get("flags", [])
-		if raw is Array or raw is PackedStringArray:
-			for item in raw:
-				packed.append(str(item))
 		ChapterRunner.flags = packed
+
+
+func _treasury_dict() -> Dictionary:
+	var out := {
+		"marks": 0,
+		"horses": 2,
+		"cloth": 0,
+		"arms": 0,
+		"royal_escrow_marks": 0,
+		"royal_escrow_horses": 0,
+	}
+	var treasury: Variant = GameState.treasury() if GameState else null
+	if treasury != null and treasury.has_method("to_save"):
+		return treasury.to_save()
+	return out
+
+
+func _clock_dict() -> Dictionary:
+	var out := {
+		"segment": "paused",
+		"days_elapsed": 0,
+		"unfed_streak": 0,
+		"plazo_days_left": 9,
+	}
+	if CampaignClock != null and CampaignClock.has_method("to_save"):
+		return CampaignClock.to_save()
+	return out
+
+
+func _apply_treasury(raw: Variant) -> void:
+	if typeof(raw) != TYPE_DICTIONARY:
+		return
+	var treasury: Variant = GameState.treasury() if GameState else null
+	if treasury != null and treasury.has_method("from_save"):
+		treasury.from_save(raw)
+
+
+func _apply_clock(raw: Variant) -> void:
+	if typeof(raw) != TYPE_DICTIONARY:
+		return
+	if CampaignClock != null and CampaignClock.has_method("from_save"):
+		CampaignClock.from_save(raw)
 
 
 func _apply_roster(payload: Dictionary) -> void:
 	var roster: Variant = GameState.roster()
+	# Cold-start Cargar: HonorService.roster is null until a New Game in this process.
+	if roster == null and HonorService != null and (payload.has("mesnada") or payload.has("lanzas")):
+		HonorService.roster = MesnadaRoster.from_starting_seed()
+		roster = HonorService.roster
 	if roster == null:
 		return
 	if payload.has("lanzas") and "lanzas" in roster:

@@ -13,8 +13,15 @@ config_version=5
 config/name="Mio Cid"
 config/description="Isometric action-RPG campaign of the Cantar de Mio Cid."
 config/version="0.0.0"
-run/main_scene="res://content/chapters/_dev/arena.tscn"
+run/main_scene="res://game/ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
 
 [autoload]
 

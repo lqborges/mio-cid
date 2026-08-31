@@ -105,6 +105,23 @@ func _apply_flags(event: HonorEvent) -> void:
 	ChapterRunner.flags = flags
 
 
+func consider_name_empty() -> void:
+	if CampaignClock == null:
+		return
+	var streak_hard := 3
+	var captains_fail_below := 4
+	if TreasuryService and TreasuryService.has_method("tunable_int"):
+		streak_hard = TreasuryService.tunable_int("unfed_streak_hard", 3)
+		captains_fail_below = TreasuryService.tunable_int("named_captains_fail_below", 4)
+	if int(CampaignClock.unfed_streak) < streak_hard:
+		return
+	var living := 0
+	if roster != null and roster.has_method("living_named_captains"):
+		living = int(roster.living_named_captains())
+	if living < captains_fail_below:
+		EventBus.hard_fail.emit(&"name_empty")
+
+
 func _load_catalog() -> void:
 	catalog.clear()
 	if not FileAccess.file_exists(EVENTS_PATH):
