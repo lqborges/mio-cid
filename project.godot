@@ -25,6 +25,11 @@ CampaignClock="*res://game/autoload/campaign_clock.gd"
 TreasuryService="*res://game/autoload/treasury_service.gd"
 GameState="*res://game/autoload/game_state.gd"
 Loc="*res://game/autoload/loc.gd"
+DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/dialogue_manager/plugin.cfg")
 
 [internationalization]
 
