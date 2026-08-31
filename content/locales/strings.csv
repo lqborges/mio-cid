@@ -2,3 +2,8 @@ key,es,en
 _dev.smoke.child,"Las puertas de Burgos se cierran.","The gates of Burgos are shutting."
 _dev.smoke.alvar,"La mesnada está lista, mio Cid.","The warband is ready, my Cid."
 _dev.smoke.cid,"Campamos junto al río.","We camp by the river."
+a1_vivar.call_alvar,"Álvar.","Álvar."
+a1_vivar.alvar_here,"Aquí, mio Cid. El solar está vacío.","Here, my Cid. The solar is empty."
+a1_vivar.call_martin,"Martín.","Martín."
+a1_vivar.martin_here,"A vuestro servicio. Las arcas, idas.","At your service. The chests are gone."
+a1_vivar.empty_solar,"Nueve días. Cruzamos la frontera.","Nine days. We cross the frontier."

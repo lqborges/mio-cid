@@ -1,0 +1,10 @@
+# Spoken lines are CSV keys in content/locales/strings.csv (es default).
+# First-names call. Empty solar; chests already gone.
+
+~ start
+Cid: a1_vivar.call_alvar
+Álvar: a1_vivar.alvar_here
+Cid: a1_vivar.call_martin
+Martín: a1_vivar.martin_here
+Cid: a1_vivar.empty_solar [#flag_set=vivar_seen]
+=> END

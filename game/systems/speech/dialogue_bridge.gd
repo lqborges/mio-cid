@@ -30,9 +30,15 @@ func _on_got_dialogue(line: Variant) -> void:
 
 
 func _apply_honor(event_id: StringName) -> void:
-	if HonorService != null and HonorService.has_method("apply"):
-		HonorService.apply(event_id)
-	if EventBus != null and EventBus.has_signal("honor_logged"):
+	var applied := false
+	if HonorService != null:
+		if HonorService.has_method("apply_id"):
+			HonorService.apply_id(event_id)
+			applied = true
+		elif HonorService.has_method("apply"):
+			HonorService.call("apply", event_id)
+			applied = true
+	if not applied and EventBus != null and EventBus.has_signal("honor_logged"):
 		EventBus.honor_logged.emit(event_id)
 
 

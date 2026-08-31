@@ -139,7 +139,7 @@ class TestFeedAndClock(unittest.TestCase):
         stubs_block = source.split("STUBS = {", 1)[1].split("}", 1)[0]
         self.assertNotIn("CampaignClock", stubs_block)
         self.assertNotIn("TreasuryService", stubs_block)
-        self.assertIn("ChapterRunner", stubs_block)
+        self.assertNotIn("ChapterRunner", stubs_block)
 
     def test_godot_headless_camp_night_if_available(self) -> None:
         godot = None

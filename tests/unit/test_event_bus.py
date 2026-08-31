@@ -37,9 +37,7 @@ AUTOLOAD_SCRIPTS = {
     "Loc": "game/autoload/loc.gd",
     "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
 }
-STUBS = {
-    "ChapterRunner": "game/autoload/chapter_runner.gd",
-}
+STUBS = {}
 
 
 def _read(rel: str) -> str:

@@ -103,7 +103,7 @@ class TestCidController(unittest.TestCase):
 
     def test_project_boots_compatibility_16_9(self) -> None:
         text = _read("project.godot")
-        self.assertIn('run/main_scene="res://content/chapters/_dev/arena.tscn"', text)
+        self.assertIn('run/main_scene="res://game/ui/main_menu.tscn"', text)
         self.assertIn('renderer/rendering_method="gl_compatibility"', text)
         self.assertIn("GL Compatibility", text)
         self.assertNotIn("Forward Plus", text)

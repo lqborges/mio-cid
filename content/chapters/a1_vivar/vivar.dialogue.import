@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dg075ya6x3yle"
+path="res://.godot/imported/vivar.dialogue-29d13a3de4cbe93b0441bebfaaa9fe92.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_vivar/vivar.dialogue"
+dest_files=["res://.godot/imported/vivar.dialogue-29d13a3de4cbe93b0441bebfaaa9fe92.tres"]
+
+[params]
+
+defaults=true

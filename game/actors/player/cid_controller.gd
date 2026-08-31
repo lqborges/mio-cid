@@ -309,4 +309,12 @@ func _tick_cooldowns(delta: float) -> void:
 func _try_interact() -> void:
 	if interact_ray == null or not interact_ray.is_colliding():
 		return
-	# Chapter interactables (talk / gift / open) land here in later PRs.
+	var node := interact_ray.get_collider() as Node
+	while node:
+		if node.has_method("interact"):
+			node.call("interact")
+			return
+		if node.has_method("action"):
+			node.call("action")
+			return
+		node = node.get_parent()

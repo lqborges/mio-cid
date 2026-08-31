@@ -92,7 +92,7 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	draw_rect(bar, PARCHMENT, false, 1.5)
 	var font := ThemeDB.fallback_font
 	var font_size := 12
-	var label := LABELS[meter]
+	var label: String = str(LABELS[meter])
 	var text_w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	draw_string(
 		font,

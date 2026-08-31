@@ -80,6 +80,9 @@ func _first_empty_slot() -> int:
 
 
 func _enter_game() -> void:
+	if ChapterRunner and ChapterRunner.has_method("goto"):
+		ChapterRunner.goto(&"a1_vivar")
+		return
 	if ResourceLoader.exists(VIVAR_SCENE):
 		get_tree().change_scene_to_file(VIVAR_SCENE)
 		return

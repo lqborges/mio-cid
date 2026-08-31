@@ -92,6 +92,9 @@ jobs:
       - name: Run Python controller tests
         run: python3 tests/unit/test_cid_controller.py
 
+      - name: Run Python a1_vivar tests
+        run: python3 tests/unit/test_a1_vivar.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -131,6 +134,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_dialogue_bridge.gd
+
+      - name: Run a1_vivar prologue headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_vivar.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
