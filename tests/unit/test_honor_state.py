@@ -65,8 +65,8 @@ class TestHonorMeters(unittest.TestCase):
         self.assertIn("EventBus.hard_fail", impl)
         self.assertIn("state.reset()", impl)
         self.assertNotIn("_uncurable_honra", impl)
-        self.assertNotIn("Treasury", impl)
         self.assertNotIn("CidCombat", impl)
+        self.assertNotIn("camp_night", impl)
         state_src = _read("game/systems/honor/honor_state.gd")
         self.assertIsNone(re.search(r"^(@export )?var unfed_streak\b", state_src, re.MULTILINE))
 

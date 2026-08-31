@@ -120,7 +120,6 @@ func camp_night() -> Dictionary:
 
 
 func divide_booty(pile: Dictionary) -> Dictionary:
-	# TownHolding (PR-16) will call this; cheat/refuse fixtures need the fractions now.
 	if tunables.is_empty():
 		load_economy()
 	if state == null:

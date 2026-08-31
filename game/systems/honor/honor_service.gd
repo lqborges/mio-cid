@@ -106,17 +106,13 @@ func _apply_flags(event: HonorEvent) -> void:
 
 
 func consider_name_empty() -> void:
-	# unfed_streak lives only on CampaignClock. Thresholds from economy.json.
 	if CampaignClock == null:
 		return
 	var streak_hard := 3
 	var captains_fail_below := 4
-	var path := "res://data/economy.json"
-	if FileAccess.file_exists(path):
-		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
-		if parsed is Dictionary:
-			streak_hard = int(parsed.get("unfed_streak_hard", streak_hard))
-			captains_fail_below = int(parsed.get("named_captains_fail_below", captains_fail_below))
+	if TreasuryService and TreasuryService.has_method("tunable_int"):
+		streak_hard = TreasuryService.tunable_int("unfed_streak_hard", 3)
+		captains_fail_below = TreasuryService.tunable_int("named_captains_fail_below", 4)
 	if int(CampaignClock.unfed_streak) < streak_hard:
 		return
 	var living := 0

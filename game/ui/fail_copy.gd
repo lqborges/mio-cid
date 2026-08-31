@@ -28,7 +28,8 @@ func show_reason(reason: StringName) -> void:
 	if _line:
 		_line.text = str(COPY.get(reason, COPY[&"name_empty"]))
 	if _reason:
-		_reason.text = String(reason)
+		_reason.visible = OS.is_debug_build()
+		_reason.text = String(reason) if _reason.visible else ""
 
 
 func _on_reload() -> void:

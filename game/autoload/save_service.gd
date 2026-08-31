@@ -428,6 +428,10 @@ func _apply_clock(raw: Variant) -> void:
 
 func _apply_roster(payload: Dictionary) -> void:
 	var roster: Variant = GameState.roster()
+	# Cold-start Cargar: HonorService.roster is null until a New Game in this process.
+	if roster == null and HonorService != null and (payload.has("mesnada") or payload.has("lanzas")):
+		HonorService.roster = MesnadaRoster.from_starting_seed()
+		roster = HonorService.roster
 	if roster == null:
 		return
 	if payload.has("lanzas") and "lanzas" in roster:

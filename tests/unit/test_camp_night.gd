@@ -35,6 +35,7 @@ func _initialize() -> void:
 	failures.append_array(_test_refuse_through_third_unfed())
 	failures.append_array(_test_booty_horses_follow_fractions())
 	failures.append_array(_test_treasury_clock_save_roundtrip())
+	failures.append_array(_test_cold_start_roster_load())
 	_reset_campaign()
 	_finish(failures)
 
@@ -303,6 +304,40 @@ func _test_treasury_clock_save_roundtrip() -> PackedStringArray:
 		failures.append("loaded segment want CAMP_NIGHT")
 	if _clock.segment_id() != "camp_night":
 		failures.append("loaded segment_id want camp_night got %s" % _clock.segment_id())
+	return failures
+
+
+func _test_cold_start_roster_load() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_reset_campaign()
+	var roster: MesnadaRoster = MesnadaRoster.from_starting_seed()
+	_honor.roster = roster
+	var martin: MesnadaMember = roster.member(&"martin_antolinez")
+	if martin == null:
+		failures.append("cold-start seed missing Martín")
+		return failures
+	martin.alive = false
+	roster.lanzas = 6
+	if _save.save(2) != OK:
+		failures.append("cold-start save failed: %s" % _save.last_error)
+		return failures
+	_honor.roster = null
+	var loaded: Dictionary = _save.load(2)
+	if loaded.is_empty():
+		failures.append("cold-start load failed: %s" % _save.last_error)
+		return failures
+	var restored: Variant = _honor.roster
+	if restored == null:
+		failures.append("cold-start load must restore mesnada when HonorService.roster was null")
+		return failures
+	if restored.lanzas != 6:
+		failures.append("cold-start lanzas want 6 got %s" % restored.lanzas)
+	var again: MesnadaMember = restored.member(&"martin_antolinez")
+	if again == null or again.alive:
+		failures.append("cold-start Martín must stay dead")
+	var alvar: MesnadaMember = restored.member(&"alvar_fanez")
+	if alvar == null or not alvar.alive:
+		failures.append("cold-start Álvar must still ride")
 	return failures
 
 

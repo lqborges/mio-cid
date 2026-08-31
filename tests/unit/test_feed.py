@@ -40,7 +40,8 @@ class TestFeedAndClock(unittest.TestCase):
         self.assertEqual(data["quinto_fraction"], 0.2)
         self.assertEqual(data["mesnada_fraction"], 0.4)
         self.assertEqual(data["treasury_fraction"], 0.4)
-        self.assertEqual(data["camp_unfed_onores"], -8)
+        self.assertNotIn("camp_fed_onores", data)
+        self.assertNotIn("camp_unfed_onores", data)
         self.assertEqual(data["unfed_streak_hard"], 3)
         self.assertEqual(data["named_captains_fail_below"], 4)
         self.assertTrue(data["horses_follow_fractions"])
@@ -74,7 +75,8 @@ class TestFeedAndClock(unittest.TestCase):
         self.assertIsNone(re.search(r"^(@export )?var unfed_streak\b", honor, re.MULTILINE))
         service = _read("game/systems/honor/honor_service.gd")
         self.assertIn("CampaignClock.unfed_streak", service)
-        self.assertNotIn("Treasury", service)
+        self.assertIn("TreasuryService.tunable_int", service)
+        self.assertNotIn("economy.json", service)
 
     def test_advance_plazo_never_calls_camp_night(self) -> None:
         source = _read("game/autoload/campaign_clock.gd")

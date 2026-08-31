@@ -4,6 +4,7 @@ const VIVAR_SCENE := "res://content/chapters/a1_vivar/world.tscn"
 
 @onready var _status: Label = $Center/Status
 @onready var _slots: HBoxContainer = $Center/Slots
+var _overwrite_armed: bool = false
 
 
 func _ready() -> void:
@@ -17,14 +18,25 @@ func _ready() -> void:
 
 
 func _on_new_game() -> void:
+	var slot := _first_empty_slot()
+	if slot == 0:
+		if not _overwrite_armed:
+			_overwrite_armed = true
+			if _status:
+				_status.text = "¿Sobrescribir hueco 1?"
+			return
+		slot = 1
+	_overwrite_armed = false
 	_reset_campaign()
 	if SaveService:
-		SaveService.save(1)
+		SaveService.save(slot)
 		SaveService.autosave()
+	_rebuild_slots()
 	_enter_game()
 
 
 func _on_load_pressed() -> void:
+	_overwrite_armed = false
 	_rebuild_slots()
 	_slots.visible = not _slots.visible
 
@@ -56,6 +68,15 @@ func _reset_campaign() -> void:
 		ChapterRunner.current_id = &"a1_vivar"
 	if ChapterRunner and "flags" in ChapterRunner:
 		ChapterRunner.flags = PackedStringArray()
+
+
+func _first_empty_slot() -> int:
+	if SaveService == null or not SaveService.has_method("slot_exists"):
+		return 1
+	for slot in range(1, 6):
+		if not SaveService.slot_exists(slot):
+			return slot
+	return 0
 
 
 func _enter_game() -> void:
