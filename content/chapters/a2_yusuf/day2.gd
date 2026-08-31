@@ -41,6 +41,7 @@ func _ready() -> void:
 	_name_horse()
 	_label_jimena()
 	_bind_yusuf()
+	_connect_yusuf()
 	_connect_charge_zone()
 	_connect_climb_zone()
 	_show_place_name()
@@ -55,8 +56,15 @@ func play_cinematic() -> bool:
 	_whisper(WATCH_KEY)
 	var player: AnimationPlayer = get_node_or_null("Day2Cinematic") as AnimationPlayer
 	if player and player.has_animation("watch"):
+		if not player.animation_finished.is_connected(_on_watch_finished):
+			player.animation_finished.connect(_on_watch_finished)
+		_set_cid_frozen(true)
 		player.play("watch")
 	return true
+
+
+func _on_watch_finished(_anim: StringName = &"") -> void:
+	return_to_cid_camera()
 
 
 func start_charge(_cue: String = "charge") -> void:
@@ -117,6 +125,13 @@ func look_from_wall() -> bool:
 
 
 func return_to_cid_camera() -> void:
+	_set_cid_frozen(false)
+	var player: AnimationPlayer = get_node_or_null("Day2Cinematic") as AnimationPlayer
+	if player:
+		if player.animation_finished.is_connected(_on_watch_finished):
+			player.animation_finished.disconnect(_on_watch_finished)
+		if player.is_playing():
+			player.stop()
 	var cid_cam: Camera3D = get_node_or_null("Cid/CameraRig/Camera3D") as Camera3D
 	if cid_cam:
 		cid_cam.current = true
@@ -174,7 +189,7 @@ func _leave_for_embassy3() -> bool:
 	var tree := get_tree()
 	if tree == null or tree.current_scene != self:
 		return travelled
-	# Embassy 3 is PR-27c; do not change_scene onto a missing beat.
+	# Embassy 3's scene may be absent.
 	if not ResourceLoader.exists(EMBASSY3_SCENE):
 		return travelled
 	if ChapterRunner and ChapterRunner.has_method("goto"):
@@ -214,6 +229,22 @@ func _on_charge_entered(body: Node) -> void:
 	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
 		start_charge()
 		complete_resolve()
+
+
+func _connect_yusuf() -> void:
+	var node: Node = get_node_or_null("Host/Yusuf")
+	if node == null:
+		return
+	var hurt: Node = node.get_node_or_null("HurtBox")
+	if hurt == null or not hurt.has_signal("died"):
+		return
+	if not hurt.died.is_connected(_on_yusuf_died):
+		hurt.died.connect(_on_yusuf_died)
+
+
+func _on_yusuf_died() -> void:
+	start_charge()
+	complete_resolve()
 
 
 func _connect_climb_zone() -> void:
@@ -354,3 +385,11 @@ func _whisper(key: String) -> void:
 		return
 	if whisper and Loc and whisper.has_method("_show"):
 		whisper.call("_show", Loc.text(key))
+
+
+func _set_cid_frozen(frozen: bool) -> void:
+	var mode := Node.PROCESS_MODE_DISABLED if frozen else Node.PROCESS_MODE_INHERIT
+	for path in ["Cid", "Horse"]:
+		var node: Node = get_node_or_null(path)
+		if node:
+			node.process_mode = mode

@@ -468,8 +468,11 @@ func _check_day2_scene(world: Node) -> PackedStringArray:
 		failures.append("day2 missing Jimena")
 	if world.get_node_or_null("WallWalk") == null:
 		failures.append("day2 missing WallWalk")
-	if world.get_node_or_null("Day2Cinematic") == null:
+	var cinematic: AnimationPlayer = world.get_node_or_null("Day2Cinematic") as AnimationPlayer
+	if cinematic == null:
 		failures.append("day2 missing Day2Cinematic")
+	elif cinematic.animation_finished.get_connections().size() == 0 and not bool(world.get("_charged")):
+		failures.append("day2 cinematic must listen for animation_finished")
 	if world.find_child("HallWhisper", true, false) == null:
 		failures.append("day2 missing HallWhisper")
 	if world.find_child("HonorMeters", true, false) == null:
@@ -485,6 +488,13 @@ func _check_day2_scene(world: Node) -> PackedStringArray:
 	var charge: Area3D = world.get_node_or_null("ChargeZone") as Area3D
 	if charge and (charge.collision_mask & 130) != 130:
 		failures.append("ChargeZone must listen for player and horse, mask %s" % charge.collision_mask)
+	if charge:
+		var shape_node: CollisionShape3D = charge.get_node_or_null("CollisionShape3D") as CollisionShape3D
+		var box: BoxShape3D = null
+		if shape_node and shape_node.shape is BoxShape3D:
+			box = shape_node.shape as BoxShape3D
+		if box == null or box.size.x < 48.0:
+			failures.append("ChargeZone must span the fight corridor, size %s" % (box.size if box else "missing"))
 	if world.has_method("is_scripted_day2") and not bool(world.is_scripted_day2()):
 		failures.append("day2 must report is_scripted_day2")
 	if bool(world.get("_resolved")):

@@ -70,7 +70,7 @@ radius = 0.38
 height = 1.7
 
 [sub_resource type="BoxShape3D" id="Box_charge"]
-size = Vector3(12, 2.4, 6)
+size = Vector3(52, 8, 6)
 
 [sub_resource type="BoxShape3D" id="Box_climb"]
 size = Vector3(18, 2.4, 4)

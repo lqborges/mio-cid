@@ -36,13 +36,15 @@
     },
     {
       "id": "yusuf_day2",
-      "type": "honor_event"
+      "type": "honor_event",
+      "skip_if": ["yusuf_day2_done"]
     },
     {
       "id": "leave",
       "type": "travel_spawn",
       "next": "a2_embassy3",
-      "set_flags": ["yusuf_day2_done"]
+      "set_flags": ["yusuf_day2_done"],
+      "skip_if": ["yusuf_day2_done"]
     }
   ]
 }

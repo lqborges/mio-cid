@@ -184,6 +184,8 @@ class TestA2YusufDay1(unittest.TestCase):
         world_script = _read(f"{CHAPTER}/world.gd")
         self.assertIn("day1.gd", world_script)
         self.assertIn("day2.tscn", world_script)
+        self.assertIn("create_timer", world_script)
+        self.assertIn("DAY2_HOLD_SEC", world_script)
         runner = _read("game/autoload/chapter_runner.gd")
         self.assertIn("res://content/chapters/a2_yusuf/world.tscn", runner)
         self.assertIn('&"a2_yusuf"', runner)
@@ -311,6 +313,13 @@ class TestA2YusufDay1(unittest.TestCase):
         self.assertIn("yusuf_day1_done", flags)
         self.assertIn("yusuf_day2_done", flags)
         self.assertIn("a2_embassy3", next_ids)
+        for step in beats["steps"]:
+            if isinstance(step, dict) and step.get("id") in ("yusuf_day2", "leave"):
+                self.assertIn(
+                    "yusuf_day2_done",
+                    step.get("skip_if", []),
+                    step.get("id"),
+                )
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
         self.assertIn(("a2_embassy2", "a2_yusuf"), pairs)
@@ -430,6 +439,9 @@ class TestA2YusufDay2(unittest.TestCase):
         self.assertIn("func start_charge", source)
         self.assertIn("func complete_resolve", source)
         self.assertIn("func play_cinematic", source)
+        self.assertIn("animation_finished", source)
+        self.assertIn("return_to_cid_camera", source)
+        self.assertIn("_on_yusuf_died", source)
         self.assertIn("yusuf_day2", source)
         self.assertIn("yusuf_day2_done", source)
         self.assertIn("func jimena_on_wall", source)
@@ -480,6 +492,8 @@ class TestA2YusufDay2(unittest.TestCase):
                 _aabb_overlap(horse_min, horse_max, zmin, zmax),
                 f"{node_name} overlaps Horse spawn {horse}",
             )
+        charge_size = _subresource_size(scene, "Box_charge")
+        self.assertGreaterEqual(charge_size[0], 48.0)
         yusuf = _origin(scene, "Yusuf")
         self.assertGreater(abs(cid[2] - yusuf[2]), 4.0)
 
