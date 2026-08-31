@@ -34,9 +34,12 @@ func advance() -> bool:
 	var raw: Variant = steps[step_index]
 	if not raw is Dictionary:
 		return false
+	var source_id := beat_id
 	if not run_step(raw):
 		return false
-	step_index += 1
+	# travel() already called start() on this director; do not skip dest step 0.
+	if beat_id == source_id:
+		step_index += 1
 	return true
 
 

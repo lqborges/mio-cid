@@ -176,6 +176,10 @@ func _test_advance_retries_failed_travel() -> PackedStringArray:
 	_runner.add_flag("vivar_seen")
 	if not director.advance():
 		failures.append("travel_spawn should succeed after vivar_seen")
+	if String(director.beat_id) != "a1_burgos":
+		failures.append("successful travel_spawn must start destination beat")
+	if int(director.step_index) != 0:
+		failures.append("successful travel_spawn must leave destination step_index at 0")
 	return failures
 
 

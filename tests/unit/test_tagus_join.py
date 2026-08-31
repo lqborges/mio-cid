@@ -104,6 +104,8 @@ class TestChapterGraph(unittest.TestCase):
         self.assertIsNotNone(advance)
         body = advance.group("body")
         self.assertLess(body.find("run_step"), body.find("step_index += 1"))
+        self.assertIn("source_id", body)
+        self.assertIn("beat_id == source_id", body)
         menu = _read("game/ui/main_menu.gd")
         self.assertIn("ChapterRunner.reset()", menu)
         save_src = _read("game/autoload/save_service.gd")
