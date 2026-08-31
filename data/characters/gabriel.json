@@ -1,0 +1,17 @@
+{
+  "id": "gabriel",
+  "display_name_key": "char.gabriel",
+  "role": "ally",
+  "combat": 0,
+  "birth": 0,
+  "diplomacy": 0,
+  "mesura_max": 0,
+  "loyalty_0": 1.0,
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": true,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_navapalos",
+  "vo_id": "gabriel"
+}

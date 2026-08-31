@@ -1,0 +1,309 @@
+[gd_scene load_steps=22 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_navapalos/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="6_bridge"]
+[ext_resource type="Script" path="res://content/chapters/a1_navapalos/sleep_bed.gd" id="7_bed"]
+[ext_resource type="Script" path="res://content/chapters/a1_navapalos/gabriel.gd" id="8_gabriel"]
+
+[sub_resource type="Environment" id="Environment_navapalos"]
+background_mode = 1
+background_color = Color(0.10, 0.12, 0.18, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.38, 0.36, 0.42, 1)
+ambient_light_energy = 0.32
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.46, 0.36, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ridge"]
+albedo_color = Color(0.32, 0.30, 0.34, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_tent"]
+albedo_color = Color(0.40, 0.32, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_cloak"]
+albedo_color = Color(0.22, 0.26, 0.36, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_fig"]
+albedo_color = Color(0.16, 0.22, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ember"]
+albedo_color = Color(0.55, 0.28, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_gabriel"]
+albedo_color = Color(0.78, 0.80, 0.88, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_gabriel"]
+radius = 0.38
+height = 1.85
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_gabriel")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_gabriel"]
+radius = 0.38
+height = 1.85
+
+[sub_resource type="BoxShape3D" id="Box_bed"]
+size = Vector3(1.8, 0.5, 1.0)
+
+[sub_resource type="BoxShape3D" id="Box_sleep"]
+size = Vector3(3.2, 2.0, 3.2)
+
+[sub_resource type="Animation" id="Animation_sleep"]
+resource_name = "sleep"
+length = 1.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("DreamCamera:rotation_degrees")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1.6),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector3(-18, 40, 0), Vector3(-28, 48, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("HUD/Fade:color")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.45, 1.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(0.04, 0.05, 0.1, 0), Color(0.04, 0.05, 0.1, 0.72), Color(0.04, 0.05, 0.1, 0.2)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_sleep"]
+_data = {
+&"sleep": SubResource("Animation_sleep")
+}
+
+[node name="Navapalos" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_navapalos")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(0.62, 0.68, 0.82, 1)
+light_energy = 0.42
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(32, 1, 30)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RidgeNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -14.4)
+size = Vector3(28, 3.2, 1.6)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RidgeSouth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 14.4)
+size = Vector3(28, 2.2, 1.2)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RidgeWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -15, 1.2, 0)
+size = Vector3(1.4, 2.8, 28)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RidgeEast" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 1.2, 0)
+size = Vector3(1.4, 2.8, 28)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Path" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 2)
+size = Vector3(3.2, 0.08, 16)
+material = SubResource("Mat_floor")
+
+[node name="RockA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 0.35, 3.4)
+size = Vector3(1.4, 0.7, 1.1)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RockB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8, 0.28, 4.2)
+size = Vector3(1.1, 0.56, 0.9)
+material = SubResource("Mat_ridge")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentA" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 0, -3.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="TentA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+size = Vector3(3.4, 2.2, 3.2)
+material = SubResource("Mat_tent")
+
+[node name="Door" type="CSGBox3D" parent="TentA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 1.6)
+operation = 2
+size = Vector3(1.2, 1.6, 0.6)
+material = SubResource("Mat_tent")
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.0, 0.9, -2.6)
+size = Vector3(2.8, 1.8, 2.6)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cloak" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.14, -8)
+size = Vector3(1.8, 0.28, 0.9)
+material = SubResource("Mat_cloak")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="EmberPit" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.12, -4.4)
+radius = 0.55
+height = 0.24
+sides = 8
+material = SubResource("Mat_ember")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="FigTree" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.2, 2.2, -6.4)
+radius = 0.7
+height = 4.4
+sides = 8
+cone = true
+material = SubResource("Mat_fig")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 9)
+
+[node name="Gabriel" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, -7.1)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("8_gabriel")
+character_id = &"gabriel"
+cue = "dream"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Gabriel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+mesh = SubResource("CapsuleMesh_gabriel")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Gabriel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+shape = SubResource("CapsuleShape_gabriel")
+
+[node name="Name" type="Label3D" parent="Gabriel"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Gabriel"
+modulate = Color(0.86, 0.88, 0.94, 1)
+outline_modulate = Color(0.12, 0.12, 0.16, 1)
+font_size = 36
+
+[node name="CloakBed" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -8)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_bed")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CloakBed"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+shape = SubResource("Box_bed")
+
+[node name="SleepZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -8)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SleepZone"]
+shape = SubResource("Box_sleep")
+
+[node name="DreamCamera" type="Camera3D" parent="."]
+transform = Transform3D(0.766044, -0.219846, 0.604023, 0, 0.939693, 0.34202, -0.642788, -0.262003, 0.719846, 4.2, 3.6, -4.2)
+current = false
+fov = 34.0
+keep_aspect = 1
+
+[node name="SleepCinematic" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_sleep")
+}
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("6_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
+
+[node name="Fade" type="ColorRect" parent="HUD"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.1, 0)

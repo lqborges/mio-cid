@@ -224,7 +224,7 @@ class TestA1CardenaFarewell(unittest.TestCase):
         self.assertFalse(can_travel(graph, "a1_cardena", "a1_burgos", locked))
         self.assertFalse(can_travel(graph, "a1_cardena", "a1_arcas", locked))
         self.assertFalse(can_travel(graph, "a1_vivar", "a1_navapalos", locked))
-        self.assertFalse(
+        self.assertTrue(
             (ROOT / "content/chapters/a1_navapalos/world.tscn").is_file()
         )
 

@@ -1,0 +1,9 @@
+# Spoken lines are CSV keys. Gabriel then Cid, separate speakers.
+
+~ start
+=> dream
+
+~ dream
+Gabriel: a1_navapalos.gabriel_dream
+Cid: a1_navapalos.sleep
+=> END

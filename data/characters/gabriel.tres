@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"gabriel"
+display_name_key = &"char.gabriel"
+poem_formula_key = &""
+role = &"ally"
+combat = 0.0
+birth = 0.0
+diplomacy = 0.0
+mesura_max = 0.0
+loyalty = 1.0
+gift_bias = &""
+alive = true
+essential = false
+desertion_capable = false
+unkillable = true
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a1_navapalos"
+must_survive_until = &""
+vo_id = &"gabriel"
+will_swear_riepto = true

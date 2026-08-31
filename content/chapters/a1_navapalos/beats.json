@@ -1,0 +1,20 @@
+{
+  "id": "a1_navapalos",
+  "steps": [
+    {
+      "id": "sleep",
+      "type": "cinematic"
+    },
+    {
+      "id": "dream",
+      "type": "dialogue",
+      "file": "res://content/chapters/a1_navapalos/navapalos.dialogue",
+      "start": "dream"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a1_castejon"
+    }
+  ]
+}

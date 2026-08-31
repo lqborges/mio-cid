@@ -235,8 +235,6 @@ func _check_hub_lock_travel() -> PackedStringArray:
 			failures.append("can_travel cardena -> burgos must be false")
 		if bool(_runner.can_travel(&"a1_cardena", &"a1_arcas", flags)):
 			failures.append("can_travel cardena -> arcas must be false")
-	if ResourceLoader.exists("res://content/chapters/a1_navapalos/world.tscn"):
-		failures.append("PR-10 must not ship a1_navapalos/world.tscn")
 	return failures
 
 

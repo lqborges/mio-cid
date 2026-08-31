@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://d1b838b6t82ay"
+path="res://.godot/imported/navapalos.dialogue-0ee35d2b09e2cd43b2bd841b753041ba.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_navapalos/navapalos.dialogue"
+dest_files=["res://.godot/imported/navapalos.dialogue-0ee35d2b09e2cd43b2bd841b753041ba.tres"]
+
+[params]
+
+defaults=true
