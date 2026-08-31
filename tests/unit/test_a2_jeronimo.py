@@ -145,6 +145,7 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         self.assertIn("AppointZone", scene)
         self.assertIn("CageZone", scene)
         self.assertIn("EmbassyExit", scene)
+        self.assertIn("ToEmbassy", scene)
         self.assertIn("Altar", scene)
         self.assertIn("Anvil", scene)
         self.assertIn("SolarBed", scene)
@@ -187,6 +188,19 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
                 _aabb_overlap(horse_min, horse_max, zmin, zmax),
                 f"{node_name} overlaps Horse spawn {horse}",
             )
+        cage_min, cage_max = _zone_aabb(scene, "CageZone", "Box_cage")
+        exit_min, exit_max = _zone_aabb(scene, "EmbassyExit", "Box_embassy")
+        self.assertFalse(
+            _aabb_overlap(cage_min, cage_max, exit_min, exit_max),
+            "EmbassyExit must sit on a plaza edge, not the lion cage",
+        )
+        cage = _origin(scene, "CageZone")
+        exit_pos = _origin(scene, "EmbassyExit")
+        self.assertGreater(
+            abs(exit_pos[0] - cage[0]) + abs(exit_pos[2] - cage[2]),
+            12.0,
+            f"EmbassyExit {exit_pos} too close to CageZone {cage}",
+        )
 
     def test_honor_and_character_json(self) -> None:
         payload = json.loads(_read("data/honor_events/jeronimo.json"))
@@ -216,6 +230,8 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         self.assertIn("func try_open_cage", source)
         self.assertIn("func is_cage_closed", source)
         self.assertIn("func travel_to_embassy2", source)
+        self.assertIn("_restore_avengalvon_if_ready", source)
+        self.assertIn("avengalvon_recruited", source)
         self.assertIn("apply_name", source)
         self.assertIn("babieca", source)
         self.assertIn("jeronimo_appointed", source)

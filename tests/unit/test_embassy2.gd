@@ -45,6 +45,7 @@ func _run() -> void:
 	failures.append_array(_check_thirty_horses_refused_below_herd())
 	failures.append_array(_check_escrow_spent_first())
 	failures.append_array(_check_ten_horses_and_return_to_hub())
+	failures.append_array(_check_avengalvon_survives_save_load())
 	failures.append_array(_check_family_joins_hub())
 	failures.append_array(_check_graph_spine())
 	failures.append_array(_check_later_beats_not_shipped())
@@ -365,6 +366,52 @@ func _check_ten_horses_and_return_to_hub() -> PackedStringArray:
 	return failures
 
 
+func _check_avengalvon_survives_save_load() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var save: Node = get_root().get_node_or_null(NodePath("SaveService"))
+	if save == null or not save.has_method("autosave") or not save.has_method("apply_payload"):
+		failures.append("SaveService.autosave/apply_payload missing")
+		return failures
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("save-load: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	_treasury.state.horses = 18
+	_treasury.state.royal_escrow_horses = 8
+	if world.call("run_gift", &"ten_horses") == null:
+		failures.append("save-load run_gift failed")
+		world.free()
+		return failures
+	if save.autosave() != OK:
+		failures.append("autosave after gift failed: %s" % save.last_error)
+		world.free()
+		return failures
+	_honor.roster = MesnadaRoster.from_starting_seed()
+	if _honor.roster.member(&"avengalvon") != null:
+		failures.append("starting seed must not include Avengalvón")
+		world.free()
+		return failures
+	var payload: Dictionary = save.call("_verified_payload", save.autosave_path())
+	if payload.is_empty():
+		failures.append("autosave payload missing after gift")
+		world.free()
+		return failures
+	save.apply_payload(payload)
+	var member: Variant = _honor.roster.member(&"avengalvon")
+	if member == null:
+		failures.append("Cargar must keep Avengalvón after embassy 2")
+	else:
+		if not bool(member.essential):
+			failures.append("loaded Avengalvón must stay essential")
+		if String(member.must_survive_until) != "a3_despedida":
+			failures.append("loaded Avengalvón must_survive_until want a3_despedida got %s" % member.must_survive_until)
+	world.free()
+	return failures
+
+
 func _check_family_joins_hub() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_prep_campaign_at(
@@ -394,6 +441,13 @@ func _check_family_joins_hub() -> PackedStringArray:
 		failures.append("hub missing Elvira after embassy2_done")
 	if hub.get_node_or_null("Sol") == null:
 		failures.append("hub missing Sol after embassy2_done")
+	var hub_roster: Variant = _honor.get("roster") if _honor else null
+	if hub_roster == null or hub_roster.member(&"avengalvon") == null:
+		failures.append("hub must restore Avengalvón when avengalvon_recruited")
+	else:
+		var kept: Variant = hub_roster.member(&"avengalvon")
+		if not bool(kept.essential) or String(kept.must_survive_until) != "a3_despedida":
+			failures.append("hub Avengalvón must stay essential through a3_despedida")
 	hub.free()
 	_prep_campaign_at(&"a2_jeronimo", PackedStringArray(["hub_lock_cardena", "horse_companion", "colada_acquired", "valencia_held"]))
 	packed = load(HUB)

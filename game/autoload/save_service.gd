@@ -474,7 +474,16 @@ func _apply_roster(payload: Dictionary) -> void:
 		if typeof(row) != TYPE_DICTIONARY:
 			continue
 		var data: Dictionary = row
-		var member: Variant = roster.member(StringName(str(data.get("id", ""))))
+		var member_id := StringName(str(data.get("id", "")))
+		if member_id == &"":
+			continue
+		var member: Variant = roster.member(member_id)
+		if member == null and roster.has_method("add_member"):
+			# Recruits (Avengalvón, Jerónimo) are not in the destierro seed.
+			var added := MesnadaMember.from_id(member_id)
+			if added != null:
+				roster.add_member(added)
+				member = roster.member(member_id)
 		if member == null:
 			continue
 		if "loyalty" in member and data.has("loyalty"):

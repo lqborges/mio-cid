@@ -193,6 +193,11 @@ class TestEmbassy2EscortAndGift(unittest.TestCase):
         self.assertIn("func join_family", hub)
         self.assertIn("func family_in_hub", hub)
         self.assertIn("embassy2_done", hub)
+        self.assertIn("_restore_avengalvon_if_ready", hub)
+        self.assertIn("avengalvon_recruited", hub)
+        save = _read("game/autoload/save_service.gd")
+        self.assertIn("add_member", save)
+        self.assertIn("MesnadaMember.from_id", save)
 
     def test_scene_is_cheap_greybox_medinaceli_road(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")

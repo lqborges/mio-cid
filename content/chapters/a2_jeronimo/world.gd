@@ -49,6 +49,7 @@ func _ready() -> void:
 	_name_horse()
 	_label_npc()
 	_join_family_if_ready()
+	_restore_avengalvon_if_ready()
 	_whisper(ARRIVE_KEY)
 	intro_played = true
 
@@ -155,6 +156,19 @@ func _join_family_if_ready() -> void:
 		join_family()
 
 
+func _restore_avengalvon_if_ready() -> void:
+	if not _has_flag(&"avengalvon_recruited"):
+		return
+	var roster: Variant = _roster()
+	if roster == null or not roster.has_method("add_member"):
+		return
+	if roster.has_method("member") and roster.member(&"avengalvon") != null:
+		return
+	var member := MesnadaMember.from_id(&"avengalvon")
+	if member:
+		roster.add_member(member)
+
+
 func _spawn_family_capsule(
 	node_name: String,
 	character_id: StringName,
@@ -235,6 +249,9 @@ func _label_npc() -> void:
 	var label: Label3D = get_node_or_null("Jeronimo/Name") as Label3D
 	if label:
 		label.text = _loc("char.jeronimo")
+	var exit_label: Label3D = get_node_or_null("ToEmbassy") as Label3D
+	if exit_label:
+		exit_label.text = _loc("a2_jeronimo.to_embassy")
 
 
 func _recruit_jeronimo() -> void:
