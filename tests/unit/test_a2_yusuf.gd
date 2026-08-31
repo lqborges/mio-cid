@@ -1,5 +1,5 @@
 extends SceneTree
-## Headless a2_yusuf day-1 field battle test (gdUnit4 is still a placeholder).
+## Headless a2_yusuf day-1 field + day-2 scripted charge (gdUnit4 is still a placeholder).
 ## Run: godot --headless --path . --audio-driver Dummy -s res://tests/unit/test_a2_yusuf.gd
 
 const WORLD := "res://content/chapters/a2_yusuf/world.tscn"
@@ -13,6 +13,9 @@ const WIN_KEY := "a2_yusuf.win"
 const WALL_KEY := "a2_yusuf.wall_refused"
 const PLACE_KEY := "a2_yusuf.place_name"
 const HORSE_KEY := "a2_jeronimo.horse_name"
+const DAY2_WATCH_KEY := "a2_yusuf.day2_watch"
+const DAY2_CHARGE_KEY := "a2_yusuf.day2_charge"
+const DAY2_WIN_KEY := "a2_yusuf.day2_win"
 
 var _honor: Variant
 var _treasury: Variant
@@ -53,7 +56,8 @@ func _run() -> void:
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_win_stays_on_yusuf())
 	failures.append_array(_check_graph_spine())
-	failures.append_array(_check_day2_not_shipped())
+	failures.append_array(_check_embassy3_not_shipped())
+	failures.append_array(await _check_day2_scripted())
 	_finish(failures)
 
 
@@ -289,6 +293,21 @@ func _check_spanish_copy() -> PackedStringArray:
 	var horse := str(_loc.call("text", HORSE_KEY))
 	if horse.to_lower().find("babieca") < 0:
 		failures.append("horse loc want Babieca got %s" % horse)
+	var watch2 := str(_loc.call("text", DAY2_WATCH_KEY))
+	if watch2 == DAY2_WATCH_KEY or watch2.is_empty():
+		failures.append("Loc did not resolve a2_yusuf.day2_watch")
+	if not watch2.to_lower().contains("jimena"):
+		failures.append("day 2 watch copy must name Jimena, got %s" % watch2)
+	var charge := str(_loc.call("text", DAY2_CHARGE_KEY))
+	if charge == DAY2_CHARGE_KEY or charge.is_empty():
+		failures.append("Loc did not resolve a2_yusuf.day2_charge")
+	if not charge.to_lower().contains("carga") and not charge.to_lower().contains("charge"):
+		failures.append("day 2 charge copy must name the carga, got %s" % charge)
+	var win2 := str(_loc.call("text", DAY2_WIN_KEY))
+	if win2 == DAY2_WIN_KEY or win2.is_empty():
+		failures.append("Loc did not resolve a2_yusuf.day2_win")
+	if not win2.to_lower().contains("jimena"):
+		failures.append("day 2 win copy must name Jimena, got %s" % win2)
 	return failures
 
 
@@ -400,13 +419,228 @@ func _check_graph_spine() -> PackedStringArray:
 	return failures
 
 
-func _check_day2_not_shipped() -> PackedStringArray:
+func _check_embassy3_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(DAY2):
-		failures.append("a2_yusuf/day2.tscn must not ship in this PR")
+	if not ResourceLoader.exists(DAY2):
+		failures.append("a2_yusuf/day2.tscn must exist")
 	if ResourceLoader.exists(EMBASSY3):
 		failures.append("a2_embassy3 must not ship in this PR")
 	return failures
+
+
+func _check_day2_scripted() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_day2()
+	var packed: Resource = load(DAY2)
+	if packed == null or not (packed is PackedScene):
+		failures.append("a2_yusuf/day2.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	if world == null:
+		failures.append("day2 did not instantiate")
+		return failures
+	get_root().add_child(world)
+	failures.append_array(_check_day2_scene(world))
+	failures.append_array(_check_day2_not_encounter(world))
+	failures.append_array(_check_day2_jimena(world))
+	failures.append_array(await _check_day2_spawn_idle(world))
+	failures.append_array(_check_day2_one_charge(world))
+	world.free()
+	failures.append_array(_check_day2_resolve())
+	return failures
+
+
+func _check_day2_scene(world: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if world.get_node_or_null("Cid") == null:
+		failures.append("day2 missing Cid")
+	if world.get_node_or_null("Horse") == null:
+		failures.append("day2 missing Horse")
+	if world.get_node_or_null("Horse/CavalryCharge") == null:
+		failures.append("day2 Horse missing CavalryCharge")
+	if world.get_node_or_null("ChargeZone") == null:
+		failures.append("day2 missing ChargeZone")
+	if world.get_node_or_null("ClimbZone") == null:
+		failures.append("day2 missing ClimbZone")
+	if world.get_node_or_null("Host/Yusuf") == null:
+		failures.append("day2 missing Yusuf")
+	if world.get_node_or_null("Jimena") == null:
+		failures.append("day2 missing Jimena")
+	if world.get_node_or_null("WallWalk") == null:
+		failures.append("day2 missing WallWalk")
+	if world.get_node_or_null("Day2Cinematic") == null:
+		failures.append("day2 missing Day2Cinematic")
+	if world.find_child("HallWhisper", true, false) == null:
+		failures.append("day2 missing HallWhisper")
+	if world.find_child("HonorMeters", true, false) == null:
+		failures.append("day2 missing HonorMeters")
+	var lights := world.find_children("*", "DirectionalLight3D", true, false)
+	if lights.size() != 1:
+		failures.append("day2 must have exactly 1 DirectionalLight3D, has %d" % lights.size())
+	if world.find_children("*", "GPUParticles3D", true, false).size() != 0:
+		failures.append("day2 has GPUParticles3D")
+	var env: WorldEnvironment = world.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if env == null or env.environment == null or env.environment.sdfgi_enabled:
+		failures.append("day2 sdfgi must be off")
+	var charge: Area3D = world.get_node_or_null("ChargeZone") as Area3D
+	if charge and (charge.collision_mask & 130) != 130:
+		failures.append("ChargeZone must listen for player and horse, mask %s" % charge.collision_mask)
+	if world.has_method("is_scripted_day2") and not bool(world.is_scripted_day2()):
+		failures.append("day2 must report is_scripted_day2")
+	if bool(world.get("_resolved")):
+		failures.append("day2 resolved during _ready")
+	return failures
+
+
+func _check_day2_not_encounter(world: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if world.get_node_or_null("FieldZone") != null:
+		failures.append("day2 must not ship a FieldZone encounter")
+	if world.get_node_or_null("Mesnada") != null:
+		failures.append("day2 must not ship a Mesnada encounter director")
+	if world.get_node_or_null("Host/Dummy1") != null:
+		failures.append("day2 must not ship Dummy1-4; one charge target only")
+	var host: Node = world.get_node_or_null("Host")
+	if host and host.get_child_count() != 1:
+		failures.append("day2 Host want 1 body (Yusuf), got %s" % host.get_child_count())
+	if world.has_method("run_field"):
+		failures.append("day2 must not be a second run_field encounter")
+	if not world.has_method("run_charge"):
+		failures.append("day2 missing run_charge")
+	if not world.has_method("start_charge"):
+		failures.append("day2 missing start_charge")
+	if not world.has_method("complete_resolve"):
+		failures.append("day2 missing complete_resolve")
+	if not world.has_method("can_storm_wall") or bool(world.can_storm_wall()):
+		failures.append("day2 must not be a wall climb")
+	world.try_storm_wall()
+	if bool(world.get("_resolved")):
+		failures.append("try_storm_wall must not resolve day 2")
+	if not bool(world.get("_wall_refused")):
+		failures.append("try_storm_wall must refuse the climb on day 2")
+	if world.has_method("can_leave_to_embassy3") and bool(world.can_leave_to_embassy3()):
+		failures.append("day2 must not open embassy3 before the charge")
+	return failures
+
+
+func _check_day2_jimena(world: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var jimena: Node3D = world.get_node_or_null("Jimena") as Node3D
+	if jimena == null:
+		failures.append("day2 Jimena missing")
+		return failures
+	if not jimena.is_in_group("spectator"):
+		failures.append("day2 Jimena must be in spectator group")
+	if jimena is CollisionObject3D:
+		var layer := int((jimena as CollisionObject3D).collision_layer)
+		if (layer & 64) == 0:
+			failures.append("day2 Jimena collision_layer must include spectator 64, got %s" % layer)
+		if (layer & 4) != 0:
+			failures.append("day2 Jimena must not sit on killable hurtbox layer 4")
+	if world.has_method("jimena_on_wall") and not bool(world.jimena_on_wall()):
+		failures.append("day2 Jimena must stand on the wall walk")
+	var walk: Node3D = world.get_node_or_null("WallWalk") as Node3D
+	if walk and jimena.global_position.y < walk.global_position.y - 0.2:
+		failures.append("day2 Jimena y want wall height, got %s vs walk %s" % [jimena.global_position.y, walk.global_position.y])
+	var cam: Camera3D = world.get_node_or_null("Jimena/JimenaCamera") as Camera3D
+	if cam == null:
+		failures.append("day2 Jimena-on-wall camera missing")
+	elif cam.global_position.y < 4.0:
+		failures.append("day2 JimenaCamera must sit on the wall, y got %s" % cam.global_position.y)
+	elif not cam.current:
+		failures.append("day2 cinematic must make JimenaCamera current")
+	return failures
+
+
+func _check_day2_spawn_idle(world: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	for _i in range(4):
+		await physics_frame
+	if bool(world.get("_charged")):
+		failures.append("day2 charged on spawn physics frames")
+	if bool(world.get("_resolved")):
+		failures.append("day2 resolved on spawn physics frames")
+	if "yusuf_day2" in _logged:
+		failures.append("yusuf_day2 applied on spawn")
+	return failures
+
+
+func _check_day2_one_charge(world: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if not world.has_method("start_charge"):
+		return failures
+	world.start_charge()
+	world.start_charge()
+	if not bool(world.get("_charged")):
+		failures.append("start_charge must mark the one couch")
+	if world.has_method("charge_count") and int(world.charge_count()) != 1:
+		failures.append("day2 must couch once, got %s" % world.charge_count())
+	if bool(world.get("_resolved")):
+		failures.append("start_charge must not resolve without complete_resolve")
+	var cavalry: Node = world.get_node_or_null("Horse/CavalryCharge")
+	if cavalry and "last_move" in cavalry and String(cavalry.last_move) != "lance_couch":
+		failures.append("day2 couch last_move want lance_couch got %s" % cavalry.last_move)
+	return failures
+
+
+func _check_day2_resolve() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_day2()
+	var packed: Resource = load(DAY2)
+	if packed == null or not (packed is PackedScene):
+		failures.append("day2 resolve: scene failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	_logged.clear()
+	_completed.clear()
+	var scene_before: Node = current_scene
+	var honor_before := 0.0
+	if _honor:
+		honor_before = float(_honor.state.honor)
+	world.run_charge()
+	if current_scene != scene_before:
+		failures.append("day2 resolve must not change_scene when current_scene != world")
+	if "yusuf_day2" not in _logged:
+		failures.append("resolve must apply yusuf_day2 from JSON, logged %s" % str(_logged))
+	if "yusuf_win" in _logged:
+		failures.append("day2 must not re-apply yusuf_win")
+	if not bool(world.get("_resolved")):
+		failures.append("run_charge must resolve day 2")
+	if not bool(world.get("_charged")):
+		failures.append("run_charge must include the one player charge")
+	if _honor:
+		var event: HonorEvent = _honor.event_by_id(&"yusuf_day2")
+		var want := honor_before
+		if event:
+			want += event.delta_for(&"honor")
+		if not is_equal_approx(float(_honor.state.honor), want):
+			failures.append("yusuf_day2 honor want %s got %s" % [want, _honor.state.honor])
+	if _completed.count("a2_yusuf") == 0:
+		failures.append("day2 must complete the beat toward embassy3, got %s" % str(_completed))
+	if _runner:
+		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		if "yusuf_day2_done" not in flags:
+			failures.append("resolve must set yusuf_day2_done, flags %s" % str(flags))
+		if "yusuf_day1_done" not in flags:
+			failures.append("day2 must keep yusuf_day1_done")
+		if not bool(world.can_leave_to_embassy3()):
+			failures.append("resolve must open embassy3 travel")
+		if String(_runner.current_id) != "a2_embassy3":
+			failures.append("day2 travel must complete toward embassy3, got %s" % _runner.current_id)
+		if ResourceLoader.exists(EMBASSY3):
+			failures.append("a2_embassy3 must not ship in this PR")
+	world.free()
+	return failures
+
+
+func _prep_day2() -> void:
+	_prep_campaign()
+	if _runner and _runner.has_method("restore"):
+		_runner.restore(&"a2_yusuf", PackedStringArray(["hub_lock_cardena", "horse_companion", "babieca_named", "yusuf_day1_done"]))
+	elif _runner and "flags" in _runner:
+		_runner.flags = PackedStringArray(["hub_lock_cardena", "horse_companion", "babieca_named", "yusuf_day1_done"])
+		_runner.current_id = &"a2_yusuf"
 
 
 func _on_hard_fail(reason: StringName) -> void:

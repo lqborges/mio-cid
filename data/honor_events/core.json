@@ -137,6 +137,15 @@
       "ui_whisper_key": "a2_yusuf.win"
     },
     {
+      "id": "yusuf_day2",
+      "deltas": { "honor": 0 },
+      "tags": ["battle"],
+      "beat": "a2_yusuf",
+      "once": true,
+      "flags_set": ["yusuf_day2_done"],
+      "ui_whisper_key": "a2_yusuf.day2_win"
+    },
+    {
       "id": "pardon",
       "deltas": { "honor": 30 },
       "tags": ["king"],

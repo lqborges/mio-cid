@@ -14,3 +14,15 @@ Cid: a2_yusuf.win
 ~ wall
 Alvar: a2_yusuf.wall_refused
 => END
+
+~ day2
+Cid: a2_yusuf.day2_watch
+=> END
+
+~ charge
+Cid: a2_yusuf.day2_charge
+=> END
+
+~ day2_win
+Cid: a2_yusuf.day2_win
+=> END

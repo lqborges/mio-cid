@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Structural tests for PR-27 Yusuf day 1 (playable field battle).
+"""Structural tests for PR-27 Yusuf day 1 and PR-27b scripted day 2.
 
 Run: python3 tests/unit/test_a2_yusuf.py
 """
@@ -112,6 +112,8 @@ class TestA2YusufDay1(unittest.TestCase):
             f"{CHAPTER}/jimena_wall.gd",
             f"{CHAPTER}/yusuf.dialogue",
             f"{CHAPTER}/beats.json",
+            f"{CHAPTER}/day2.tscn",
+            f"{CHAPTER}/day2.gd",
             "data/honor_events/core.json",
             "data/characters/yusuf.json",
             "data/characters/jimena.json",
@@ -120,7 +122,6 @@ class TestA2YusufDay1(unittest.TestCase):
             "content/art/characters/dummy/dummy.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / f"{CHAPTER}/day2.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
 
     def test_scene_is_field_not_climb(self) -> None:
@@ -182,6 +183,7 @@ class TestA2YusufDay1(unittest.TestCase):
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         world_script = _read(f"{CHAPTER}/world.gd")
         self.assertIn("day1.gd", world_script)
+        self.assertIn("day2.tscn", world_script)
         runner = _read("game/autoload/chapter_runner.gd")
         self.assertIn("res://content/chapters/a2_yusuf/world.tscn", runner)
         self.assertIn('&"a2_yusuf"', runner)
@@ -245,6 +247,12 @@ class TestA2YusufDay1(unittest.TestCase):
         self.assertEqual(row["tags"], ["battle"])
         self.assertIn("yusuf_day1_done", row["flags_set"])
         self.assertTrue(row.get("once"))
+        day2 = events["yusuf_day2"]
+        self.assertEqual(day2["beat"], "a2_yusuf")
+        self.assertEqual(day2["tags"], ["battle"])
+        self.assertIn("yusuf_day2_done", day2["flags_set"])
+        self.assertTrue(day2.get("once"))
+        self.assertIn("honor", day2["deltas"])
         yusuf = json.loads(_read("data/characters/yusuf.json"))
         self.assertEqual(yusuf["id"], "yusuf")
         self.assertFalse(yusuf["unkillable"])
@@ -263,6 +271,9 @@ class TestA2YusufDay1(unittest.TestCase):
             "a2_yusuf.wall_refused",
             "a2_yusuf.jimena_watch",
             "a2_yusuf.day1_hold",
+            "a2_yusuf.day2_watch",
+            "a2_yusuf.day2_charge",
+            "a2_yusuf.day2_win",
             "char.yusuf",
         ):
             self.assertIn(key, strings, key)
@@ -273,6 +284,9 @@ class TestA2YusufDay1(unittest.TestCase):
         self.assertIn("huerta", strings["a2_yusuf.field"]["es"].lower())
         self.assertIn("Jimena", strings["a2_yusuf.win"]["es"])
         self.assertIn("escala", strings["a2_yusuf.wall_refused"]["es"].lower())
+        self.assertIn("Jimena", strings["a2_yusuf.day2_watch"]["es"])
+        self.assertIn("carga", strings["a2_yusuf.day2_charge"]["es"].lower())
+        self.assertIn("Jimena", strings["a2_yusuf.day2_win"]["es"])
 
     def test_beats_and_graph_spine(self) -> None:
         beats = json.loads(_read(f"{CHAPTER}/beats.json"))
@@ -280,15 +294,23 @@ class TestA2YusufDay1(unittest.TestCase):
         types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
         self.assertIn("blocking", types)
         self.assertIn("honor_event", types)
+        self.assertIn("cinematic", types)
+        self.assertIn("travel_spawn", types)
         ids = [step.get("id") for step in beats["steps"] if isinstance(step, dict)]
         self.assertIn("field", ids)
         self.assertIn("yusuf_win", ids)
+        self.assertIn("charge", ids)
+        self.assertIn("yusuf_day2", ids)
         flags = []
+        next_ids = []
         for step in beats["steps"]:
             if isinstance(step, dict):
                 flags.extend(step.get("set_flags", []))
+                if step.get("next"):
+                    next_ids.append(step.get("next"))
         self.assertIn("yusuf_day1_done", flags)
-        self.assertNotIn("travel_spawn", types)
+        self.assertIn("yusuf_day2_done", flags)
+        self.assertIn("a2_embassy3", next_ids)
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
         self.assertIn(("a2_embassy2", "a2_yusuf"), pairs)
@@ -302,6 +324,7 @@ class TestA2YusufDay1(unittest.TestCase):
         self.assertEqual(node["scene"], "res://content/chapters/a2_yusuf/world.tscn")
         world_scene = _read(f"{CHAPTER}/world.tscn")
         self.assertIn("day1.tscn", world_scene)
+        self.assertIn("world.gd", world_scene)
 
     def test_graph_validator_ok(self) -> None:
         self.assertEqual(validate_main(["--graph", str(ROOT / "data/chapters/graph.json")]), 0)
@@ -310,6 +333,8 @@ class TestA2YusufDay1(unittest.TestCase):
         for rel in (
             f"{CHAPTER}/day1.gd",
             f"{CHAPTER}/day1.tscn",
+            f"{CHAPTER}/day2.gd",
+            f"{CHAPTER}/day2.tscn",
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/jimena_wall.gd",
@@ -371,6 +396,98 @@ class TestA2YusufDay1(unittest.TestCase):
             0,
             result.stdout + "\n" + result.stderr,
         )
+
+
+class TestA2YusufDay2(unittest.TestCase):
+    def test_day2_is_scripted_charge_not_encounter(self) -> None:
+        scene = _read(f"{CHAPTER}/day2.tscn")
+        source = _read(f"{CHAPTER}/day2.gd")
+        self.assertIn("cid.tscn", scene)
+        self.assertIn("horse.tscn", scene)
+        self.assertIn("dummy.tscn", scene)
+        self.assertIn("hall_whisper.tscn", scene)
+        self.assertIn("honor_meters.tscn", scene)
+        self.assertIn("mesura_hud.tscn", scene)
+        self.assertIn("ChargeZone", scene)
+        self.assertIn("Day2Cinematic", scene)
+        self.assertIn("JimenaCamera", scene)
+        self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
+        self.assertNotIn("FieldZone", scene)
+        self.assertNotIn("Mesnada", scene)
+        self.assertNotIn("Dummy1", scene)
+        self.assertNotIn("captain.tscn", scene)
+        self.assertNotIn("GPUParticles3D", scene)
+        self.assertEqual(scene.count('type="DirectionalLight3D"'), 1)
+        self.assertNotIn("OmniLight3D", scene)
+        self.assertNotIn("SpotLight3D", scene)
+        self.assertIn("sdfgi_enabled = false", scene)
+        self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
+        self.assertIn("CSGCylinder3D", scene)
+        charge_at = scene.find('[node name="ChargeZone"')
+        self.assertGreaterEqual(charge_at, 0)
+        self.assertIn("collision_mask = 130", scene[charge_at : charge_at + 280])
+        self.assertIn("func run_charge", source)
+        self.assertIn("func start_charge", source)
+        self.assertIn("func complete_resolve", source)
+        self.assertIn("func play_cinematic", source)
+        self.assertIn("yusuf_day2", source)
+        self.assertIn("yusuf_day2_done", source)
+        self.assertIn("func jimena_on_wall", source)
+        self.assertNotIn("func run_field", source)
+        self.assertNotIn("func _enter_tree", source)
+        self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
+        self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
+
+    def test_jimena_stands_on_wall_day2(self) -> None:
+        scene = _read(f"{CHAPTER}/day2.tscn")
+        jimena = _origin(scene, "Jimena")
+        walk = _origin(scene, "WallWalk")
+        wall = _origin(scene, "Wall")
+        cid = _origin(scene, "Cid")
+        self.assertGreaterEqual(jimena[1], walk[1] - 0.2)
+        self.assertGreater(jimena[1], 3.5)
+        self.assertLess(abs(jimena[2] - walk[2]), 1.5)
+        self.assertLess(abs(jimena[2] - wall[2]), 3.0)
+        self.assertGreater(abs(cid[2] - jimena[2]), 8.0)
+        cam_at = scene.find('[node name="JimenaCamera"')
+        self.assertGreaterEqual(cam_at, 0)
+        self.assertIn("current = false", scene[cam_at : cam_at + 280])
+        self.assertIn('character_id = &"jimena"', scene)
+        self.assertIn("collision_layer = 64", scene)
+
+    def test_charge_zone_does_not_overlap_spawn(self) -> None:
+        scene = _read(f"{CHAPTER}/day2.tscn")
+        cid = _origin(scene, "Cid")
+        horse = _origin(scene, "Horse")
+        cid_radius = 0.4
+        cid_height = 1.8
+        cid_min = (cid[0] - cid_radius, cid[1], cid[2] - cid_radius)
+        cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
+        horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
+        horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
+        for node_name, shape_id in (
+            ("ChargeZone", "Box_charge"),
+            ("ClimbZone", "Box_climb"),
+        ):
+            zmin, zmax = _zone_aabb(scene, node_name, shape_id)
+            size = _subresource_size(scene, shape_id)
+            origin = _origin(scene, node_name)
+            self.assertFalse(
+                _aabb_overlap(cid_min, cid_max, zmin, zmax),
+                f"{node_name} {origin} size {size} overlaps Cid spawn {cid}",
+            )
+            self.assertFalse(
+                _aabb_overlap(horse_min, horse_max, zmin, zmax),
+                f"{node_name} overlaps Horse spawn {horse}",
+            )
+        yusuf = _origin(scene, "Yusuf")
+        self.assertGreater(abs(cid[2] - yusuf[2]), 4.0)
+
+    def test_embassy3_not_shipped(self) -> None:
+        self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
+        source = _read(f"{CHAPTER}/day2.gd")
+        self.assertIn("a2_embassy3", source)
+        self.assertIn("EMBASSY3_SCENE", source)
 
 
 if __name__ == "__main__":

@@ -4,20 +4,45 @@
     {
       "id": "watch",
       "type": "cinematic",
-      "camera": "JimenaCamera"
+      "camera": "JimenaCamera",
+      "skip_if": ["yusuf_day1_done"]
     },
     {
       "id": "field",
-      "type": "blocking"
+      "type": "blocking",
+      "skip_if": ["yusuf_day1_done"]
     },
     {
       "id": "yusuf_win",
-      "type": "honor_event"
+      "type": "honor_event",
+      "skip_if": ["yusuf_day1_done"]
     },
     {
       "id": "day1_hold",
       "type": "blocking",
-      "set_flags": ["yusuf_day1_done"]
+      "set_flags": ["yusuf_day1_done"],
+      "skip_if": ["yusuf_day1_done"]
+    },
+    {
+      "id": "day2_watch",
+      "type": "cinematic",
+      "camera": "JimenaCamera",
+      "skip_if": ["yusuf_day2_done"]
+    },
+    {
+      "id": "charge",
+      "type": "blocking",
+      "skip_if": ["yusuf_day2_done"]
+    },
+    {
+      "id": "yusuf_day2",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_embassy3",
+      "set_flags": ["yusuf_day2_done"]
     }
   ]
 }

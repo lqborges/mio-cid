@@ -138,3 +138,6 @@ a2_yusuf.field,"Salimos a la huerta. Yusuf espera en el campo, no en el muro.","
 a2_yusuf.win,El primer día es nuestro. Jimena mira desde el muro.,The first day is ours. Jimena watches from the wall.
 a2_yusuf.wall_refused,Álvar: este día se pelea en la huerta. No hay escala.,Álvar: this day is fought in the huerta. There is no climb.
 a2_yusuf.day1_hold,"Anochece. Mañana, el segundo día.","Night falls. Tomorrow, the second day."
+a2_yusuf.day2_watch,Segundo día. Jimena mira otra vez desde el muro.,Second day. Jimena watches from the wall again.
+a2_yusuf.day2_charge,"Una carga. De frente, en la huerta.","One charge. Straight, in the huerta."
+a2_yusuf.day2_win,Yusuf se retira. Jimena ve el campo nuestro.,Yusuf withdraws. Jimena sees the field is ours.
