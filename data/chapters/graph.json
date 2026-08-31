@@ -1,0 +1,306 @@
+{
+  "nodes": [
+    {
+      "id": "a1_vivar",
+      "scene": "res://content/chapters/a1_vivar/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_burgos",
+      "scene": "res://content/chapters/a1_burgos/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_arcas",
+      "scene": "res://content/chapters/a1_arcas/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_cardena",
+      "scene": "res://content/chapters/a1_cardena/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_navapalos",
+      "scene": "res://content/chapters/a1_navapalos/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_castejon",
+      "scene": "res://content/chapters/a1_castejon/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_alcocer",
+      "scene": "res://content/chapters/a1_alcocer/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_embassy1",
+      "scene": "res://content/chapters/a1_embassy1/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_poyo",
+      "scene": "res://content/chapters/a1_poyo/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_tevar",
+      "scene": "res://content/chapters/a1_tevar/world.tscn",
+      "act": 1,
+      "reorderable": false
+    },
+    {
+      "id": "a1_poyo_raid",
+      "scene": "res://content/chapters/a1_poyo_raid/world.tscn",
+      "act": 1,
+      "reorderable": true,
+      "v1_cut": true
+    },
+    {
+      "id": "a2_murviedro",
+      "scene": "res://content/chapters/a2_murviedro/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_siege",
+      "scene": "res://content/chapters/a2_siege/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_jeronimo",
+      "scene": "res://content/chapters/a2_jeronimo/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_embassy2",
+      "scene": "res://content/chapters/a2_embassy2/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_yusuf",
+      "scene": "res://content/chapters/a2_yusuf/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_embassy3",
+      "scene": "res://content/chapters/a2_embassy3/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_repay_raquel",
+      "scene": "res://content/chapters/a2_repay_raquel/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_tagus",
+      "scene": "res://content/chapters/a2_tagus/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a2_bodas",
+      "scene": "res://content/chapters/a2_bodas/world.tscn",
+      "act": 2,
+      "reorderable": false
+    },
+    {
+      "id": "a3_leon",
+      "scene": "res://content/chapters/a3_leon/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_bucar",
+      "scene": "res://content/chapters/a3_bucar/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_despedida",
+      "scene": "res://content/chapters/a3_despedida/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_corpes",
+      "scene": "res://content/chapters/a3_corpes/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_querella",
+      "scene": "res://content/chapters/a3_querella/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_toledo",
+      "scene": "res://content/chapters/a3_toledo/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_valencia_wait",
+      "scene": "res://content/chapters/a3_valencia_wait/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_carrion",
+      "scene": "res://content/chapters/a3_carrion/world.tscn",
+      "act": 3,
+      "reorderable": false
+    },
+    {
+      "id": "a3_pentecost",
+      "scene": "res://content/chapters/a3_pentecost/world.tscn",
+      "act": 3,
+      "reorderable": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "a1_vivar",
+      "to": "a1_burgos",
+      "req_flags": ["vivar_seen"]
+    },
+    {
+      "from": "a1_burgos",
+      "to": "a1_arcas",
+      "req_flags": ["burgos_shutters_seen"]
+    },
+    {
+      "from": "a1_arcas",
+      "to": "a1_cardena"
+    },
+    {
+      "from": "a1_cardena",
+      "to": "a1_navapalos",
+      "set_flags": ["hub_lock_cardena"]
+    },
+    {
+      "from": "a1_navapalos",
+      "to": "a1_castejon"
+    },
+    {
+      "from": "a1_castejon",
+      "to": "a1_alcocer"
+    },
+    {
+      "from": "a1_alcocer",
+      "to": "a1_embassy1"
+    },
+    {
+      "from": "a1_embassy1",
+      "to": "a1_poyo"
+    },
+    {
+      "from": "a1_poyo",
+      "to": "a1_tevar"
+    },
+    {
+      "from": "a1_poyo",
+      "to": "a1_poyo_raid",
+      "req_flags": ["v1_extra_raids"]
+    },
+    {
+      "from": "a1_tevar",
+      "to": "a2_murviedro",
+      "set_flags": ["colada_acquired"]
+    },
+    {
+      "from": "a2_murviedro",
+      "to": "a2_siege"
+    },
+    {
+      "from": "a2_siege",
+      "to": "a2_jeronimo"
+    },
+    {
+      "from": "a2_jeronimo",
+      "to": "a2_embassy2"
+    },
+    {
+      "from": "a2_embassy2",
+      "to": "a2_yusuf"
+    },
+    {
+      "from": "a2_yusuf",
+      "to": "a2_embassy3"
+    },
+    {
+      "from": "a2_embassy3",
+      "to": "a2_repay_raquel",
+      "req_flags": ["embassy3_done", "arcas_cheated"]
+    },
+    {
+      "from": "a2_embassy3",
+      "to": "a2_tagus",
+      "req_flags": ["embassy3_done"],
+      "forbid_flags": ["arcas_cheated"]
+    },
+    {
+      "from": "a2_repay_raquel",
+      "to": "a2_tagus",
+      "req_flags": ["repay_done"]
+    },
+    {
+      "from": "a2_tagus",
+      "to": "a2_bodas"
+    },
+    {
+      "from": "a2_bodas",
+      "to": "a3_leon"
+    },
+    {
+      "from": "a3_leon",
+      "to": "a3_bucar"
+    },
+    {
+      "from": "a3_bucar",
+      "to": "a3_despedida"
+    },
+    {
+      "from": "a3_despedida",
+      "to": "a3_corpes"
+    },
+    {
+      "from": "a3_corpes",
+      "to": "a3_querella"
+    },
+    {
+      "from": "a3_querella",
+      "to": "a3_toledo"
+    },
+    {
+      "from": "a3_toledo",
+      "to": "a3_valencia_wait"
+    },
+    {
+      "from": "a3_valencia_wait",
+      "to": "a3_carrion"
+    },
+    {
+      "from": "a3_carrion",
+      "to": "a3_pentecost"
+    }
+  ]
+}

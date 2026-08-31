@@ -35,9 +35,8 @@ AUTOLOAD_SCRIPTS = {
     "GameState": "game/autoload/game_state.gd",
     "Loc": "game/autoload/loc.gd",
 }
-STUBS = {
-    "ChapterRunner": "game/autoload/chapter_runner.gd",
-}
+# ChapterRunner is implemented in PR-06. No remaining autoload stubs.
+STUBS = {}
 
 
 def _read(rel: str) -> str:
