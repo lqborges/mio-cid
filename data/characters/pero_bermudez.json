@@ -1,0 +1,18 @@
+{
+  "id": "pero_bermudez",
+  "display_name_key": "char.pero_bermudez",
+  "role": "captain",
+  "combat": 74,
+  "birth": 30,
+  "diplomacy": 40,
+  "mesura_max": 55,
+  "loyalty_0": 0.8,
+  "gift_bias": "arms",
+  "essential": false,
+  "desertion_capable": true,
+  "unkillable": false,
+  "list_eligible": true,
+  "list_index": 1,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "pero_bermudez"
+}

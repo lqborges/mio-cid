@@ -1,0 +1,205 @@
+{
+  "events": [
+    {
+      "id": "burgos_draw_steel",
+      "deltas": { "honra": -12 },
+      "tags": ["mesura_fail"],
+      "beat": "a1_burgos"
+    },
+    {
+      "id": "burgos_camp_river",
+      "deltas": { "honra": 2 },
+      "tags": ["mesura"],
+      "beat": "a1_burgos",
+      "ui_whisper_key": "poem.v20"
+    },
+    {
+      "id": "arcas_cheat",
+      "deltas": { "onores": 22, "honra": -6 },
+      "tags": ["allowed_crime"],
+      "stain_id": "arcas_cheat",
+      "flags_set": ["arcas_cheated"],
+      "beat": "a1_arcas"
+    },
+    {
+      "id": "arcas_refuse",
+      "deltas": { "honra": 3 },
+      "tags": ["kept_word", "poverty"],
+      "beat": "a1_arcas"
+    },
+    {
+      "id": "camp_fed",
+      "deltas": { "onores": 1 },
+      "tags": ["feed"]
+    },
+    {
+      "id": "camp_unfed",
+      "deltas": { "onores": -8 },
+      "tags": ["feed", "hunger"]
+    },
+    {
+      "id": "cardena_gift_monastery",
+      "deltas": { "honra": 4 },
+      "tags": ["gift_down"],
+      "beat": "a1_cardena"
+    },
+    {
+      "id": "castejon_take",
+      "deltas": { "onores": 14 },
+      "tags": ["raid"],
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "castejon_sell",
+      "deltas": { "onores": 10 },
+      "tags": ["sell", "mobility"],
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "castejon_keep",
+      "deltas": { "honor": -40 },
+      "tags": ["alfonso_wrath"],
+      "hard_fail": true,
+      "hard_fail_reason": "alfonso_wrath",
+      "beat": "a1_castejon"
+    },
+    {
+      "id": "alcocer_sortie_win",
+      "deltas": { "onores": 18 },
+      "tags": ["battle"],
+      "beat": "a1_alcocer"
+    },
+    {
+      "id": "alcocer_sell",
+      "deltas": { "onores": 10 },
+      "tags": ["sell"],
+      "beat": "a1_alcocer"
+    },
+    {
+      "id": "alcocer_keep",
+      "deltas": { "honor": -25 },
+      "tags": ["alfonso_wrath"],
+      "hard_fail": true,
+      "hard_fail_reason": "alfonso_host",
+      "beat": "a1_alcocer"
+    },
+    {
+      "id": "gift_to_alvar",
+      "deltas": { "honra": 3 },
+      "tags": ["gift_down", "loyalty"]
+    },
+    {
+      "id": "captain_deserted",
+      "deltas": { "onores": -4, "honra": -4 },
+      "tags": ["desertion"]
+    },
+    {
+      "id": "tevar_feed_count",
+      "deltas": { "honra": 10 },
+      "tags": ["mesura", "table"],
+      "beat": "a1_tevar"
+    },
+    {
+      "id": "repay_raquel",
+      "deltas": { "honra": 8 },
+      "tags": ["kept_word"],
+      "clear_stain": "arcas_cheat",
+      "flags_set": ["repay_done"],
+      "beat": "a2_repay_raquel"
+    },
+    {
+      "id": "valencia_held",
+      "deltas": { "honor": 25 },
+      "tags": ["city"],
+      "beat": "a2_siege"
+    },
+    {
+      "id": "yusuf_win",
+      "deltas": { "honor": 12 },
+      "tags": ["battle"],
+      "beat": "a2_yusuf"
+    },
+    {
+      "id": "pardon",
+      "deltas": { "honor": 30 },
+      "tags": ["king"],
+      "beat": "a2_tagus"
+    },
+    {
+      "id": "accept_marriages",
+      "deltas": { "honor": 5, "honra": -4 },
+      "tags": ["king", "bitter", "foreboding"],
+      "beat": "a2_tagus"
+    },
+    {
+      "id": "lion_mesura",
+      "deltas": { "honra": 8 },
+      "tags": ["mesura"],
+      "beat": "a3_leon"
+    },
+    {
+      "id": "lion_rage",
+      "deltas": { "honra": -10 },
+      "tags": ["mesura_fail"],
+      "beat": "a3_leon"
+    },
+    {
+      "id": "corpes_news",
+      "deltas": { "honra": -35 },
+      "tags": ["crime_against_you", "uncurable_by_combat"],
+      "stain_id": "uncurable_by_combat",
+      "beat": "a3_corpes"
+    },
+    {
+      "id": "corpes_rage_dump",
+      "deltas": { "honra": -12 },
+      "tags": ["mesura_fail"],
+      "beat": "a3_corpes"
+    },
+    {
+      "id": "ride_host_to_carrion",
+      "deltas": { "honra": -25 },
+      "tags": ["mesura_fail", "illegal"],
+      "beat": "a3_querella"
+    },
+    {
+      "id": "querella_filed",
+      "deltas": { "honra": 6 },
+      "tags": ["law"],
+      "beat": "a3_querella"
+    },
+    {
+      "id": "toledo_ask1_swords",
+      "deltas": { "honra": 4 },
+      "tags": ["speech", "joke"],
+      "clear_stain": "uncurable_by_combat",
+      "beat": "a3_toledo"
+    },
+    {
+      "id": "toledo_ask2_dowry",
+      "deltas": { "honra": 8 },
+      "tags": ["speech", "humiliation_them"],
+      "clear_stain": "uncurable_by_combat",
+      "beat": "a3_toledo"
+    },
+    {
+      "id": "toledo_ask3_riepto",
+      "deltas": { "honra": 12 },
+      "tags": ["speech"],
+      "clear_stain": "uncurable_by_combat",
+      "beat": "a3_toledo"
+    },
+    {
+      "id": "lists_win_all",
+      "deltas": { "honra": 40 },
+      "tags": ["proxy"],
+      "beat": "a3_carrion"
+    },
+    {
+      "id": "lists_lose_any",
+      "deltas": { "honra": -20 },
+      "tags": ["proxy_fail"],
+      "beat": "a3_carrion"
+    }
+  ]
+}

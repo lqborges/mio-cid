@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/character",
+  "title": "Character",
+  "description": "One person. Never pack two people in one document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "display_name_key",
+    "role",
+    "combat",
+    "birth",
+    "loyalty_0",
+    "essential",
+    "desertion_capable",
+    "unkillable",
+    "list_eligible",
+    "mesura_max"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "examples": ["alvar_fanez", "martin_antolinez"]
+    },
+    "display_name_key": { "type": "string" },
+    "poem_formula_key": { "type": "string" },
+    "role": {
+      "type": "string",
+      "enum": [
+        "player",
+        "captain",
+        "family",
+        "king",
+        "infante",
+        "ally_taifa",
+        "bishop",
+        "burgales",
+        "usurer",
+        "count",
+        "taifa_captain",
+        "taifa_king",
+        "ally"
+      ]
+    },
+    "combat": { "type": "number", "minimum": 0, "maximum": 100 },
+    "birth": { "type": "number", "minimum": 0, "maximum": 100 },
+    "diplomacy": { "type": "number" },
+    "mesura_max": { "type": "number" },
+    "loyalty_0": { "type": "number", "minimum": 0, "maximum": 1 },
+    "gift_bias": {
+      "type": "string",
+      "enum": ["gold", "arms", "horses", "land_right", "chapel"]
+    },
+    "essential": {
+      "type": "boolean",
+      "description": "Death → reload prompt. Independent of desertion."
+    },
+    "desertion_capable": { "type": "boolean" },
+    "unkillable": { "type": "boolean" },
+    "list_eligible": { "type": "boolean" },
+    "list_index": { "type": "integer", "minimum": -1, "maximum": 3 },
+    "recruitable_beat": { "type": "string" },
+    "must_survive_until": {
+      "type": ["string", "null"],
+      "examples": ["a3_despedida"]
+    },
+    "vo_id": { "type": "string" }
+  }
+}

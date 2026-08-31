@@ -36,8 +36,6 @@ AUTOLOAD_SCRIPTS = {
     "Loc": "game/autoload/loc.gd",
 }
 STUBS = {
-    "HonorService": "game/autoload/honor_service.gd",
-    "SaveService": "game/autoload/save_service.gd",
     "ChapterRunner": "game/autoload/chapter_runner.gd",
     "CampaignClock": "game/autoload/campaign_clock.gd",
     "TreasuryService": "game/autoload/treasury_service.gd",

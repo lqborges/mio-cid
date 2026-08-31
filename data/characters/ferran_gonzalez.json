@@ -1,0 +1,18 @@
+{
+  "id": "ferran_gonzalez",
+  "display_name_key": "char.ferran_gonzalez",
+  "role": "infante",
+  "combat": 22,
+  "birth": 92,
+  "diplomacy": 30,
+  "mesura_max": 0,
+  "loyalty_0": 0.2,
+  "gift_bias": "gold",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a2_bodas",
+  "vo_id": "ferran_gonzalez"
+}

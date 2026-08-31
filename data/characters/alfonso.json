@@ -1,0 +1,18 @@
+{
+  "id": "alfonso",
+  "display_name_key": "char.alfonso",
+  "role": "king",
+  "combat": 0,
+  "birth": 100,
+  "diplomacy": 85,
+  "mesura_max": 90,
+  "loyalty_0": 0.15,
+  "gift_bias": "horses",
+  "essential": true,
+  "desertion_capable": false,
+  "unkillable": true,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "alfonso"
+}

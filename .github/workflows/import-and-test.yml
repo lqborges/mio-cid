@@ -77,6 +77,18 @@ jobs:
       - name: Run Python controller tests
         run: python3 tests/unit/test_cid_controller.py
 
+      - name: Run Python honor-meter tests
+        run: python3 tests/unit/test_honor_state.py
+
+      - name: Import character JSON
+        run: python3 tools/import_characters.py
+
+      - name: Run Python loyalty tests
+        run: python3 tests/unit/test_loyalty.py
+
+      - name: Run Python save HMAC tests
+        run: python3 tests/unit/test_save_hmac.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -91,6 +103,21 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_cid_controller.gd
+
+      - name: Run HonorState headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_honor_state.gd
+
+      - name: Run loyalty headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_loyalty.gd
+
+      - name: Run SaveService headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_save_hmac.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
@@ -116,4 +143,4 @@ jobs:
 
       - name: Skip notice
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus/CidController headless tests, and gdUnit4 skipped."
+        run: echo "Godot binary missing in CI cache; import and headless tests skipped."

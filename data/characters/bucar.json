@@ -1,0 +1,18 @@
+{
+  "id": "bucar",
+  "display_name_key": "char.bucar",
+  "role": "taifa_king",
+  "combat": 68,
+  "birth": 90,
+  "diplomacy": 45,
+  "mesura_max": 30,
+  "loyalty_0": 0.0,
+  "gift_bias": "arms",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a3_bucar",
+  "vo_id": "bucar"
+}

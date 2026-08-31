@@ -1,0 +1,18 @@
+{
+  "id": "asur_gonzalez",
+  "display_name_key": "char.asur_gonzalez",
+  "role": "infante",
+  "combat": 28,
+  "birth": 90,
+  "diplomacy": 15,
+  "mesura_max": 0,
+  "loyalty_0": 0.15,
+  "gift_bias": "gold",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a2_bodas",
+  "vo_id": "asur_gonzalez"
+}
