@@ -1,0 +1,12 @@
+# Spoken lines are CSV keys. Bishopric is administration, not a crusade.
+
+~ start
+=> appoint
+
+~ appoint
+Cid: a2_jeronimo.appoint
+Jeronimo: a2_jeronimo.wants_lance
+Cid: a2_jeronimo.give_lance
+Jeronimo: a2_jeronimo.bishop_admin
+Cid: a2_jeronimo.gift
+=> END

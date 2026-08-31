@@ -1,0 +1,25 @@
+{
+  "id": "a2_jeronimo",
+  "gift_marks": 40,
+  "steps": [
+    {
+      "id": "arrive",
+      "type": "cinematic",
+      "camera": "place_name",
+      "skip_if": ["babieca_named"],
+      "set_flags": ["babieca_named"]
+    },
+    {
+      "id": "appoint",
+      "type": "dialogue"
+    },
+    {
+      "id": "jeronimo_appointed",
+      "type": "honor_event"
+    },
+    {
+      "id": "hub",
+      "type": "blocking"
+    }
+  ]
+}

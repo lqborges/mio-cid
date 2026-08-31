@@ -102,8 +102,8 @@ func _check_siege_scene_loads() -> PackedStringArray:
 	var plazo: Node = _world.find_child("PlazoBar", true, false)
 	if plazo and bool(plazo.visible):
 		failures.append("plazo bar must stay hidden during the siege")
-	if ResourceLoader.exists(JERONIMO):
-		failures.append("a2_jeronimo must not ship in this PR")
+	if not ResourceLoader.exists(JERONIMO):
+		failures.append("a2_jeronimo world must exist after the siege")
 	return failures
 
 
@@ -332,8 +332,8 @@ func _check_murviedro_take_travels_to_siege() -> PackedStringArray:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _runner and String(_runner.current_id) != "a2_siege":
 		failures.append("Murviedro travel must land on a2_siege, got %s" % _runner.current_id)
-	if ResourceLoader.exists(JERONIMO):
-		failures.append("a2_jeronimo must not ship in this PR")
+	if not ResourceLoader.exists(JERONIMO):
+		failures.append("a2_jeronimo world must exist after Murviedro")
 	world.free()
 	return failures
 
@@ -392,13 +392,13 @@ func _check_calendar_eight_events_then_jeronimo() -> PackedStringArray:
 	if not _fails.is_empty():
 		failures.append("siege must not hard_fail: %s" % ", ".join(_fails))
 	if current_scene != scene_before:
-		failures.append("goto must no-op because a2_jeronimo is missing")
+		failures.append("calendar must not change_scene when current_scene != world")
 	if _completed.count("a2_siege") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _runner and String(_runner.current_id) != "a2_jeronimo":
 		failures.append("siege travel must land on a2_jeronimo, got %s" % _runner.current_id)
-	if ResourceLoader.exists(JERONIMO):
-		failures.append("a2_jeronimo must not ship in this PR")
+	if not ResourceLoader.exists(JERONIMO):
+		failures.append("a2_jeronimo world must exist after the calendar")
 	world.free()
 	return failures
 

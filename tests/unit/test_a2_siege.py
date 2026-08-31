@@ -129,7 +129,7 @@ class TestA2MurviedroAndSiegeClock(unittest.TestCase):
             "content/art/characters/dummy/dummy.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_jeronimo/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a2_jeronimo/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a2_valencia_hub/world.tscn").is_file())
 
     def test_valencia_events_are_eight_authored_rows(self) -> None:
@@ -375,7 +375,7 @@ class TestA2MurviedroAndSiegeClock(unittest.TestCase):
         self.assertIn("a2_murviedro.place_name,Murviedro,", poem)
         self.assertIn("a2_siege.place_name,Valencia,", poem)
 
-    def test_beats_graph_and_jeronimo_missing(self) -> None:
+    def test_beats_graph_and_jeronimo_next(self) -> None:
         self.assertEqual(validate_main([]), 0)
         murv = json.loads(_read(f"{MURV}/beats.json"))
         self.assertEqual(murv["id"], "a2_murviedro")

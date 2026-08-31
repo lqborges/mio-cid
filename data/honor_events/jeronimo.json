@@ -1,0 +1,14 @@
+{
+  "gift_marks": 40,
+  "events": [
+    {
+      "id": "jeronimo_appointed",
+      "deltas": { "honor": 6, "honra": 4 },
+      "tags": ["gift_down", "city"],
+      "beat": "a2_jeronimo",
+      "once": true,
+      "flags_set": ["jeronimo_appointed"],
+      "ui_whisper_key": "a2_jeronimo.appointed"
+    }
+  ]
+}

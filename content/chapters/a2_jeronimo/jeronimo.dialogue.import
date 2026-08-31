@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bsw8ldco48qyv"
+path="res://.godot/imported/jeronimo.dialogue-865ca90bed684bf4b0a978d9ac57f33d.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_jeronimo/jeronimo.dialogue"
+dest_files=["res://.godot/imported/jeronimo.dialogue-865ca90bed684bf4b0a978d9ac57f33d.tres"]
+
+[params]
+
+defaults=true

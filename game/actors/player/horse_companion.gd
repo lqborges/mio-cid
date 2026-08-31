@@ -1,8 +1,8 @@
 class_name HorseCompanion
 extends CharacterBody3D
 
-## Unnamed greybox mount (debug id horse / destrier). Gaits are speed bands
-## (gallop ≡ DESIGN canter). Camera stays on Cid. Gallop spends stamina.
+## Greybox mount (debug id horse / destrier until a chapter applies a legend name).
+## Gaits are speed bands (gallop ≡ DESIGN canter). Camera stays on Cid.
 
 const TUNABLES_PATH := "res://data/combat/horse.json"
 const FLAG_ID := "horse_companion"
@@ -27,6 +27,8 @@ var _rider_mask: int = 5
 var _last_facing: Vector3 = Vector3(0.0, 0.0, -1.0)
 var _spent_stamina: bool = false
 var _following: bool = false
+var _named_id: StringName = &""
+var _named_key: String = ""
 
 
 func _init() -> void:
@@ -58,7 +60,21 @@ func load_tunables() -> void:
 
 
 func debug_id() -> StringName:
+	if _named_id != &"":
+		return _named_id
 	return StringName(str(tunables.get("debug_id", "horse")))
+
+
+func apply_name(id: StringName, display_key: String) -> void:
+	# Valencia hub supplies the legend name; destierro scenes never call this.
+	if id == &"":
+		return
+	_named_id = id
+	_named_key = display_key
+
+
+func is_named() -> bool:
+	return _named_id != &""
 
 
 func current_gait() -> StringName:
@@ -104,10 +120,14 @@ func gait_for_speed(speed: float) -> StringName:
 
 
 func display_name() -> String:
-	var key := str(tunables.get("display_name_key", "horse.companion"))
+	var key := _named_key
+	if key.is_empty():
+		key = str(tunables.get("display_name_key", "horse.companion"))
 	var loc := _loc()
 	if loc != null and loc.has_method("text"):
 		return str(loc.call("text", key))
+	if not _named_key.is_empty():
+		return _named_key
 	return "el caballo"
 
 

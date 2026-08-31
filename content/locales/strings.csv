@@ -122,3 +122,13 @@ a2_siege.parias,Ofrecen parias. El cerco sigue.,They offer parias. The siege hol
 a2_siege.sally_2,Otra salida a la huerta. El muro no se escala.,Another sally to the huerta. The wall is not climbed.
 a2_siege.sermon,Se reza en el real. El cerco es de espera.,We pray in camp. The siege is a wait.
 a2_siege.city_opens,Valencia abre. Es ciudad para vivir.,Valencia opens. It is a city to live in.
+char.jeronimo,Jerónimo,Jerónimo
+a2_jeronimo.appoint,"Jerónimo, tomad el obispado de Valencia. La mezquita pasa a iglesia.","Jerónimo, take the bishopric of Valencia. The mosque becomes a church."
+a2_jeronimo.wants_lance,"Quiero lanza, mio Cid. Bendeciré y combatiré.","I want a lance, my Cid. I will bless and fight."
+a2_jeronimo.give_lance,Tomad lanza. El obispado es de la ciudad.,Take a lance. The bishopric is of the city.
+a2_jeronimo.bishop_admin,Así se administra Valencia.,Thus Valencia is administered.
+a2_jeronimo.appointed,Jerónimo es obispo. Toma lanza con la mesnada.,Jerónimo is bishop. He takes a lance with the mesnada.
+a2_jeronimo.gift,Marcos para el obispado. Es administración.,Marks for the bishopric. It is administration.
+a2_jeronimo.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
+a2_jeronimo.appoint_first,Primero el obispado.,The bishopric first.
+a2_jeronimo.to_embassy,Hacia Alfonso,Toward Alfonso
