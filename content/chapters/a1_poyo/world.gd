@@ -15,7 +15,6 @@ var _cid_in_rest: bool = false
 func _ready() -> void:
 	_bind_chapter()
 	_connect_zones()
-	# WHY: HallWhisper.line is @onready; whispering from _enter_tree drops the line.
 	apply_arrival()
 
 
