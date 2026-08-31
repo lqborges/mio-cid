@@ -129,6 +129,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _consume_queues(wish: Vector3) -> void:
+	# Short step-off stays legal while waiting; not a Souls roll.
 	if _queued_dodge and _dodge_cd <= 0.0:
 		_start_dodge(wish)
 	_queued_dodge = false

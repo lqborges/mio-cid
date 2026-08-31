@@ -19,6 +19,8 @@ var holding: bool = false
 var rotate_in_ready: bool = false
 var unlocked: PackedStringArray = []
 
+var rotate_cd: float = 0.0
+
 var _hold_elapsed: float = 0.0
 var _strike_lock: float = 0.0
 var _hold_fights: int = 0
@@ -33,6 +35,8 @@ func _init() -> void:
 func _ready() -> void:
 	add_to_group(String(GROUP))
 	set_physics_process(true)
+	if not tree_exiting.is_connected(_restore_world_clock):
+		tree_exiting.connect(_restore_world_clock)
 	var bus := _event_bus()
 	if bus != null and bus.has_signal("honor_logged"):
 		if not bus.honor_logged.is_connected(_on_honor_logged):
@@ -62,9 +66,13 @@ func set_holding(on: bool) -> void:
 	holding = on
 	_hold_elapsed = 0.0
 	_hold_saw_threat = false
-	rotate_in_ready = holding
+	rotate_in_ready = false
 	if holding:
-		rotate_in_requested.emit()
+		var combat := _combat()
+		if combat != null and combat.has_method("lower_weapon"):
+			combat.lower_weapon()
+		_try_rotate_in()
+	_apply_time_scale()
 	held_changed.emit(holding)
 
 
@@ -180,8 +188,12 @@ func dump_move() -> Dictionary:
 
 
 func tick(delta: float) -> void:
+	if rotate_cd > 0.0:
+		rotate_cd = maxf(rotate_cd - delta, 0.0)
 	if holding:
 		_hold_elapsed += delta
+		if rotate_cd <= 0.0:
+			_try_rotate_in()
 	if _strike_lock > 0.0:
 		_strike_lock = maxf(_strike_lock - delta, 0.0)
 	elif not _is_striking():
@@ -202,11 +214,16 @@ func _on_honor_logged(event: HonorEvent) -> void:
 	if event.has_tag(&"mesura_fail"):
 		add_ira(float(traits.get("ira_on_mesura_fail", 0.0)))
 	var eid := String(event.id)
-	for trait_id in ["mesa_para_el_conde", "querella_not_hueste"]:
-		var row := _trait_row(StringName(trait_id))
-		var unlocks: Variant = row.get("unlocks_at", {})
+	var rows: Variant = traits.get("traits", [])
+	if not rows is Array:
+		return
+	for row in rows:
+		if not row is Dictionary:
+			continue
+		var data: Dictionary = row
+		var unlocks: Variant = data.get("unlocks_at", {})
 		if unlocks is Dictionary and str((unlocks as Dictionary).get("honor_event", "")) == eid:
-			grant_trait(StringName(trait_id))
+			grant_trait(StringName(str(data.get("id", ""))))
 
 
 func _finish_hold() -> void:
@@ -228,7 +245,34 @@ func _try_unlock(id: StringName, key: String, value: int) -> void:
 		grant_trait(id)
 
 
+func _try_rotate_in() -> void:
+	if not holding:
+		rotate_in_ready = false
+		return
+	if rotate_cd > 0.0:
+		rotate_in_ready = false
+		return
+	rotate_in_ready = true
+	rotate_in_requested.emit()
+	rotate_cd = _rotate_cooldown_sec()
+
+
+func _rotate_cooldown_sec() -> float:
+	return float(traits.get("rotate_in_cooldown_sec", 0.0)) * rotate_in_cooldown_mult()
+
+
+func _apply_time_scale() -> void:
+	Engine.time_scale = time_scale()
+
+
+func _restore_world_clock() -> void:
+	holding = false
+	rotate_in_ready = false
+	Engine.time_scale = 1.0
+
+
 func _parry_window_sec() -> float:
+	# Difficulty parry_window_ms is a hold modifier, not an always-on assist.
 	var ms := float(traits.get("hold_parry_window_ms", 0.0))
 	var combat := _combat()
 	if combat != null and "difficulty" in combat:
@@ -254,7 +298,10 @@ func _make_dump_event() -> HonorEvent:
 	var combat := _combat()
 	if combat != null and "difficulty" in combat:
 		sinks = float(combat.difficulty.get("meter_sinks", 1.0))
-	ev.deltas = {"honra": honra * sinks}
+	honra *= sinks
+	var band_a := float(traits.get("dump_honra_min", honra))
+	var band_b := float(traits.get("dump_honra_max", honra))
+	ev.deltas = {"honra": clampf(honra, minf(band_a, band_b), maxf(band_a, band_b))}
 	return ev
 
 
@@ -348,5 +395,9 @@ func _load_json(path: String) -> Dictionary:
 
 
 func _exit_tree() -> void:
-	if holding:
-		set_holding(false)
+	_restore_world_clock()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		_restore_world_clock()

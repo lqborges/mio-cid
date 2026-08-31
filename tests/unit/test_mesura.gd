@@ -5,16 +5,22 @@ extends SceneTree
 const MESURA := preload("res://game/actors/player/mesura_component.gd")
 const COMBAT := preload("res://game/actors/player/cid_combat.gd")
 const HURT := preload("res://game/combat/hurt_box.gd")
+const HIT := preload("res://game/combat/hit_box.gd")
 const HUD := preload("res://game/ui/mesura_hud.gd")
 
 
 func _initialize() -> void:
+	Engine.time_scale = 1.0
 	var failures: PackedStringArray = []
 	failures.append_array(_test_traits_from_json())
 	failures.append_array(_test_dump_sinks_honra_not_onores())
 	failures.append_array(_test_hold_refuses_dump())
 	failures.append_array(_test_dump_requires_ira())
 	failures.append_array(_test_parry_window())
+	failures.append_array(_test_hold_time_scale_and_restore())
+	failures.append_array(_test_hold_lowers_in_flight_weapon())
+	failures.append_array(_test_rotate_in_signal_and_cooldown())
+	failures.append_array(_test_dump_stamina_and_honra_band())
 	failures.append_array(_test_mesura_regen_and_strike_pause())
 	failures.append_array(_test_slam_combo_with_mesura())
 	failures.append_array(_test_trait_cap())
@@ -139,13 +145,145 @@ func _test_parry_window() -> PackedStringArray:
 	combat.take_damage(12.0, &"slash", 0.1, null)
 	if not is_equal_approx(hurt.hp, hp):
 		failures.append("parry must ignore the hit, hp %s -> %s" % [hp, hurt.hp])
-	mes.set_holding(false)
+	var window := float(mes.traits.get("hold_parry_window_ms", 0.0)) / 1000.0
+	mes.tick(window + 0.05)
+	if mes.is_parry_open():
+		failures.append("parry window must close after hold_parry_window_ms")
 	combat.take_damage(12.0, &"slash", 0.1, null)
 	if is_equal_approx(hurt.hp, hp):
+		failures.append("hit after parry window must land")
+	var after_window: float = hurt.hp
+	mes.set_holding(false)
+	combat.take_damage(12.0, &"slash", 0.1, null)
+	if is_equal_approx(hurt.hp, after_window):
 		failures.append("unheld Cid must take the hit")
 	root.remove_child(body)
 	hurt.free()
 	body.free()
+	Engine.time_scale = 1.0
+	return failures
+
+
+func _test_hold_time_scale_and_restore() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var mes: MesuraComponent = MESURA.new()
+	mes.name = "Mesura"
+	root.add_child(mes)
+	var want := float(mes.traits.get("hold_time_scale", 1.0))
+	mes.set_holding(true)
+	if not is_equal_approx(Engine.time_scale, want):
+		failures.append("hold time_scale want %s got %s" % [want, Engine.time_scale])
+	mes.set_holding(false)
+	if not is_equal_approx(Engine.time_scale, 1.0):
+		failures.append("release must restore time_scale, got %s" % Engine.time_scale)
+	mes.set_holding(true)
+	if mes.is_inside_tree():
+		root.remove_child(mes)
+	else:
+		mes._restore_world_clock()
+	if not is_equal_approx(Engine.time_scale, 1.0):
+		failures.append("free while held must restore time_scale, got %s" % Engine.time_scale)
+		mes._restore_world_clock()
+	mes.free()
+	Engine.time_scale = 1.0
+	return failures
+
+
+func _test_hold_lowers_in_flight_weapon() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var body := Node.new()
+	var combat: CidCombat = COMBAT.new()
+	var mes: MesuraComponent = MESURA.new()
+	var box: HitBox = HIT.new()
+	mes.name = "Mesura"
+	combat.name = "CidCombat"
+	body.add_child(combat)
+	body.add_child(mes)
+	body.add_child(box)
+	combat.hit_box = box
+	root.add_child(body)
+	combat.slam()
+	if not box.monitoring:
+		failures.append("slam should arm HitBox")
+	if not combat.is_attacking():
+		failures.append("slam should leave an in-flight attack")
+	mes.set_holding(true)
+	if box.monitoring:
+		failures.append("hold must disarm in-flight HitBox")
+	if combat.is_attacking():
+		failures.append("hold must zero _attack_left")
+	mes.set_holding(false)
+	root.remove_child(body)
+	body.free()
+	Engine.time_scale = 1.0
+	return failures
+
+
+func _test_rotate_in_signal_and_cooldown() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var mes: MesuraComponent = MESURA.new()
+	var got: Array = []
+	mes.rotate_in_requested.connect(func() -> void:
+		got.append(true)
+	)
+	mes.set_holding(true)
+	if got.is_empty():
+		failures.append("hold must emit rotate_in_requested")
+	if mes.rotate_cd <= 0.0:
+		failures.append("rotate_in must start a cooldown")
+	var base_cd: float = mes.rotate_cd
+	mes.set_holding(false)
+	if not mes.grant_trait(&"dejar_golpear"):
+		failures.append("dejar_golpear grant failed")
+	mes.rotate_cd = 0.0
+	mes.set_holding(true)
+	var reduced: float = float(mes.traits.get("rotate_in_cooldown_sec", 0.0)) * mes.rotate_in_cooldown_mult()
+	if not is_equal_approx(mes.rotate_cd, reduced):
+		failures.append("dejar_golpear cooldown want %s got %s" % [reduced, mes.rotate_cd])
+	if not is_equal_approx(base_cd, float(mes.traits.get("rotate_in_cooldown_sec", 0.0))):
+		failures.append("base rotate cooldown should match JSON")
+	mes.set_holding(false)
+	mes.free()
+	Engine.time_scale = 1.0
+	return failures
+
+
+func _test_dump_stamina_and_honra_band() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var honor := _honor()
+	if honor == null or not honor.has_method("reset_state"):
+		failures.append("HonorService missing")
+		return failures
+	honor.reset_state()
+	var body := Node.new()
+	var combat: CidCombat = COMBAT.new()
+	var mes: MesuraComponent = MESURA.new()
+	mes.name = "Mesura"
+	combat.name = "CidCombat"
+	body.add_child(combat)
+	body.add_child(mes)
+	root.add_child(body)
+	mes.traits["dump_stamina"] = 10.0
+	mes.ira = float(mes.traits.get("ira_max", 0.0))
+	var stam0: float = combat.stamina
+	if not mes.try_dump():
+		failures.append("dump with dump_stamina must succeed")
+	if not is_equal_approx(combat.stamina, stam0 - 10.0):
+		failures.append("dump must spend dump_stamina, want %s got %s" % [stam0 - 10.0, combat.stamina])
+	if combat.last_move != &"dump":
+		failures.append("dump_strike must set last_move dump")
+	honor.reset_state()
+	mes.traits["dump_honra_min"] = -10.0
+	mes.traits["dump_honra_max"] = -10.0
+	mes.ira = float(mes.traits.get("ira_max", 0.0))
+	var honra0: float = honor.state.honra
+	if not mes.try_dump():
+		failures.append("banded dump must succeed")
+	if not is_equal_approx(honor.state.honra, honra0 - 10.0):
+		failures.append("dump honra must clamp to band, want %s got %s" % [honra0 - 10.0, honor.state.honra])
+	root.remove_child(body)
+	body.free()
+	honor.reset_state()
 	return failures
 
 
@@ -261,6 +399,7 @@ func _test_cid_scene_wires_mesura() -> PackedStringArray:
 
 
 func _finish(failures: PackedStringArray) -> void:
+	Engine.time_scale = 1.0
 	if failures.is_empty():
 		print("test_mesura: ok")
 		quit(0)

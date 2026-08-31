@@ -30,6 +30,7 @@
     "hold_move_mult": { "type": "number" },
     "hold_parry_window_ms": { "type": "number" },
     "hold_fight_min_sec": { "type": "number" },
+    "rotate_in_cooldown_sec": { "type": "number" },
     "rotate_in_cooldown_mult": { "type": "number" },
     "ira_max": { "type": "number" },
     "ira_start": { "type": "number" },

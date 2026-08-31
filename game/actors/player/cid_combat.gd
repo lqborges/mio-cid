@@ -82,6 +82,16 @@ func is_attacking() -> bool:
 	return _attack_left > 0.0
 
 
+func lower_weapon() -> void:
+	_attack_left = 0.0
+	combo_step = 0
+	_combo_left = 0.0
+	if hit_box != null:
+		hit_box.disarm()
+	if shout_ring != null:
+		shout_ring.disarm()
+
+
 func try_sprint(delta: float) -> bool:
 	var cost := float(tunables.get("sprint_stamina_per_sec", 0.0)) * delta
 	if stamina <= 0.0:
@@ -169,17 +179,14 @@ func dump_strike() -> void:
 	var mes := _mesura()
 	if mes != null and mes.has_method("dump_move"):
 		move = mes.dump_move()
+	if not _spend(float(move.get("stamina", 0.0))):
+		return
+	_note_strike()
 	last_move = &"dump"
 	if hit_box != null:
 		hit_box.disarm()
-	_attack_left = float(move.get("duration", 0.0))
-	if shout_ring == null:
-		return
-	shout_ring.source = self
-	var shape_node := shout_ring.get_node_or_null("CollisionShape3D") as CollisionShape3D
-	if shape_node != null and shape_node.shape is SphereShape3D:
-		(shape_node.shape as SphereShape3D).radius = float(move.get("radius", 0.0))
-	shout_ring.arm(float(move.get("damage", 0.0)), &"shout", float(move.get("stagger", 0.0)))
+	_arm_shout(move)
+	_play_sfx(&"shout")
 
 
 func weapon_swap() -> void:
@@ -325,6 +332,9 @@ func _on_player_died() -> void:
 		hit_box.disarm()
 	if shout_ring != null:
 		shout_ring.disarm()
+	var mes := _mesura()
+	if mes != null and mes.has_method("set_holding"):
+		mes.set_holding(false)
 	_emit_you_fell()
 	if not allow_death_reload:
 		return
