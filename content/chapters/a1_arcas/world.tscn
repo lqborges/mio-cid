@@ -267,4 +267,4 @@ script = ExtResource("6_bridge")
 
 [node name="DesertionTicker" parent="HUD" instance=ExtResource("9_ticker")]
 
-[node name="ChoiceUI" parent="HUD" instance=ExtResource("8_choice")]]
+[node name="ChoiceUI" parent="HUD" instance=ExtResource("8_choice")]
