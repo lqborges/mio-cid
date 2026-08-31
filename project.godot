@@ -15,6 +15,17 @@ config/description="Third-person action-RPG campaign of the Cantar de Mio Cid."
 config/version="0.0.0"
 config/features=PackedStringArray("4.7", "Forward Plus")
 
+[autoload]
+
+EventBus="*res://game/autoload/event_bus.gd"
+HonorService="*res://game/autoload/honor_service.gd"
+SaveService="*res://game/autoload/save_service.gd"
+ChapterRunner="*res://game/autoload/chapter_runner.gd"
+CampaignClock="*res://game/autoload/campaign_clock.gd"
+TreasuryService="*res://game/autoload/treasury_service.gd"
+GameState="*res://game/autoload/game_state.gd"
+Loc="*res://game/autoload/loc.gd"
+
 [internationalization]
 
 locale/fallback="es"
