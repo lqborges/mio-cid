@@ -104,6 +104,8 @@ class TestSpeechTrialRules(unittest.TestCase):
 
     def test_garcia_is_separate_in_tests(self) -> None:
         gd = _read("tests/unit/test_speech_trial.gd")
+        self.assertIn("pressed.emit()", gd)
+        self.assertIn("_test_press_line_does_not_free_emitter", gd)
         self.assertIn("garcia_preliminary", gd)
         self.assertIn("_garcia_trial", gd)
         self.assertIn("counts_toward_win", gd)
@@ -126,6 +128,10 @@ class TestSpeechUI(unittest.TestCase):
         self.assertIn("text_in", ui)
         self.assertIn("_loc_es", ui)
         self.assertIn("_loc_en", ui)
+        self.assertIn('call("text_in", key, "es")', ui)
+        self.assertIn('call("text_in", key, "en")', ui)
+        self.assertIn("child.queue_free()", ui)
+        self.assertNotIn("child.free()", ui)
         self.assertNotIn("Timer", ui)
         self.assertNotIn("create_timer", ui)
 

@@ -12,6 +12,7 @@ func _initialize() -> void:
 	failures.append_array(_test_steel_in_hall_fails())
 	failures.append_array(_test_win_threshold_on_trial())
 	failures.append_array(_test_ui_has_spanish_and_english())
+	failures.append_array(_test_press_line_does_not_free_emitter())
 	_finish(failures)
 
 
@@ -230,6 +231,44 @@ func _test_ui_has_spanish_and_english() -> PackedStringArray:
 		failures.append("speech UI should show Spanish labels and English subtitles")
 	get_root().remove_child(ui)
 	ui.free()
+	trial.free()
+	return failures
+
+
+func _test_press_line_does_not_free_emitter() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: PackedScene = load("res://game/ui/speech_trial.tscn") as PackedScene
+	if packed == null:
+		return PackedStringArray(["speech_trial.tscn failed to load"])
+	var ui: Node = packed.instantiate()
+	get_root().add_child(ui)
+	var trial := _three_ask_trial()
+	get_root().add_child(trial)
+	(ui as SpeechTrialUI).bind(trial)
+	var lines: Node = ui.get_node_or_null("Panel/Margin/Column/Lines")
+	if lines == null or lines.get_child_count() < 2:
+		failures.append("speech UI missing line buttons after bind")
+	else:
+		var ira_button: Button = lines.get_child(1) as Button
+		if ira_button == null:
+			failures.append("ira line is not a Button")
+		else:
+			ira_button.pressed.emit()
+			if trial.current_index() != 0 or trial.legal_score != 0.0:
+				failures.append("ira press must retry without committing")
+			lines = ui.get_node_or_null("Panel/Margin/Column/Lines")
+			if lines == null or lines.get_child_count() < 1:
+				failures.append("retry rebuild left no line buttons")
+			else:
+				var ok_button: Button = lines.get_child(0) as Button
+				if ok_button == null:
+					failures.append("ok line is not a Button after retry")
+				else:
+					ok_button.pressed.emit()
+					if trial.current_index() != 1:
+						failures.append("ok press after retry should advance the ask")
+	get_root().remove_child(ui)
+	ui.queue_free()
 	trial.free()
 	return failures
 

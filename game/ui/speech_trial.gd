@@ -149,7 +149,8 @@ func _clear_lines() -> void:
 		return
 	for child in _lines.get_children():
 		_lines.remove_child(child)
-		child.free()
+		# queue_free: never free() a Button from inside its pressed signal.
+		child.queue_free()
 
 
 func _set_pair(key: String) -> void:
@@ -167,9 +168,13 @@ func _loc_es(key: String) -> String:
 	if key.is_empty():
 		return ""
 	var loc := _loc_node()
-	if loc == null or not loc.has_method("text"):
+	if loc == null:
 		return key
-	return str(loc.call("text", key))
+	if loc.has_method("text_in"):
+		return str(loc.call("text_in", key, "es"))
+	if loc.has_method("text"):
+		return str(loc.call("text", key))
+	return key
 
 
 func _loc_en(key: String) -> String:
