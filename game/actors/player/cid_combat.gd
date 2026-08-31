@@ -172,21 +172,22 @@ func shout() -> void:
 	_play_sfx(&"shout")
 
 
-func dump_strike() -> void:
+func dump_strike() -> bool:
 	if _dead:
-		return
+		return false
 	var move := {}
 	var mes := _mesura()
 	if mes != null and mes.has_method("dump_move"):
 		move = mes.dump_move()
 	if not _spend(float(move.get("stamina", 0.0))):
-		return
+		return false
 	_note_strike()
 	last_move = &"dump"
 	if hit_box != null:
 		hit_box.disarm()
 	_arm_shout(move)
 	_play_sfx(&"shout")
+	return true
 
 
 func weapon_swap() -> void:

@@ -265,6 +265,18 @@ func _test_dump_stamina_and_honra_band() -> PackedStringArray:
 	root.add_child(body)
 	mes.traits["dump_stamina"] = 10.0
 	mes.ira = float(mes.traits.get("ira_max", 0.0))
+	var ira0: float = mes.ira
+	var honra_blocked: float = honor.state.honra
+	combat.stamina = 4.0
+	if mes.try_dump():
+		failures.append("dump_stamina above stamina must fail")
+	if not is_equal_approx(mes.ira, ira0):
+		failures.append("failed dump must keep ira")
+	if not is_equal_approx(honor.state.honra, honra_blocked):
+		failures.append("failed dump must not sink honra")
+	if not is_equal_approx(combat.stamina, 4.0):
+		failures.append("failed dump must not spend stamina")
+	combat.stamina = 100.0
 	var stam0: float = combat.stamina
 	if not mes.try_dump():
 		failures.append("dump with dump_stamina must succeed")

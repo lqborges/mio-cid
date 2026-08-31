@@ -81,6 +81,12 @@ func try_dump() -> bool:
 		return false
 	if ira + 0.0001 < float(traits.get("dump_ira_min", 0.0)):
 		return false
+	var combat := _combat()
+	if combat != null and combat.has_method("dump_strike"):
+		if not bool(combat.dump_strike()):
+			return false
+	else:
+		note_strike()
 	var event := _make_dump_event()
 	var honra_delta := event.delta_for(&"honra")
 	if event.delta_for(&"onores") != 0.0:
@@ -90,11 +96,7 @@ func try_dump() -> bool:
 	if service != null and service.has_method("apply"):
 		service.apply(event)
 	ira = 0.0
-	note_strike()
 	_sync_honor()
-	var combat := _combat()
-	if combat != null and combat.has_method("dump_strike"):
-		combat.dump_strike()
 	dumped.emit(honra_delta)
 	return true
 
