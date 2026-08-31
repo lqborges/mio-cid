@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/horse",
+  "title": "Horse companion tunables",
+  "type": "object",
+  "required": [
+    "id",
+    "debug_id",
+    "display_name_key",
+    "hp",
+    "stamina",
+    "walk_speed",
+    "trot_speed",
+    "gallop_speed",
+    "trot_min_speed",
+    "gallop_min_speed",
+    "follow_stop_distance",
+    "follow_distance",
+    "mount_distance",
+    "mount_hold_sec"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "id": { "type": "string", "enum": ["horse"] },
+    "debug_id": { "type": "string", "enum": ["horse", "destrier"] },
+    "debug_id_alt": { "type": "string", "enum": ["horse", "destrier"] },
+    "display_name_key": { "type": "string", "minLength": 1 },
+    "hp": { "type": "number", "minimum": 0 },
+    "stamina": { "type": "number", "minimum": 0 },
+    "stamina_regen_per_sec": { "type": "number" },
+    "gallop_stamina_per_sec": { "type": "number" },
+    "walk_speed": { "type": "number", "minimum": 0 },
+    "trot_speed": { "type": "number", "minimum": 0 },
+    "gallop_speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Top gait band. DESIGN canter; runtime id is gallop. Couch is a charge, not a gait."
+    },
+    "trot_min_speed": { "type": "number", "minimum": 0 },
+    "gallop_min_speed": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Speed at which the gait becomes gallop (DESIGN canter)."
+    },
+    "follow_stop_distance": { "type": "number", "minimum": 0 },
+    "follow_distance": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Start-follow leash. Follow begins beyond this, stops at follow_stop_distance."
+    },
+    "mount_prompt_key": { "type": "string" },
+    "dismount_prompt_key": { "type": "string" },
+    "follow_trot_distance": { "type": "number" },
+    "follow_gallop_distance": { "type": "number" },
+    "mount_distance": { "type": "number", "minimum": 0 },
+    "mount_hold_sec": { "type": "number", "minimum": 0 },
+    "saddle_offset_x": { "type": "number" },
+    "saddle_offset_y": { "type": "number" },
+    "saddle_offset_z": { "type": "number" },
+    "dismount_offset_x": { "type": "number" },
+    "dismount_offset_y": { "type": "number" },
+    "dismount_offset_z": { "type": "number" },
+    "panic_duration": { "type": "number", "minimum": 0 },
+    "panic_speed": { "type": "number", "minimum": 0 },
+    "straight_couch_m": { "type": "number", "minimum": 0 }
+  }
+}

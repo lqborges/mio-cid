@@ -1,6 +1,7 @@
 extends Node
 
 const FAIL_SCENE := "res://game/ui/fail_copy.tscn"
+const HORSE_COMPANION_FLAG := "horse_companion"
 
 
 func _ready() -> void:
@@ -36,15 +37,21 @@ func chapter_id() -> StringName:
 
 
 func flags() -> PackedStringArray:
+	var packed := PackedStringArray()
 	var value: Variant = _service_prop(ChapterRunner, &"flags")
 	if value is PackedStringArray:
-		return value
-	if value is Array:
-		var packed := PackedStringArray()
+		packed = (value as PackedStringArray).duplicate()
+	elif value is Array:
 		for item in value:
 			packed.append(str(item))
-		return packed
-	return PackedStringArray()
+	var has_horse := false
+	for flag in packed:
+		if flag == HORSE_COMPANION_FLAG:
+			has_horse = true
+			break
+	if not has_horse:
+		packed.append(HORSE_COMPANION_FLAG)
+	return packed
 
 
 func _on_hard_fail(reason: StringName) -> void:

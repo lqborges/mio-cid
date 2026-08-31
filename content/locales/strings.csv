@@ -38,4 +38,6 @@ a1_cardena.leave,"Abrazo y camino. No hay vuelta.","Embrace, and I ride. There i
 char.gabriel,"Gabriel","Gabriel"
 a1_navapalos.gabriel_dream,"Mientras viváis, bien se hará lo vuestro.","While you live you will succeed."
 a1_navapalos.sleep,"Duermo. El plazo se cumple.","I sleep. The plazo is done."
-
+horse.companion,el caballo,the horse
+horse.mount,Montar,Mount
+horse.dismount,Desmontar,Dismount

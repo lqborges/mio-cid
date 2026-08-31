@@ -7,6 +7,6 @@
   "shield_bash": { "damage": 10, "stamina": 22, "duration": 0.36, "stagger": 0.42 },
   "leap": { "damage": 8, "stamina": 26, "duration": 0.4, "stagger": 0.2 },
   "shout": { "damage": 0, "stamina": 28, "duration": 0.3, "stagger": 0.55, "radius": 4.5 },
-  "lance_couch": { "damage": 0, "stamina": 0, "duration": 0, "stagger": 0 },
-  "dismount_hook": { "damage": 0, "stamina": 0, "duration": 0, "stagger": 0 }
+  "lance_couch": { "damage": 48, "stamina": 22, "duration": 0.55, "stagger": 0.5 },
+  "dismount_hook": { "damage": 0, "stamina": 0, "duration": 0.2, "stagger": 0 }
 }
