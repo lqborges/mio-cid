@@ -29,6 +29,7 @@ func _run() -> void:
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(_check_separate_lenders())
 		failures.append_array(_check_spanish_choice_copy())
+		failures.append_array(await _check_choice_after_offer())
 		failures.append_array(_check_cheat_stain_and_marks())
 		_world.free()
 		_world = null
@@ -70,6 +71,8 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("desertion ticker missing from a1_arcas HUD")
 	if _world.find_child("PlazoBar", true, false) == null:
 		failures.append("plazo bar missing from a1_arcas HUD")
+	if _world.find_child("HallWhisper", true, false) == null:
+		failures.append("hall whisper missing from a1_arcas HUD")
 	if _runner and "current_id" in _runner and String(_runner.current_id) != "a1_arcas":
 		failures.append("ChapterRunner.current_id want a1_arcas got %s" % _runner.current_id)
 	return failures
@@ -130,6 +133,20 @@ func _check_spanish_choice_copy() -> PackedStringArray:
 	return failures
 
 
+func _check_choice_after_offer() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var ui: Node = _world.find_child("ChoiceUI", true, false)
+	if ui and bool(ui.visible):
+		failures.append("choice UI must stay hidden until Raquel and Vidas finish")
+	if not _world.has_method("run_offer"):
+		failures.append("world missing run_offer")
+		return failures
+	await _world.run_offer()
+	if ui == null or not bool(ui.visible):
+		failures.append("choice UI should present after the offer cue")
+	return failures
+
+
 func _check_cheat_stain_and_marks() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if _honor == null or _treasury == null:
@@ -169,6 +186,14 @@ func _check_cheat_stain_and_marks() -> PackedStringArray:
 		var want := clampf(loyalty_before + 0.08, 0.0, 1.0)
 		if not is_equal_approx(float(martin.loyalty), want):
 			failures.append("cheat Martín loyalty want %s got %s" % [want, martin.loyalty])
+	var whisper: Node = _world.find_child("HallWhisper", true, false)
+	var shown := ""
+	if whisper:
+		var label: Node = whisper.get_node_or_null("Line")
+		if label and "text" in label:
+			shown = str(label.get("text"))
+	if not shown.contains("marcos"):
+		failures.append("cheat cue should confirm marks, got %s" % shown)
 	return failures
 
 
@@ -216,6 +241,14 @@ func _check_refuse_desertion() -> PackedStringArray:
 			failures.append("desertion ticker is blank")
 		elif not shown.contains("6"):
 			failures.append("desertion ticker should show 6 lanzas, got %s" % shown)
+	var whisper: Node = _world.find_child("HallWhisper", true, false)
+	var line := ""
+	if whisper:
+		var label: Node = whisper.get_node_or_null("Line")
+		if label and "text" in label:
+			line = str(label.get("text"))
+	if not line.to_lower().contains("ayuna") and not line.to_lower().contains("mesnada"):
+		failures.append("refuse cue should confirm hunger, got %s" % line)
 	_world.free()
 	_world = null
 	return failures

@@ -1,13 +1,14 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a1_arcas/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
 [ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
 [ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
-[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="5_bridge"]
-[ext_resource type="Script" path="res://content/chapters/a1_arcas/lenders.gd" id="6_lend"]
-[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/choice_ui.tscn" id="7_choice"]
-[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/desertion_ticker.tscn" id="8_ticker"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="6_bridge"]
+[ext_resource type="Script" path="res://content/chapters/a1_arcas/lenders.gd" id="7_lend"]
+[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/choice_ui.tscn" id="8_choice"]
+[ext_resource type="PackedScene" path="res://content/chapters/a1_arcas/desertion_ticker.tscn" id="9_ticker"]
 
 [sub_resource type="Environment" id="Environment_arcas"]
 background_mode = 1
@@ -175,7 +176,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 2.2)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0, 6.4)
 collision_layer = 1
 collision_mask = 0
-script = ExtResource("6_lend")
+script = ExtResource("7_lend")
 character_id = &"martin_antolinez"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Martin"]
@@ -199,7 +200,7 @@ font_size = 36
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 8.2)
 collision_layer = 1
 collision_mask = 0
-script = ExtResource("6_lend")
+script = ExtResource("7_lend")
 character_id = &"raquel"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Raquel"]
@@ -223,7 +224,7 @@ font_size = 36
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 8.2)
 collision_layer = 1
 collision_mask = 0
-script = ExtResource("6_lend")
+script = ExtResource("7_lend")
 character_id = &"vidas"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Vidas"]
@@ -254,7 +255,7 @@ monitorable = false
 shape = SubResource("Box_offer")
 
 [node name="DialogueBridge" type="Node" parent="."]
-script = ExtResource("5_bridge")
+script = ExtResource("6_bridge")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -262,6 +263,8 @@ script = ExtResource("5_bridge")
 
 [node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
 
-[node name="DesertionTicker" parent="HUD" instance=ExtResource("8_ticker")]
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
 
-[node name="ChoiceUI" parent="HUD" instance=ExtResource("7_choice")]
+[node name="DesertionTicker" parent="HUD" instance=ExtResource("9_ticker")]
+
+[node name="ChoiceUI" parent="HUD" instance=ExtResource("8_choice")]]

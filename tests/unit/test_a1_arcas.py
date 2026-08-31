@@ -74,6 +74,8 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertIn("Martin", scene)
         self.assertIn("ChoiceUI", scene)
         self.assertIn("DesertionTicker", scene)
+        self.assertIn("hall_whisper.tscn", scene)
+        self.assertIn("HallWhisper", scene)
         self.assertIn('character_id = &"raquel"', scene)
         self.assertIn('character_id = &"vidas"', scene)
         self.assertIn('character_id = &"martin_antolinez"', scene)
@@ -124,6 +126,15 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertIn("run_refuse_48h", source)
         self.assertIn("cheat_marks", source)
         self.assertIn("arcas_cheated", source)
+        self.assertIn("_confirm_choice", source)
+        self.assertIn("_free_balloon", source)
+        self.assertIn("a1_arcas.cheat_done", source)
+        self.assertIn("a1_arcas.refuse_done", source)
+        start = source.split("func start_offer", 1)[1].split("func run_offer", 1)[0]
+        self.assertIn("_hide_choice()", start)
+        self.assertIn("_try_balloon", start)
+        ended = source.split("func _on_dialogue_ended", 1)[1].split("func _try_balloon", 1)[0]
+        self.assertIn("_show_choice()", ended)
         self.assertNotIn("camp_night(", source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
@@ -163,11 +174,15 @@ class TestA1ArcasSandChest(unittest.TestCase):
     def test_dialogue_names_raquel_and_vidas_apart(self) -> None:
         text = _read(f"{CHAPTER}/arcas.dialogue")
         self.assertIn("~ offer", text)
+        self.assertIn("~ cheat", text)
+        self.assertIn("~ refuse", text)
         self.assertIn("Raquel:", text)
         self.assertIn("Vidas:", text)
         self.assertIn("Martín:", text)
         self.assertIn("a1_arcas.raquel_ask", text)
         self.assertIn("a1_arcas.vidas_ask", text)
+        self.assertIn("a1_arcas.cheat_done", text)
+        self.assertIn("a1_arcas.refuse_done", text)
         self.assertNotIn("Raquel y Vidas:", text)
         self.assertNotIn("{{", text)
         lowered = text.lower()
@@ -181,6 +196,10 @@ class TestA1ArcasSandChest(unittest.TestCase):
         burgos = _read("content/chapters/a1_burgos/world.gd")
         self.assertIn("a1_arcas", burgos)
         self.assertIn("_travel_to_arcas", burgos)
+        self.assertIn("can_travel", burgos)
+        travel = burgos.split("func _travel_to_arcas", 1)[1].split("func draw_steel", 1)[0]
+        self.assertIn("can_travel", travel)
+        self.assertIn("goto", travel)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

@@ -121,8 +121,20 @@ func _travel_to_arcas() -> void:
 	var tree := get_tree()
 	if tree == null or tree.current_scene != self:
 		return
-	if ChapterRunner and ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(&"a1_arcas")
+	if ChapterRunner == null:
+		return
+	if not ChapterRunner.has_flag(SEEN_FLAG):
+		_set_flag(SEEN_FLAG)
+	var dest := &"a1_arcas"
+	if ChapterRunner.has_method("can_travel"):
+		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
+		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
+			return
+		if ChapterRunner.has_method("goto"):
+			ChapterRunner.goto(dest)
+		return
+	if ChapterRunner.has_method("goto"):
+		ChapterRunner.goto(dest)
 
 
 func draw_steel_on_burgaleses() -> void:

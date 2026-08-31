@@ -28,25 +28,30 @@ func start_offer(_cue: String = "offer") -> void:
 	if _resolved or _talking:
 		return
 	_talking = true
-	_show_choice()
+	_hide_choice()
 	var resource := _load_dialogue()
 	if resource == null:
 		_talking = false
+		_show_choice()
 		return
 	if _try_balloon(resource, "offer"):
 		return
 	await _walk_lines(resource, "offer")
 	_talking = false
+	if not _resolved:
+		_show_choice()
 
 
 func run_offer() -> void:
-	# Headless: walk the offer cue, then present the branch.
+	# Headless: walk Martín / Raquel / Vidas first, then present the branch.
 	_talking = true
+	_hide_choice()
 	var resource := _load_dialogue()
 	if resource:
 		await _walk_lines(resource, "offer")
-	_show_choice()
 	_talking = false
+	if not _resolved:
+		_show_choice()
 
 
 func choose_cheat() -> void:
@@ -60,6 +65,7 @@ func choose_cheat() -> void:
 		TreasuryService.state.marks += _tunable_int("cheat_marks")
 	_tick_martin_loyalty()
 	_finish_beat()
+	_confirm_choice("cheat", "a1_arcas.cheat_done")
 
 
 func choose_refuse() -> void:
@@ -74,6 +80,7 @@ func choose_refuse() -> void:
 		CampaignClock.run_refuse_48h()
 	_refresh_ticker()
 	_finish_beat()
+	_confirm_choice("refuse", "a1_arcas.refuse_done")
 
 
 func cheated() -> bool:
@@ -125,6 +132,44 @@ func _hide_choice() -> void:
 		ui.call("dismiss")
 	else:
 		ui.visible = false
+
+
+func _confirm_choice(cue: String, whisper_key: String) -> void:
+	_whisper(whisper_key)
+	_free_balloon()
+	var resource := _load_dialogue()
+	if resource == null:
+		return
+	_talking = true
+	if _try_balloon(resource, cue):
+		return
+	_talking = false
+
+
+func _whisper(key: String) -> void:
+	var whisper: Node = find_child("HallWhisper", true, false)
+	if whisper and whisper.has_method("whisper_key"):
+		whisper.call("whisper_key", key)
+		return
+	if whisper and Loc and whisper.has_method("_show"):
+		whisper.call("_show", Loc.text(key))
+
+
+func _free_balloon() -> void:
+	var roots: Array[Node] = [self]
+	var tree := get_tree()
+	if tree:
+		roots.append(tree.root)
+		if tree.current_scene:
+			roots.append(tree.current_scene)
+	var seen: Dictionary = {}
+	for root in roots:
+		if root == null or seen.has(root):
+			continue
+		seen[root] = true
+		for node in root.find_children("*", "TalkBalloon", true, false):
+			if is_instance_valid(node) and not node.is_queued_for_deletion():
+				node.queue_free()
 
 
 func _finish_beat() -> void:
@@ -203,6 +248,9 @@ func _on_dialogue_ended(_resource: Variant = null) -> void:
 
 
 func _try_balloon(resource: Resource, cue: String) -> bool:
+	var tree := get_tree()
+	if tree == null or tree.current_scene == null:
+		return false
 	var dm := _dialogue_manager()
 	if dm and dm.has_method("show_dialogue_balloon_scene") and ResourceLoader.exists(BALLOON_PATH):
 		if dm.has_signal("dialogue_ended") and not dm.dialogue_ended.is_connected(_on_dialogue_ended):
