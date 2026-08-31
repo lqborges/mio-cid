@@ -86,6 +86,9 @@ jobs:
       - name: Run Python save HMAC tests
         run: python3 tests/unit/test_save_hmac.py
 
+      - name: Run Python feed / camp-night tests
+        run: python3 tests/unit/test_feed.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -110,6 +113,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_save_hmac.gd
+
+      - name: Run camp-night headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_camp_night.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

@@ -1,0 +1,50 @@
+class_name FailCopy
+extends Control
+
+const MENU_SCENE := "res://game/ui/main_menu.tscn"
+
+static var last_reason: StringName = &"name_empty"
+
+const COPY := {
+	&"name_empty": "the name is empty",
+	&"you_fell": "the name is empty",
+	&"alfonso_host": "the name is empty",
+	&"alfonso_wrath": "the name is empty",
+	&"plazo_expired": "the name is empty",
+}
+
+@onready var _line: Label = $Center/Line
+@onready var _reason: Label = $Center/Reason
+
+
+func _ready() -> void:
+	$Center/Reload.pressed.connect(_on_reload)
+	$Center/Menu.pressed.connect(_on_menu)
+	show_reason(last_reason)
+
+
+func show_reason(reason: StringName) -> void:
+	last_reason = reason
+	if _line:
+		_line.text = str(COPY.get(reason, COPY[&"name_empty"]))
+	if _reason:
+		_reason.text = String(reason)
+
+
+func _on_reload() -> void:
+	if SaveService == null:
+		_on_menu()
+		return
+	var payload: Dictionary = SaveService.load_file(SaveService.autosave_path())
+	if payload.is_empty():
+		_on_menu()
+		return
+	var vivar := "res://content/chapters/a1_vivar/world.tscn"
+	if ResourceLoader.exists(vivar):
+		get_tree().change_scene_to_file(vivar)
+		return
+	_on_menu()
+
+
+func _on_menu() -> void:
+	get_tree().change_scene_to_file(MENU_SCENE)

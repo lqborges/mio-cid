@@ -37,8 +37,6 @@ AUTOLOAD_SCRIPTS = {
 }
 STUBS = {
     "ChapterRunner": "game/autoload/chapter_runner.gd",
-    "CampaignClock": "game/autoload/campaign_clock.gd",
-    "TreasuryService": "game/autoload/treasury_service.gd",
 }
 
 

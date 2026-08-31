@@ -1,5 +1,12 @@
 extends Node
 
+const FAIL_SCENE := "res://game/ui/fail_copy.tscn"
+
+
+func _ready() -> void:
+	if EventBus:
+		EventBus.hard_fail.connect(_on_hard_fail)
+
 
 func honor() -> Variant:
 	return _service_prop(HonorService, &"state")
@@ -38,6 +45,19 @@ func flags() -> PackedStringArray:
 			packed.append(str(item))
 		return packed
 	return PackedStringArray()
+
+
+func _on_hard_fail(reason: StringName) -> void:
+	FailCopy.last_reason = reason
+	var tree := get_tree()
+	if tree == null or tree.current_scene == null:
+		return
+	var scene := tree.current_scene
+	if scene.scene_file_path == FAIL_SCENE:
+		if scene.has_method("show_reason"):
+			scene.show_reason(reason)
+		return
+	tree.change_scene_to_file(FAIL_SCENE)
 
 
 func _service_prop(service: Object, prop: StringName) -> Variant:
