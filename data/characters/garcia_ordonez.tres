@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"garcia_ordonez"
+display_name_key = &"char.garcia_ordonez"
+poem_formula_key = &""
+role = &"count"
+combat = 40.0
+birth = 95.0
+diplomacy = 60.0
+mesura_max = 10.0
+loyalty = 0.05
+gift_bias = &"gold"
+alive = true
+essential = false
+desertion_capable = false
+unkillable = false
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a2_tagus"
+must_survive_until = &""
+vo_id = &"garcia_ordonez"
+will_swear_riepto = true

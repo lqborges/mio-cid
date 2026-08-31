@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"alfonso"
+display_name_key = &"char.alfonso"
+poem_formula_key = &""
+role = &"king"
+combat = 0.0
+birth = 100.0
+diplomacy = 85.0
+mesura_max = 90.0
+loyalty = 0.15
+gift_bias = &"horses"
+alive = true
+essential = true
+desertion_capable = false
+unkillable = true
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a1_vivar"
+must_survive_until = &""
+vo_id = &"alfonso"
+will_swear_riepto = true

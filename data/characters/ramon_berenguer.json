@@ -1,0 +1,18 @@
+{
+  "id": "ramon_berenguer",
+  "display_name_key": "char.ramon_berenguer",
+  "role": "count",
+  "combat": 58,
+  "birth": 90,
+  "diplomacy": 55,
+  "mesura_max": 20,
+  "loyalty_0": 0.1,
+  "gift_bias": "horses",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a1_tevar",
+  "vo_id": "ramon_berenguer"
+}

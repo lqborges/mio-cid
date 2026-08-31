@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="MesnadaMember" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_member.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ramon_berenguer"
+display_name_key = &"char.ramon_berenguer"
+poem_formula_key = &""
+role = &"count"
+combat = 58.0
+birth = 90.0
+diplomacy = 55.0
+mesura_max = 20.0
+loyalty = 0.1
+gift_bias = &"horses"
+alive = true
+essential = false
+desertion_capable = false
+unkillable = false
+list_eligible = false
+list_index = -1
+recruitable_beat = &"a1_tevar"
+must_survive_until = &""
+vo_id = &"ramon_berenguer"
+will_swear_riepto = true

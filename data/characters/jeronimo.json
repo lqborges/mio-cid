@@ -1,0 +1,18 @@
+{
+  "id": "jeronimo",
+  "display_name_key": "char.jeronimo",
+  "role": "bishop",
+  "combat": 60,
+  "birth": 40,
+  "diplomacy": 50,
+  "mesura_max": 40,
+  "loyalty_0": 0.6,
+  "gift_bias": "chapel",
+  "essential": false,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": true,
+  "list_index": -1,
+  "recruitable_beat": "a2_jeronimo",
+  "vo_id": "jeronimo"
+}

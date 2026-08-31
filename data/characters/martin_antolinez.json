@@ -1,0 +1,18 @@
+{
+  "id": "martin_antolinez",
+  "display_name_key": "char.martin_antolinez",
+  "role": "captain",
+  "combat": 70,
+  "birth": 35,
+  "diplomacy": 55,
+  "mesura_max": 50,
+  "loyalty_0": 0.55,
+  "gift_bias": "gold",
+  "essential": false,
+  "desertion_capable": true,
+  "unkillable": false,
+  "list_eligible": true,
+  "list_index": 2,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "martin_antolinez"
+}

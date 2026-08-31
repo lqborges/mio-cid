@@ -1,0 +1,18 @@
+{
+  "id": "felez_munoz",
+  "display_name_key": "char.felez_munoz",
+  "role": "captain",
+  "combat": 55,
+  "birth": 25,
+  "diplomacy": 45,
+  "mesura_max": 45,
+  "loyalty_0": 0.55,
+  "gift_bias": "horses",
+  "essential": false,
+  "desertion_capable": true,
+  "unkillable": false,
+  "list_eligible": true,
+  "list_index": -1,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "felez_munoz"
+}

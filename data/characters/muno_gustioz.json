@@ -1,0 +1,18 @@
+{
+  "id": "muno_gustioz",
+  "display_name_key": "char.muno_gustioz",
+  "role": "captain",
+  "combat": 68,
+  "birth": 30,
+  "diplomacy": 50,
+  "mesura_max": 55,
+  "loyalty_0": 0.75,
+  "gift_bias": "arms",
+  "essential": false,
+  "desertion_capable": true,
+  "unkillable": false,
+  "list_eligible": true,
+  "list_index": 3,
+  "recruitable_beat": "a1_vivar",
+  "vo_id": "muno_gustioz"
+}

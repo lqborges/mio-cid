@@ -1,0 +1,19 @@
+{
+  "id": "avengalvon",
+  "display_name_key": "char.avengalvon",
+  "role": "ally_taifa",
+  "combat": 66,
+  "birth": 55,
+  "diplomacy": 75,
+  "mesura_max": 60,
+  "loyalty_0": 0.7,
+  "gift_bias": "horses",
+  "essential": true,
+  "desertion_capable": false,
+  "unkillable": false,
+  "list_eligible": false,
+  "list_index": -1,
+  "recruitable_beat": "a2_embassy2",
+  "must_survive_until": "a3_despedida",
+  "vo_id": "avengalvon"
+}
