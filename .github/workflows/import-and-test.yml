@@ -95,6 +95,12 @@ jobs:
       - name: Run Python a1_vivar tests
         run: python3 tests/unit/test_a1_vivar.py
 
+      - name: Validate chapter graph
+        run: python3 tools/validate_graph.py
+
+      - name: Run Python chapter-graph tests
+        run: python3 tests/unit/test_tagus_join.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -140,6 +146,11 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_vivar.gd
 
+      - name: Run Tagus AND-join headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_tagus_join.gd
+
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -164,4 +175,4 @@ jobs:
 
       - name: Skip notice
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty/CidController headless tests, and gdUnit4 skipped."
+        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty/CidController/Tagus headless tests, and gdUnit4 skipped."

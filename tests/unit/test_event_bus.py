@@ -37,6 +37,7 @@ AUTOLOAD_SCRIPTS = {
     "Loc": "game/autoload/loc.gd",
     "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
 }
+# ChapterRunner is implemented in PR-06. No remaining autoload stubs.
 STUBS = {}
 
 
