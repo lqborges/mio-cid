@@ -166,11 +166,24 @@ func _check_ledger_greys_thirty_horses() -> PackedStringArray:
 		return failures
 	if ui.has_method("is_option_blocked") and not bool(ui.call("is_option_blocked", &"thirty_horses")):
 		failures.append("ledger must treat thirty_horses as blocked below herd")
+	if ui.has_method("select"):
+		ui.call("select", &"thirty_horses")
 	var btn: Button = ui.find_child("thirty_horses", true, false) as Button
 	if btn == null:
 		failures.append("ledger missing thirty_horses row")
-	elif not btn.disabled:
-		failures.append("thirty_horses row must be greyed/disabled when herd is short")
+	else:
+		if btn.disabled:
+			failures.append("blocked thirty_horses row must stay clickable")
+		if btn.modulate.is_equal_approx(Color(1, 1, 1, 1)):
+			failures.append("thirty_horses row must be greyed when herd is short")
+	var warn: Label = ui.get_node_or_null(NodePath("Center/Warn")) as Label
+	if warn == null or warn.text.is_empty():
+		failures.append("selecting blocked thirty_horses must show warn copy")
+	elif not warn.text.to_lower().contains("caballo"):
+		failures.append("blocked thirty_horses warn must mention horses, got %s" % warn.text)
+	var confirm: Button = ui.get_node_or_null(NodePath("Center/Confirm")) as Button
+	if confirm and confirm.disabled:
+		failures.append("Confirm must stay enabled so blocked resolve() can run")
 	return failures
 
 
@@ -327,7 +340,8 @@ func _check_empty_hands_refuse_branch() -> PackedStringArray:
 	_logged.clear()
 	_treasury.state.horses = 2
 	_treasury.state.marks = 0
-	_honor.state.onores = 8.0
+	# After Castejón take, onores is already > 20; empty_hands must still finish the beat.
+	_honor.state.onores = 55.0
 	var honor_before := float(_honor.state.honor)
 	var ev: HonorEvent = world.call("run_gift", &"empty_hands")
 	if ev == null or String(ev.id) != "embassy1_gift":

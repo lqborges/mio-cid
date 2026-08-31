@@ -12,11 +12,19 @@ extends Resource
 
 
 func affordable(t: Treasury, honor: HonorState) -> bool:
+	return block_reason(t, honor) == &""
+
+
+func block_reason(t: Treasury, honor: HonorState) -> StringName:
 	if t == null or honor == null:
-		return false
-	if t.horses < horses or t.marks < marks or t.horses < blocked_if_horses_lt:
-		return false
-	return honor.onores <= blocked_if_onores_gt
+		return &"horses"
+	if t.horses < horses or t.horses < blocked_if_horses_lt:
+		return &"horses"
+	if t.marks < marks:
+		return &"marks"
+	if honor.onores > blocked_if_onores_gt:
+		return &"onores"
+	return &""
 
 
 static func from_dict(data: Dictionary) -> GiftOption:
