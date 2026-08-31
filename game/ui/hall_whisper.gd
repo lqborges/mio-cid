@@ -13,13 +13,17 @@ func _ready() -> void:
 		EventBus.honor_logged.connect(_on_honor_logged)
 
 
+func whisper_key(key: String) -> void:
+	_show(Loc.text(key) if Loc else key)
+
+
 func _on_honor_logged(event: HonorEvent) -> void:
 	if event == null:
 		return
 	var key := String(event.ui_whisper_key)
 	if key.is_empty():
 		return
-	_show(Loc.text(key) if Loc else key)
+	whisper_key(key)
 
 
 func _show(text: String) -> void:

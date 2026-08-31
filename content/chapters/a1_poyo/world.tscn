@@ -1,0 +1,201 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_poyo/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="3_ai"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="4_captain"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+
+[sub_resource type="Environment" id="Environment_poyo"]
+background_mode = 1
+background_color = Color(0.42, 0.40, 0.34, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.55, 0.50, 0.42, 1)
+ambient_light_energy = 0.42
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.46, 0.40, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_hill"]
+albedo_color = Color(0.40, 0.36, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_camp"]
+albedo_color = Color(0.50, 0.44, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.48, 0.46, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_fire"]
+albedo_color = Color(0.22, 0.16, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_banner"]
+albedo_color = Color(0.62, 0.58, 0.50, 1)
+roughness = 1.0
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_poyo"]
+vertices = PackedVector3Array(-20, 0.05, -20, 20, 0.05, -20, 20, 0.05, 20, -20, 0.05, 20)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[sub_resource type="BoxShape3D" id="Box_rest"]
+size = Vector3(8, 2.4, 8)
+
+[sub_resource type="BoxShape3D" id="Box_tevar"]
+size = Vector3(6, 2.4, 4)
+
+[node name="Poyo" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_poyo")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1, 0.92, 0.78, 1)
+light_energy = 0.95
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(40, 1, 40)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="PoyoHill" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -8)
+radius = 7.0
+height = 1.6
+sides = 10
+material = SubResource("Mat_hill")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="NameStone" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -6.2)
+size = Vector3(0.6, 2.2, 0.4)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.4, 0.7, 3.2)
+size = Vector3(2.6, 1.4, 2.6)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.6, 0.55, 3.4)
+size = Vector3(2.2, 1.1, 2.2)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentC" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.5, 6.4)
+size = Vector3(2.0, 1.0, 2.0)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="FireRing" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 1.6)
+radius = 0.7
+height = 0.4
+sides = 8
+material = SubResource("Mat_fire")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="PlaceName" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, -6.2)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_poyo")
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("3_ai")
+leader_path = NodePath("../Cid")
+lanza_body_limit = 3
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="AlvarFanez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 2.4)
+member_id = &"alvar_fanez"
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 2.4)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("4_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 3.6)
+member_id = &"pero_bermudez"
+
+[node name="RestZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 1.6)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RestZone"]
+shape = SubResource("Box_rest")
+
+[node name="TevarExit" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 14)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TevarExit"]
+shape = SubResource("Box_tevar")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]

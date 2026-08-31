@@ -45,6 +45,22 @@ func can_travel(from_id: StringName, to_id: StringName, travel_flags: PackedStri
 	return bool(graph.can_travel(from_id, to_id, travel_flags))
 
 
+func can_skip_travel(from_id: StringName, to_id: StringName, travel_flags: PackedStringArray) -> bool:
+	if not can_travel(from_id, to_id, travel_flags):
+		return false
+	return _visited(to_id, travel_flags)
+
+
+func skip_travel(to_id: StringName) -> bool:
+	if not can_skip_travel(current_id, to_id, flags):
+		return false
+	return travel(to_id)
+
+
+func has_flag(flag: StringName) -> bool:
+	return String(flag) in flags
+
+
 func add_flag(flag: String) -> void:
 	if flag.is_empty() or flag in flags:
 		return
@@ -75,6 +91,17 @@ func travel(to_id: StringName) -> bool:
 	current_id = to_id
 	_start_director()
 	return true
+
+
+func _visited(to_id: StringName, travel_flags: PackedStringArray) -> bool:
+	var dest := String(to_id)
+	var cut := dest.find("_")
+	var short := dest.substr(cut + 1) if cut >= 0 else dest
+	if "%s_named" % short in travel_flags:
+		return true
+	if "%s_seen" % short in travel_flags:
+		return true
+	return false
 
 
 func _start_director() -> void:

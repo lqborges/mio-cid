@@ -219,7 +219,18 @@ def _edge_open(graph: dict[str, Any], from_id: str, to_id: str, flags: Iterable[
     return False
 
 
+def _hub_lock_flag(to_id: str) -> str:
+    parts = to_id.split("_", 1)
+    if len(parts) != 2 or not parts[1]:
+        return ""
+    return f"hub_lock_{parts[1]}"
+
+
 def can_travel(graph: dict[str, Any], from_id: str, to_id: str, flags: Iterable[str]) -> bool:
+    have = {str(flag) for flag in flags}
+    lock = _hub_lock_flag(to_id)
+    if lock and lock in have:
+        return False
     nodes = _nodes_by_id(graph)
     dest = nodes.get(to_id)
     src = nodes.get(from_id)

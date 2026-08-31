@@ -26,9 +26,21 @@ func start(id: StringName) -> void:
 	beat_id = id
 	step_index = 0
 	steps = _load_steps(id)
+	skip_repeatable()
+
+
+func skip_repeatable() -> void:
+	# WHY: first-arrival / corridor steps with skip_if do not replay on a return visit.
+	while step_index >= 0 and step_index < steps.size():
+		var raw: Variant = steps[step_index]
+		if raw is Dictionary and _should_skip(raw):
+			step_index += 1
+			continue
+		break
 
 
 func advance() -> bool:
+	skip_repeatable()
 	if step_index < 0 or step_index >= steps.size():
 		return false
 	var raw: Variant = steps[step_index]
@@ -78,6 +90,20 @@ func _load_steps(id: StringName) -> Array:
 	elif parsed is Array:
 		return parsed
 	return []
+
+
+func _should_skip(step: Dictionary) -> bool:
+	var raw: Variant = step.get("skip_if", [])
+	if not (raw is PackedStringArray or raw is Array):
+		return false
+	var runner := _autoload("ChapterRunner")
+	var have: PackedStringArray = PackedStringArray()
+	if runner != null and "flags" in runner:
+		have = runner.flags
+	for flag in raw:
+		if str(flag) in have:
+			return true
+	return false
 
 
 func _apply_flags(raw: Variant) -> void:

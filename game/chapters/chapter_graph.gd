@@ -52,6 +52,9 @@ func get_chapter(id: StringName) -> Resource:
 
 
 func can_travel(from_id: StringName, to_id: StringName, flags: PackedStringArray) -> bool:
+	# WHY: hub_lock_cardena forbids any return to Cardeña, even from a later hub.
+	if _hub_locked(to_id, flags):
+		return false
 	var dest: Resource = get_chapter(to_id)
 	if dest != null and int(dest.act) == 1 and not bool(dest.reorderable):
 		var src: Resource = get_chapter(from_id)
@@ -98,6 +101,15 @@ func _locked_act1_ids() -> PackedStringArray:
 		if node != null and int(node.act) == 1 and not bool(node.reorderable):
 			ids.append(String(node.id))
 	return ids
+
+
+func _hub_locked(to_id: StringName, flags: PackedStringArray) -> bool:
+	var dest := String(to_id)
+	var cut := dest.find("_")
+	if cut < 0:
+		return false
+	var lock := "hub_lock_%s" % dest.substr(cut + 1)
+	return lock in flags
 
 
 func _edge_open(from_id: StringName, to_id: StringName, flags: PackedStringArray) -> bool:

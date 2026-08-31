@@ -189,7 +189,8 @@
     },
     {
       "from": "a1_arcas",
-      "to": "a1_cardena"
+      "to": "a1_cardena",
+      "forbid_flags": ["hub_lock_cardena"]
     },
     {
       "from": "a1_cardena",
