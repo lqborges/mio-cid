@@ -1,0 +1,63 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://game/actors/player/cid_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://game/actors/player/cid_combat.gd" id="2_combat"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_cid"]
+albedo_color = Color(0.22, 0.2, 0.18, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cid"]
+radius = 0.4
+height = 1.8
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_cid")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_cid"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_facing"]
+albedo_color = Color(0.72, 0.58, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_facing"]
+size = Vector3(0.22, 0.18, 0.42)
+material = SubResource("Mat_facing")
+
+[node name="Cid" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+floor_snap_length = 0.25
+script = ExtResource("1_controller")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_cid")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_cid")
+
+[node name="FacingMarker" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -0.38)
+mesh = SubResource("BoxMesh_facing")
+
+[node name="InteractRay" type="RayCast3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+target_position = Vector3(0, 0, -2.2)
+collision_mask = 1
+
+[node name="CidCombat" type="Node" parent="."]
+script = ExtResource("2_combat")
+
+[node name="CameraRig" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+transform = Transform3D(0.707107, -0.468293, 0.529813, 0, 0.749269, 0.662266, -0.707107, -0.468293, 0.529813, 8, 11, 8)
+current = true
+fov = 34.0
+keep_aspect = 1

@@ -89,6 +89,9 @@ jobs:
       - name: Run Python feed / camp-night tests
         run: python3 tests/unit/test_feed.py
 
+      - name: Run Python controller tests
+        run: python3 tests/unit/test_cid_controller.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -119,6 +122,11 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_camp_night.gd
 
+      - name: Run CidController headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_cid_controller.gd
+
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -143,4 +151,4 @@ jobs:
 
       - name: Skip notice
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty headless tests, and gdUnit4 skipped."
+        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty/CidController headless tests, and gdUnit4 skipped."
