@@ -20,6 +20,7 @@ func _initialize() -> void:
 	failures.append_array(_test_couch_owns_xz())
 	failures.append_array(_test_follow_leash())
 	failures.append_array(_test_rider_faces_horse())
+	failures.append_array(_test_physics_priority_before_cid())
 	failures.append_array(_test_scenes_cheap_camera_on_cid())
 	_finish(failures)
 
@@ -177,6 +178,30 @@ func _test_couch_lance_wedge() -> PackedStringArray:
 	horse.free()
 	box.free()
 	charge.free()
+	return failures
+
+
+func _test_physics_priority_before_cid() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var horse: HorseCompanion = HORSE.new()
+	if horse.process_physics_priority != -1:
+		failures.append("HorseCompanion physics priority want -1 got %s" % horse.process_physics_priority)
+	horse.free()
+	var packed: Resource = load("res://content/chapters/_dev/arena.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("arena.tscn failed to load for physics priority")
+		return failures
+	var arena: Node = (packed as PackedScene).instantiate()
+	var cid: Node = arena.get_node_or_null("Cid")
+	var mount: Node = arena.get_node_or_null("Horse")
+	if cid == null or mount == null:
+		failures.append("arena missing Cid or Horse for physics priority")
+	elif int(mount.get("process_physics_priority")) >= int(cid.get("process_physics_priority")):
+		failures.append("horse physics tick must run before Cid (priorities %s vs %s)" % [
+			mount.get("process_physics_priority"),
+			cid.get("process_physics_priority"),
+		])
+	arena.free()
 	return failures
 
 

@@ -31,12 +31,13 @@ var _following: bool = false
 
 func _init() -> void:
 	load_tunables()
+	# Physics tick (not idle): snap rider before Cid orients the child camera.
+	process_physics_priority = -1
 
 
 func _ready() -> void:
 	add_to_group("horse_companion")
-	# Snap rider facing before Cid orients the child camera.
-	process_priority = -1
+	process_physics_priority = -1
 	floor_snap_length = 0.25
 	collision_layer = LAYER_HORSE
 	if collision_mask == 0:
