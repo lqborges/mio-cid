@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://ban2ikvokch7k"
+path="res://.godot/imported/yusuf.dialogue-2e5ed8c98651bc08523478bf33eae0af.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_yusuf/yusuf.dialogue"
+dest_files=["res://.godot/imported/yusuf.dialogue-2e5ed8c98651bc08523478bf33eae0af.tres"]
+
+[params]
+
+defaults=true

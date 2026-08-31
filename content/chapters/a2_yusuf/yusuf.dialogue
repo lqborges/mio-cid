@@ -1,0 +1,16 @@
+# Spoken lines are CSV keys. Huerta field battle; Jimena watches. No wall climb.
+
+~ start
+=> field
+
+~ field
+Cid: a2_yusuf.field
+=> END
+
+~ win
+Cid: a2_yusuf.win
+=> END
+
+~ wall
+Alvar: a2_yusuf.wall_refused
+=> END

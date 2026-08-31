@@ -132,3 +132,9 @@ a2_jeronimo.gift,Marcos para el obispado. Es administración.,Marks for the bish
 a2_jeronimo.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
 a2_jeronimo.appoint_first,Primero el obispado.,The bishopric first.
 a2_jeronimo.to_embassy,Hacia Alfonso,Toward Alfonso
+char.yusuf,Yusuf,Yusuf
+a2_yusuf.jimena_watch,Jimena mira el campo desde el muro.,Jimena watches the field from the wall.
+a2_yusuf.field,"Salimos a la huerta. Yusuf espera en el campo, no en el muro.","We ride into the huerta. Yusuf waits in the field, not on the wall."
+a2_yusuf.win,El primer día es nuestro. Jimena mira desde el muro.,The first day is ours. Jimena watches from the wall.
+a2_yusuf.wall_refused,Álvar: este día se pelea en la huerta. No hay escala.,Álvar: this day is fought in the huerta. There is no climb.
+a2_yusuf.day1_hold,"Anochece. Mañana, el segundo día.","Night falls. Tomorrow, the second day."

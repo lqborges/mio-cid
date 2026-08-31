@@ -131,7 +131,10 @@
       "id": "yusuf_win",
       "deltas": { "honor": 12 },
       "tags": ["battle"],
-      "beat": "a2_yusuf"
+      "beat": "a2_yusuf",
+      "once": true,
+      "flags_set": ["yusuf_day1_done"],
+      "ui_whisper_key": "a2_yusuf.win"
     },
     {
       "id": "pardon",

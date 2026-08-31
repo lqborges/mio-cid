@@ -1,0 +1,23 @@
+{
+  "id": "a2_yusuf",
+  "steps": [
+    {
+      "id": "watch",
+      "type": "cinematic",
+      "camera": "JimenaCamera"
+    },
+    {
+      "id": "field",
+      "type": "blocking"
+    },
+    {
+      "id": "yusuf_win",
+      "type": "honor_event"
+    },
+    {
+      "id": "day1_hold",
+      "type": "blocking",
+      "set_flags": ["yusuf_day1_done"]
+    }
+  ]
+}

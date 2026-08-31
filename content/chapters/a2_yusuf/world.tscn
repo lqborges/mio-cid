@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://content/chapters/a2_yusuf/day1.tscn" id="1_day1"]
+
+[node name="YusufDay1" instance=ExtResource("1_day1")]
