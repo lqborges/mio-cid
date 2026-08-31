@@ -128,7 +128,7 @@ func _rebuild_options() -> void:
 			btn.name = String(opt.id)
 			btn.custom_minimum_size = Vector2(0, 36)
 			box.add_child(btn)
-		var blocked_now := not opt.affordable(_treasury_state(), _honor_state())
+		var blocked_now := not opt.affordable(_treasury_state(), _honor_state(), _spend_escrow())
 		btn.text = _option_label(opt)
 		btn.disabled = _applied
 		btn.modulate = Color(0.55, 0.52, 0.48, 1) if blocked_now else Color(1, 1, 1, 1)
@@ -160,10 +160,14 @@ func _block_reason(opt: GiftOption, treasury: Treasury, honor: HonorState) -> St
 	if opt == null:
 		return &"horses"
 	if opt.has_method("block_reason"):
-		return opt.block_reason(treasury, honor)
-	if not opt.affordable(treasury, honor):
+		return opt.block_reason(treasury, honor, _spend_escrow())
+	if not opt.affordable(treasury, honor, _spend_escrow()):
 		return &"horses"
 	return &""
+
+
+func _spend_escrow() -> bool:
+	return gift != null and bool(gift.spend_escrow_first)
 
 
 func _blocked_loc(reason: StringName) -> String:

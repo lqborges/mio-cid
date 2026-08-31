@@ -1,0 +1,35 @@
+{
+  "id": "a2_embassy3",
+  "steps": [
+    {
+      "id": "prompt",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_embassy3/embassy3.dialogue",
+      "start": "gift"
+    },
+    {
+      "id": "ledger",
+      "type": "embassy_ledger"
+    },
+    {
+      "id": "alvar_leave",
+      "type": "cinematic"
+    },
+    {
+      "id": "alvar_return",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_embassy3/embassy3.dialogue",
+      "start": "return"
+    },
+    {
+      "id": "pardon",
+      "type": "whisper",
+      "set_flags": ["embassy3_done"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_tagus"
+    }
+  ]
+}

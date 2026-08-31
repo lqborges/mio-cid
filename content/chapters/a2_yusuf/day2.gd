@@ -189,7 +189,7 @@ func _leave_for_embassy3() -> bool:
 	var tree := get_tree()
 	if tree == null or tree.current_scene != self:
 		return travelled
-	# Embassy 3's scene may be absent.
+	# travel() does not change scenes.
 	if not ResourceLoader.exists(EMBASSY3_SCENE):
 		return travelled
 	if ChapterRunner and ChapterRunner.has_method("goto"):

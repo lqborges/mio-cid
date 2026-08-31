@@ -122,7 +122,6 @@ class TestA2YusufDay1(unittest.TestCase):
             "content/art/characters/dummy/dummy.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
 
     def test_scene_is_field_not_climb(self) -> None:
         scene = _read(f"{CHAPTER}/day1.tscn")
@@ -497,11 +496,13 @@ class TestA2YusufDay2(unittest.TestCase):
         yusuf = _origin(scene, "Yusuf")
         self.assertGreater(abs(cid[2] - yusuf[2]), 4.0)
 
-    def test_embassy3_not_shipped(self) -> None:
-        self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
+    def test_day2_goto_embassy3_when_present(self) -> None:
+        self.assertTrue((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
         source = _read(f"{CHAPTER}/day2.gd")
         self.assertIn("a2_embassy3", source)
         self.assertIn("EMBASSY3_SCENE", source)
+        self.assertIn("ResourceLoader.exists", source)
+        self.assertIn("goto", source)
 
 
 if __name__ == "__main__":

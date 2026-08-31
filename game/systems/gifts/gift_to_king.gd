@@ -9,23 +9,38 @@ const EVENT_ID := &"embassy1_gift"
 @export var id: StringName
 @export var beat: StringName
 @export var bearer_id: StringName = &"alvar_fanez"
+@export var event_id: StringName = EVENT_ID
+@export var spend_escrow_first: bool = false
 @export var options: Array[GiftOption] = []
 @export var alfonso_response: StringName = &""
 
 
 func resolve(choice_id: StringName, honor: HonorState, treasury: Treasury) -> HonorEvent:
 	var opt := _find(choice_id)
-	if opt == null or not opt.affordable(treasury, honor):
+	if opt == null or not opt.affordable(treasury, honor, spend_escrow_first):
 		return HonorEvent.new()  # caller shows blocked copy; no assert
-	treasury.horses = maxi(0, treasury.horses - opt.horses)
-	treasury.marks = maxi(0, treasury.marks - opt.marks)
+	_spend(treasury, opt)
 	var ev := HonorEvent.new()
-	ev.id = EVENT_ID
+	ev.id = event_id if event_id != &"" else EVENT_ID
 	ev.deltas = { "honor": opt.honor_delta }
 	ev.tags = PackedStringArray(["gift_up", String(beat)])
 	ev.beat = beat
 	_apply_honor(ev, honor)
 	return ev
+
+
+func _spend(treasury: Treasury, opt: GiftOption) -> void:
+	var horses_left := opt.horses
+	var marks_left := opt.marks
+	if spend_escrow_first:
+		var take_h := mini(maxi(0, treasury.royal_escrow_horses), horses_left)
+		treasury.royal_escrow_horses -= take_h
+		horses_left -= take_h
+		var take_m := mini(maxi(0, treasury.royal_escrow_marks), marks_left)
+		treasury.royal_escrow_marks -= take_m
+		marks_left -= take_m
+	treasury.horses = maxi(0, treasury.horses - horses_left)
+	treasury.marks = maxi(0, treasury.marks - marks_left)
 
 
 func option(choice_id: StringName) -> GiftOption:
@@ -76,6 +91,10 @@ static func from_dict(data: Dictionary) -> GiftToKing:
 	if gift.bearer_id == &"":
 		gift.bearer_id = &"alvar_fanez"
 	gift.alfonso_response = _name(data.get("alfonso_response", ""))
+	gift.event_id = _name(data.get("event_id", EVENT_ID))
+	if gift.event_id == &"":
+		gift.event_id = EVENT_ID
+	gift.spend_escrow_first = bool(data.get("spend_escrow_first", false))
 	var raw: Variant = data.get("player_options", data.get("options", []))
 	var packed: Array[GiftOption] = []
 	if raw is Array:

@@ -11,16 +11,21 @@ extends Resource
 @export var blocked_if_onores_gt: float = 100.0
 
 
-func affordable(t: Treasury, honor: HonorState) -> bool:
-	return block_reason(t, honor) == &""
+func affordable(t: Treasury, honor: HonorState, spend_escrow_first: bool = false) -> bool:
+	return block_reason(t, honor, spend_escrow_first) == &""
 
 
-func block_reason(t: Treasury, honor: HonorState) -> StringName:
+func block_reason(t: Treasury, honor: HonorState, spend_escrow_first: bool = false) -> StringName:
 	if t == null or honor == null:
 		return &"horses"
-	if t.horses < horses or t.horses < blocked_if_horses_lt:
+	var herd := t.horses
+	var purse := t.marks
+	if spend_escrow_first:
+		herd += t.royal_escrow_horses
+		purse += t.royal_escrow_marks
+	if herd < horses or herd < blocked_if_horses_lt:
 		return &"horses"
-	if t.marks < marks:
+	if purse < marks:
 		return &"marks"
 	if honor.onores > blocked_if_onores_gt:
 		return &"onores"
