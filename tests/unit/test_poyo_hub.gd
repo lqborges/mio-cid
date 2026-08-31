@@ -31,6 +31,7 @@ func _initialize() -> void:
 	failures.append_array(_test_extra_raid_closed())
 	failures.append_array(_test_skip_repeatable_travel())
 	failures.append_array(_test_mesnada_can_camp())
+	failures.append_array(await _test_arrival_does_not_feed())
 	_finish(failures)
 
 
@@ -91,10 +92,21 @@ func _test_second_visit_skips_intro() -> PackedStringArray:
 		failures.append("first arrival must set poyo_named")
 	elif "poyo_named" not in _runner.flags:
 		failures.append("first arrival must set poyo_named")
+	if not _whisper_shows(first, "Poyo de mio Cid"):
+		failures.append("first arrival must whisper a1_poyo.arrive")
 	first.free()
 	_runner.restore(&"a1_poyo", PackedStringArray(["poyo_named", "hub_lock_cardena"]))
-	if _runner.director != null and int(_runner.director.step_index) < 1:
-		failures.append("BeatDirector must skip the named arrival on a return visit")
+	if _runner.director == null:
+		failures.append("BeatDirector missing after return-visit start")
+	else:
+		if int(_runner.director.step_index) != 1:
+			failures.append("return visit must land on camp step, index %s" % _runner.director.step_index)
+		if _runner.director.steps.size() < 2:
+			failures.append("Poyo beats must keep the camp step")
+		else:
+			var camp_step: Variant = _runner.director.steps[1]
+			if not (camp_step is Dictionary) or str(camp_step.get("id", "")) != "camp":
+				failures.append("return visit steps[1] must be camp, got %s" % str(camp_step))
 	var second: Node = (packed as PackedScene).instantiate()
 	root.add_child(second)
 	if second.has_method("apply_arrival"):
@@ -186,6 +198,9 @@ func _test_skip_repeatable_travel() -> PackedStringArray:
 
 func _test_mesnada_can_camp() -> PackedStringArray:
 	var failures: PackedStringArray = []
+	var clock: Node = root.get_node_or_null(NodePath("CampaignClock"))
+	if clock != null and clock.has_method("reset"):
+		clock.reset()
 	if _runner != null and _runner.has_method("restore"):
 		_runner.restore(&"a1_poyo", PackedStringArray(["poyo_named"]))
 	var packed: Resource = load(WORLD_PATH)
@@ -198,15 +213,68 @@ func _test_mesnada_can_camp() -> PackedStringArray:
 		failures.append("Poyo mesnada missing follow AI")
 		world.free()
 		return failures
+	var days_before := 0
+	var plazo_before := 9
+	var segment_before := 0
+	if clock != null:
+		days_before = int(clock.days_elapsed)
+		plazo_before = int(clock.plazo_days_left)
+		segment_before = int(clock.segment)
 	if world.has_method("rest_camp"):
 		world.rest_camp()
 	if str(mesnada.get("formation")) != "wedge":
 		failures.append("rest_camp should plant the banner so the mesnada can camp")
-	var clock: Node = root.get_node_or_null(NodePath("CampaignClock"))
-	if clock != null and "segment" in clock and int(clock.segment) != 1 and not clock.has_method("rest_camp"):
-		failures.append("Poyo camp should use CampaignClock camp night")
+	if clock == null:
+		failures.append("CampaignClock missing")
+	else:
+		if int(clock.days_elapsed) != days_before + 1:
+			failures.append("rest_camp must tick one night, days %s -> %s" % [days_before, clock.days_elapsed])
+		if int(clock.plazo_days_left) != plazo_before:
+			failures.append("rest_camp must not advance plazo, left %s" % clock.plazo_days_left)
+		if int(clock.segment) != segment_before:
+			failures.append("rest_camp must restore segment %s, got %s" % [segment_before, clock.segment])
 	world.free()
 	return failures
+
+
+func _test_arrival_does_not_feed() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var clock: Node = root.get_node_or_null(NodePath("CampaignClock"))
+	if clock != null and clock.has_method("reset"):
+		clock.reset()
+	var days_before := 0
+	var segment_before := 0
+	if clock != null:
+		days_before = int(clock.days_elapsed)
+		segment_before = int(clock.segment)
+	if _runner != null and _runner.has_method("restore"):
+		_runner.restore(&"a1_poyo", PackedStringArray())
+	var packed: Resource = load(WORLD_PATH)
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	if world.has_method("apply_arrival"):
+		world.apply_arrival()
+	await physics_frame
+	await physics_frame
+	if clock != null:
+		if int(clock.days_elapsed) != days_before:
+			failures.append("arrival must not spend a feed night, days %s -> %s" % [days_before, clock.days_elapsed])
+		if int(clock.segment) != segment_before:
+			failures.append("arrival must not stick CAMP_NIGHT, segment %s" % clock.segment)
+	if world.get("_cid_in_rest") == true:
+		failures.append("Cid spawn must not sit inside RestZone")
+	world.free()
+	return failures
+
+
+func _whisper_shows(world: Node, snippet: String) -> bool:
+	var whisper: Node = world.find_child("HallWhisper", true, false)
+	if whisper == null:
+		return false
+	var line: Node = whisper.get_node_or_null("Line")
+	if line == null:
+		return false
+	return str(line.get("text")).find(snippet) >= 0
 
 
 func _finish(failures: PackedStringArray) -> void:

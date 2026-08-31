@@ -9,25 +9,14 @@ const RAID_ID := &"a1_poyo_raid"
 
 var intro_played: bool = false
 var intro_skipped: bool = false
-var _booted: bool = false
-
-
-func _enter_tree() -> void:
-	_boot()
+var _cid_in_rest: bool = false
 
 
 func _ready() -> void:
-	_boot()
-	_connect_zones()
-
-
-func _boot() -> void:
-	if _booted:
-		return
-	_booted = true
 	_bind_chapter()
+	_connect_zones()
+	# WHY: HallWhisper.line is @onready; whispering from _enter_tree drops the line.
 	apply_arrival()
-	_set_camp_night()
 
 
 func apply_arrival() -> void:
@@ -99,24 +88,34 @@ func _bind_chapter() -> void:
 		runner.current_id = BEAT_ID
 
 
-func _set_camp_night() -> void:
-	var clock := _clock()
-	if clock != null and "segment" in clock:
-		clock.segment = 1
-
-
 func _connect_zones() -> void:
 	var rest: Area3D = get_node_or_null("RestZone") as Area3D
-	if rest != null and not rest.body_entered.is_connected(_on_rest_entered):
-		rest.body_entered.connect(_on_rest_entered)
+	if rest != null:
+		if not rest.body_entered.is_connected(_on_rest_entered):
+			rest.body_entered.connect(_on_rest_entered)
+		if not rest.body_exited.is_connected(_on_rest_exited):
+			rest.body_exited.connect(_on_rest_exited)
 	var exit_zone: Area3D = get_node_or_null("TevarExit") as Area3D
 	if exit_zone != null and not exit_zone.body_entered.is_connected(_on_tevar_entered):
 		exit_zone.body_entered.connect(_on_tevar_entered)
 
 
+func _input(event: InputEvent) -> void:
+	if event.is_echo() or not event.is_pressed():
+		return
+	if _cid_in_rest and event.is_action_pressed("interact"):
+		rest_camp()
+		get_viewport().set_input_as_handled()
+
+
 func _on_rest_entered(body: Node) -> void:
 	if body != null and body.has_method("facing_dir"):
-		rest_camp()
+		_cid_in_rest = true
+
+
+func _on_rest_exited(body: Node) -> void:
+	if body != null and body.has_method("facing_dir"):
+		_cid_in_rest = false
 
 
 func _on_tevar_entered(body: Node) -> void:

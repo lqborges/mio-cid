@@ -60,6 +60,8 @@ class TestPoyoCampHub(unittest.TestCase):
         self.assertIn("mesnada_ai.gd", scene)
         self.assertIn("PoyoHill", scene)
         self.assertIn("NavigationRegion3D", scene)
+        self.assertNotIn("size = Vector3(8, 2.4, 8)", scene)
+        self.assertIn("size = Vector3(2.2, 2.4, 2.2)", scene)
 
     def test_beats_skip_repeatable_arrival(self) -> None:
         beats = json.loads(_read("content/chapters/a1_poyo/beats.json"))
@@ -72,20 +74,12 @@ class TestPoyoCampHub(unittest.TestCase):
         camp = next(step for step in steps if step.get("id") == "camp")
         self.assertEqual(camp.get("segment"), "camp_night")
 
-    def test_runner_skip_hook_and_forbid_flags(self) -> None:
+    def test_runner_has_no_class_name(self) -> None:
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("func can_skip_travel(", runner)
-        self.assertIn("func skip_travel(", runner)
-        self.assertIn("func has_flag(", runner)
         self.assertIsNone(re.search(r"^class_name\s", runner, re.MULTILINE))
-        director = _read("game/chapters/beat_director.gd")
-        self.assertIn("func skip_repeatable(", director)
-        self.assertIn('step.get("skip_if"', director)
-        graph_src = _read("game/chapters/chapter_graph.gd")
-        self.assertIn("func _hub_locked(", graph_src)
-        self.assertIn("hub_lock_", graph_src)
-        edge = _read("game/chapters/chapter_edge.gd")
-        self.assertIn("forbid_flags", edge)
+        world = _read("content/chapters/a1_poyo/world.gd")
+        self.assertNotIn("func _enter_tree", world)
+        self.assertNotIn("clock.segment = 1", world)
 
     def test_graph_locks(self) -> None:
         self.assertEqual(validate_main([]), 0)
