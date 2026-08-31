@@ -3,6 +3,7 @@ extends Node
 # PR-06 owns the graph; this PR only needs current beat + flags.
 
 const VIVAR_SCENE := "res://content/chapters/a1_vivar/world.tscn"
+const BURGOS_SCENE := "res://content/chapters/a1_burgos/world.tscn"
 
 var current_id: StringName = &""
 var flags: PackedStringArray = PackedStringArray()
@@ -32,4 +33,6 @@ func goto(beat_id: StringName) -> void:
 func _scene_path(beat_id: StringName) -> String:
 	if beat_id == &"a1_vivar":
 		return VIVAR_SCENE
+	if beat_id == &"a1_burgos":
+		return BURGOS_SCENE
 	return ""

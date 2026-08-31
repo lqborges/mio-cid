@@ -58,6 +58,28 @@ func leave_solar() -> void:
 		CampaignClock.advance_plazo(1)
 	if EventBus and EventBus.has_signal("beat_completed"):
 		EventBus.beat_completed.emit(BEAT_ID)
+	_travel_to_burgos()
+
+
+func _travel_to_burgos() -> void:
+	var tree := get_tree()
+	if tree == null or tree.current_scene != self:
+		return
+	if ChapterRunner == null:
+		return
+	if not ChapterRunner.has_flag(SEEN_FLAG):
+		_set_seen()
+	var dest := &"a1_burgos"
+	if ChapterRunner.has_method("can_travel"):
+		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
+		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
+			return
+		if ChapterRunner.has_method("goto"):
+			ChapterRunner.goto(dest)
+		return
+	_set_seen()
+	if ChapterRunner.has_method("goto"):
+		ChapterRunner.goto(dest)
 
 
 func _on_frontier_entered(body: Node) -> void:

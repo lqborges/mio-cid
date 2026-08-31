@@ -1,0 +1,11 @@
+{
+  "id": "a1_burgos",
+  "steps": [
+    { "id": "enter_gate", "type": "blocking", "wait": "player_in_square" },
+    { "id": "shutters", "type": "cinematic", "camera": "shutter_pan", "set_flags": ["burgos_shutters_seen"] },
+    { "id": "verse_20", "type": "dialogue", "file": "res://content/chapters/a1_burgos/burgos.dialogue", "start": "child_v20" },
+    { "id": "inn_refused", "type": "dialogue", "start": "innkeeper" },
+    { "id": "mesura_gate", "type": "choice", "red": "draw_steel", "white": "camp_river" },
+    { "id": "camp", "type": "travel_spawn", "next": "a1_arcas" }
+  ]
+}

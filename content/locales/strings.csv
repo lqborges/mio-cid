@@ -7,3 +7,7 @@ a1_vivar.alvar_here,"Aquí, mio Cid. El solar está vacío.","Here, my Cid. The 
 a1_vivar.call_martin,"Martín.","Martín."
 a1_vivar.martin_here,"A vuestro servicio. Las arcas, idas.","At your service. The chests are gone."
 a1_vivar.empty_solar,"Nueve días. Cruzamos la frontera.","Nine days. We cross the frontier."
+char.burgos_child,"Niño","Child"
+a1_burgos.inn_refused,"No hay posada para vosotros. El rey lo vedó.","There is no lodging for you. The king forbade it."
+a1_burgos.camp_river,"Campamos junto al río.","We camp by the river."
+a1_burgos.steel_drawn,"No. Mesura. No desenvainéis contra burgaleses.","No. Mesura. Do not draw on the burgaleses."

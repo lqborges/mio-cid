@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://cmq5w1hgao68i"
+path="res://.godot/imported/burgos.dialogue-301b9b935be006c522d15620e6176a76.tres"
+
+[deps]
+
+source_file="res://content/chapters/a1_burgos/burgos.dialogue"
+dest_files=["res://.godot/imported/burgos.dialogue-301b9b935be006c522d15620e6176a76.tres"]
+
+[params]
+
+defaults=true

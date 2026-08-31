@@ -1,0 +1,21 @@
+# Spoken lines are CSV keys. Child speaks poem.v20 (Montaner v. 20) only.
+# v. 9 is the Vivar departure formula, not this beat.
+
+~ start
+=> child_v20
+
+~ child_v20
+Niño: poem.v20 [#flag_set=burgos_shutters_seen]
+=> END
+
+~ innkeeper
+Posadero: a1_burgos.inn_refused
+=> END
+
+~ camp_river
+Cid: a1_burgos.camp_river
+=> END
+
+~ draw_steel
+Cid: a1_burgos.steel_drawn
+=> END

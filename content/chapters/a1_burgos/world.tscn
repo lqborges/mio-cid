@@ -1,0 +1,424 @@
+[gd_scene load_steps=27 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a1_burgos/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="6_bridge"]
+[ext_resource type="Script" path="res://content/chapters/a1_burgos/townsfolk.gd" id="7_folk"]
+
+[sub_resource type="Environment" id="Environment_burgos"]
+background_mode = 1
+background_color = Color(0.34, 0.36, 0.38, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.50, 0.47, 0.42, 1)
+ambient_light_energy = 0.38
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.40, 0.36, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_wall"]
+albedo_color = Color(0.48, 0.45, 0.40, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_house"]
+albedo_color = Color(0.44, 0.40, 0.34, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_inn"]
+albedo_color = Color(0.42, 0.32, 0.24, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_shutter"]
+albedo_color = Color(0.22, 0.16, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_river"]
+albedo_color = Color(0.22, 0.34, 0.40, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_camp"]
+albedo_color = Color(0.50, 0.44, 0.30, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_child"]
+albedo_color = Color(0.46, 0.38, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_innkeep"]
+albedo_color = Color(0.32, 0.28, 0.26, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_burgales"]
+albedo_color = Color(0.36, 0.34, 0.32, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_child"]
+radius = 0.25
+height = 1.15
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_child")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_child"]
+radius = 0.25
+height = 1.15
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_innkeep"]
+radius = 0.4
+height = 1.8
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_innkeep")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_innkeep"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_burgales"]
+radius = 0.38
+height = 1.75
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_burgales")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_burgales"]
+radius = 0.38
+height = 1.75
+
+[sub_resource type="BoxShape3D" id="Box_burgales"]
+size = Vector3(16, 2.4, 14)
+
+[sub_resource type="BoxShape3D" id="Box_camp"]
+size = Vector3(10, 2.2, 6)
+
+[node name="Burgos" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_burgos")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1, 0.92, 0.80, 1)
+light_energy = 0.95
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(40, 1, 36)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 1.4, -2)
+size = Vector3(0.6, 2.8, 24)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallEast" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.4, -2)
+size = Vector3(0.6, 2.8, 24)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -14)
+size = Vector3(28.6, 2.8, 0.6)
+material = SubResource("Mat_wall")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="HouseWest" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 0, -2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="HouseWest"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+size = Vector3(6.5, 3.6, 10)
+material = SubResource("Mat_house")
+
+[node name="Inner" type="CSGBox3D" parent="HouseWest"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+operation = 2
+size = Vector3(5.4, 3.2, 8.8)
+material = SubResource("Mat_house")
+
+[node name="HouseNorth" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="HouseNorth"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+size = Vector3(10, 3.6, 5.5)
+material = SubResource("Mat_house")
+
+[node name="Inner" type="CSGBox3D" parent="HouseNorth"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+operation = 2
+size = Vector3(8.8, 3.2, 4.4)
+material = SubResource("Mat_house")
+
+[node name="Inn" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.2, 0, -2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="Inn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+size = Vector3(7.2, 4.2, 8)
+material = SubResource("Mat_inn")
+
+[node name="Inner" type="CSGBox3D" parent="Inn"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+operation = 2
+size = Vector3(6.0, 3.6, 6.8)
+material = SubResource("Mat_inn")
+
+[node name="InnDoor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.7, 1.15, -2)
+size = Vector3(0.25, 2.3, 1.6)
+material = SubResource("Mat_shutter")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RoofWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 3.8, -2)
+size = Vector3(7.1, 0.35, 10.6)
+material = SubResource("Mat_house")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RoofNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.8, -9.5)
+size = Vector3(10.6, 0.35, 6.1)
+material = SubResource("Mat_house")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RoofInn" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.2, 4.4, -2)
+size = Vector3(7.8, 0.4, 8.6)
+material = SubResource("Mat_inn")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="ShutterW1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.7, -4.5)
+size = Vector3(0.12, 1.3, 1.1)
+material = SubResource("Mat_shutter")
+
+[node name="ShutterW2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 1.7, 0.5)
+size = Vector3(0.12, 1.3, 1.1)
+material = SubResource("Mat_shutter")
+
+[node name="ShutterN1" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 1.7, -6.7)
+size = Vector3(1.1, 1.3, 0.12)
+material = SubResource("Mat_shutter")
+
+[node name="ShutterN2" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 1.7, -6.7)
+size = Vector3(1.1, 1.3, 0.12)
+material = SubResource("Mat_shutter")
+
+[node name="River" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 16.5)
+size = Vector3(40, 0.5, 8)
+material = SubResource("Mat_river")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.7, 11.2)
+size = Vector3(2.4, 1.4, 2.4)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0.55, 11.6)
+size = Vector3(2.0, 1.1, 2.0)
+material = SubResource("Mat_camp")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 6.5)
+
+[node name="Child" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 0, -3.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_folk")
+cue = "child_v20"
+role = "child"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Child"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+mesh = SubResource("CapsuleMesh_child")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Child"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+shape = SubResource("CapsuleShape_child")
+
+[node name="Name" type="Label3D" parent="Child"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Niño"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="Innkeeper" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.9, 0, -2)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_folk")
+cue = "innkeeper"
+role = "innkeeper"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Innkeeper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_innkeep")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Innkeeper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape_innkeep")
+
+[node name="Name" type="Label3D" parent="Innkeeper"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Posadero"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 36
+
+[node name="BurgalesA" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, 0.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_folk")
+role = "burgales"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BurgalesA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+mesh = SubResource("CapsuleMesh_burgales")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BurgalesA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape_burgales")
+
+[node name="Name" type="Label3D" parent="BurgalesA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Burgalés"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="BurgalesB" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 0, -0.8)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_folk")
+role = "burgales"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BurgalesB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+mesh = SubResource("CapsuleMesh_burgales")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BurgalesB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape_burgales")
+
+[node name="Name" type="Label3D" parent="BurgalesB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = "Burgalesa"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="Camp" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, 11.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("7_folk")
+cue = "camp_river"
+role = "camp"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Camp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("Box_camp")
+
+[node name="BurgalesZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -1)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BurgalesZone"]
+shape = SubResource("Box_burgales")
+
+[node name="RiverCamp" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 11.5)
+collision_layer = 0
+collision_mask = 2
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RiverCamp"]
+shape = SubResource("Box_camp")
+
+[node name="ShutterCam" type="Camera3D" parent="."]
+transform = Transform3D(0.92, -0.18, 0.35, 0, 0.89, 0.45, -0.39, -0.41, 0.82, -1.5, 4.2, 4.5)
+current = false
+fov = 34.0
+keep_aspect = 1
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("6_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
