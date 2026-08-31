@@ -18,13 +18,23 @@ func affordable(t: Treasury, honor: HonorState) -> bool:
 func block_reason(t: Treasury, honor: HonorState) -> StringName:
 	if t == null or honor == null:
 		return &"horses"
-	if t.horses < horses or t.horses < blocked_if_horses_lt:
+	var herd := _available_horses(t)
+	if herd < horses or herd < blocked_if_horses_lt:
 		return &"horses"
-	if t.marks < marks:
+	if _available_marks(t) < marks:
 		return &"marks"
 	if honor.onores > blocked_if_onores_gt:
 		return &"onores"
 	return &""
+
+
+func _available_horses(t: Treasury) -> int:
+	# Escrow is already the king's share; it counts toward the gift herd.
+	return t.horses + t.royal_escrow_horses
+
+
+func _available_marks(t: Treasury) -> int:
+	return t.marks + t.royal_escrow_marks
 
 
 static func from_dict(data: Dictionary) -> GiftOption:

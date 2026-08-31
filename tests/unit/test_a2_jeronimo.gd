@@ -63,6 +63,7 @@ func _run() -> void:
 		_world = null
 	failures.append_array(_check_horse_unnamed_earlier())
 	failures.append_array(await _check_appoint_jeronimo())
+	failures.append_array(await _check_cage_walk_does_not_leave_hub())
 	failures.append_array(_check_graph_spine())
 	failures.append_array(_check_later_beats_not_shipped())
 	_finish(failures)
@@ -101,8 +102,8 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("world missing CageLock")
 	if _world.get_node_or_null("EmbassyExit") == null:
 		failures.append("world missing EmbassyExit")
-	if _world.get_node_or_null("EmbassyExit/Name") == null:
-		failures.append("EmbassyExit missing Name label")
+	if _world.get_node_or_null("ToEmbassy") == null:
+		failures.append("world missing ToEmbassy label")
 	if _world.get_node_or_null("Jimena") != null:
 		failures.append("Jimena must still be at Cardeña, not in this hub")
 	if _world.find_child("HallWhisper", true, false) == null:
@@ -423,14 +424,45 @@ func _check_appoint_jeronimo() -> PackedStringArray:
 			failures.append("hub must keep babieca_named")
 	if not bool(world.call("can_leave_to_embassy2")):
 		failures.append("after appointment embassy2 graph exit should open")
-	if bool(world.call("travel_to_embassy2")):
-		failures.append("travel_to_embassy2 must not leave while a2_embassy2 is missing")
-	if bool(world.get("_left")):
-		failures.append("missing embassy2 must not set _left or autosave the hop")
-	if _runner and String(_runner.current_id) != "a2_jeronimo":
-		failures.append("hub must stay on a2_jeronimo until embassy2 ships, got %s" % _runner.current_id)
+	if not bool(world.call("travel_to_embassy2")):
+		failures.append("travel_to_embassy2 must succeed after appointment")
+	if _runner and String(_runner.current_id) != "a2_embassy2":
+		failures.append("hub exit must land on a2_embassy2, got %s" % _runner.current_id)
 	if current_scene != scene_before:
-		failures.append("missing embassy2 must not change_scene")
+		failures.append("goto must no-op when current_scene is not the hub")
+	world.free()
+	return failures
+
+
+func _check_cage_walk_does_not_leave_hub() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("cage walk: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	var cid: CharacterBody3D = world.get_node_or_null("Cid") as CharacterBody3D
+	var cage: Node3D = world.get_node_or_null("CageZone") as Node3D
+	if cid == null or cage == null:
+		failures.append("cage walk needs Cid and CageZone")
+		world.free()
+		return failures
+	if world.has_method("run_appoint"):
+		await world.run_appoint()
+	if _runner:
+		_runner.current_id = &"a2_jeronimo"
+	var start := cid.global_position
+	var dest := cage.global_position
+	dest.y = start.y
+	var steps := 16
+	for i in range(1, steps + 1):
+		cid.global_position = start.lerp(dest, float(i) / float(steps))
+		cid.velocity = Vector3.ZERO
+		await physics_frame
+	if _runner and String(_runner.current_id) != "a2_jeronimo":
+		failures.append("walking spawn to CageZone must not leave the hub, got %s" % _runner.current_id)
 	world.free()
 	return failures
 
@@ -456,8 +488,8 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(EMBASSY2):
-		failures.append("a2_embassy2 must not ship in this PR")
+	if not ResourceLoader.exists(EMBASSY2):
+		failures.append("a2_embassy2 must ship with the hub")
 	if ResourceLoader.exists(LEON):
 		failures.append("a3_leon must not ship in this PR")
 	if ResourceLoader.exists("res://content/chapters/a2_yusuf/world.tscn"):

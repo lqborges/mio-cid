@@ -546,7 +546,7 @@ monitorable = false
 shape = SubResource("Box_cage")
 
 [node name="EmbassyExit" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.2, 6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 1.2, 8)
 collision_layer = 0
 collision_mask = 130
 monitoring = true
@@ -555,22 +555,14 @@ monitorable = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="EmbassyExit"]
 shape = SubResource("Box_embassy")
 
-[node name="Name" type="Label3D" parent="EmbassyExit"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+[node name="ToEmbassy" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 2.4, 8)
 pixel_size = 0.012
 billboard = 1
 text = ""
 modulate = Color(0.91, 0.85, 0.72, 1)
 outline_modulate = Color(0.18, 0.16, 0.13, 1)
 font_size = 28
-
-[node name="ExitArch" type="CSGBox3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1.5, 7.3)
-size = Vector3(2.6, 3.0, 0.3)
-material = SubResource("Mat_stone")
-use_collision = true
-collision_layer = 1
-collision_mask = 0
 
 [node name="DialogueBridge" type="Node" parent="."]
 script = ExtResource("10_bridge")

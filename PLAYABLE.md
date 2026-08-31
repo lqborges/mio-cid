@@ -1,8 +1,8 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean campaign as of the Valencia hub. It is **not** merged to `main`. Later chapters (embassy 2, Yusuf, lion, Tagus, Corpes) are still in flight on other worktrees.
+This branch (`playable/0e9dbd46-ready`) is the review-clean campaign as of embassy 2 / Avengalvón. It is **not** merged to `main`. Later chapters (Yusuf, lion, Tagus, Corpes) are still in flight on other worktrees.
 
-**Tip commit:** `4820fd8` (Valencia hub + siege review fixes + repay Raquel).
+**Tip:** Valencia hub + siege review fixes + repay Raquel + embassy 2.
 
 ## How to run
 
@@ -46,15 +46,14 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | `a2_murviedro` | Coastal field take |
 | `a2_siege` | Eight siege events on CampaignClock; wall-storm refused |
 | `a2_jeronimo` | Valencia hub rooms, Jerónimo, horse named Babieca, locked lion cage |
+| `a2_embassy2` | Medinaceli road; recruit Avengalvón; second gift to Alfonso; family returns |
 | `a2_repay_raquel` | Cheat-path only; unreachable if you refused the sand chests |
 
 Spanish display strings. English loc keys. Greybox 3D (CSG / capsules).
 
 ## Not in this build
 
-Embassy 2 / Avengalvón road, Yusuf, lion escape, embassy 3, Tagus pardon, Búcar / Tizona, Corpes, Toledo, Pentecost, Steam/Android of *this* slice (an earlier Android debug APK exists on the `pr-android` branch).
-
-The hub’s road to Alfonso (`a2_embassy2`) is not shipped here: the exit whispers and does not graph-hop into a missing scene.
+Yusuf, lion escape, embassy 3, Tagus pardon, Búcar / Tizona, Corpes, Toledo, Pentecost. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
 
 ## Controls (foot)
 

@@ -1,0 +1,29 @@
+# Spoken lines are CSV keys. Avengalvón escorts Jimena; this house keeps him.
+
+~ start
+=> recruit
+
+~ recruit
+Avengalvon: a2_embassy2.avengalvon_kin
+Cid: a2_embassy2.keep_him
+Avengalvon: a2_embassy2.not_creed
+=> END
+
+~ escort
+Jimena: a2_embassy2.jimena_road
+Elvira: a2_embassy2.elvira_road
+Sol: a2_embassy2.sol_road
+=> END
+
+~ gift
+Cid: a2_embassy2.prompt
+=> END
+
+~ leave
+Alvar: a2_embassy2.alvar_leave
+=> END
+
+~ return
+Alvar: a2_embassy2.alvar_return
+Cid: a2_embassy2.family_arrives
+=> END

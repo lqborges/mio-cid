@@ -1,0 +1,42 @@
+{
+  "id": "a2_embassy2",
+  "steps": [
+    {
+      "id": "arrive",
+      "type": "whisper",
+      "start": "escort"
+    },
+    {
+      "id": "recruit",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_embassy2/embassy2.dialogue",
+      "start": "recruit",
+      "set_flags": ["avengalvon_recruited"]
+    },
+    {
+      "id": "escort",
+      "type": "blocking",
+      "set_flags": ["medinaceli_escort_done"]
+    },
+    {
+      "id": "ledger",
+      "type": "embassy_ledger"
+    },
+    {
+      "id": "alvar_leave",
+      "type": "cinematic"
+    },
+    {
+      "id": "return",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_embassy2/embassy2.dialogue",
+      "start": "return",
+      "set_flags": ["embassy2_done", "family_in_valencia"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a2_jeronimo"
+    }
+  ]
+}
