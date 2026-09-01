@@ -148,10 +148,10 @@ class TestSpeechUI(unittest.TestCase):
         self.assertIn("riepto", rows["speech.ui.skip_blocked"]["es"])
         self.assertIn("mesura", rows["speech.ui.skip_blocked"]["es"])
 
-    def test_no_toledo_or_querella_content(self) -> None:
+    def test_no_toledo_content(self) -> None:
         self.assertFalse((ROOT / "content/chapters/a3_toledo").exists())
-        self.assertFalse((ROOT / "data/speech/querella.json").exists())
         self.assertFalse((ROOT / "data/speech/navarre_aragon.json").exists())
+        self.assertTrue((ROOT / "data/speech/querella.json").is_file())
 
     def test_denylist(self) -> None:
         files = [

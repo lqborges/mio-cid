@@ -1,0 +1,23 @@
+{
+  "id": "a3_querella",
+  "steps": [
+    {
+      "id": "dictate",
+      "type": "speech_trial",
+      "file": "res://data/speech/querella.json",
+      "ask": "querella_dictate",
+      "white": "legal",
+      "red": "ride_host",
+      "set_flags": ["querella_filed", "querella_done"]
+    },
+    {
+      "id": "querella_filed",
+      "type": "honor_event"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_toledo"
+    }
+  ]
+}

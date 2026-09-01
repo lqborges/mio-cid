@@ -1,0 +1,45 @@
+{
+  "id": "querella",
+  "win_threshold": 6,
+  "asks": [
+    {
+      "id": "querella_dictate",
+      "prompt_key": "a3_querella.prompt",
+      "counts_toward_win": true,
+      "lines": [
+        {
+          "id": "legal",
+          "text_key": "a3_querella.line_legal",
+          "legal": 8,
+          "mesura": 4,
+          "ira": 0,
+          "tags": ["legal"]
+        },
+        {
+          "id": "mesura",
+          "text_key": "a3_querella.line_mesura",
+          "legal": 6,
+          "mesura": 8,
+          "ira": 0,
+          "tags": ["mesura"]
+        },
+        {
+          "id": "ira",
+          "text_key": "a3_querella.line_ira",
+          "legal": 1,
+          "mesura": 0,
+          "ira": 4,
+          "tags": ["ira"]
+        },
+        {
+          "id": "ride_host",
+          "text_key": "a3_querella.line_ride_host",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["ride_host"]
+        }
+      ]
+    }
+  ]
+}

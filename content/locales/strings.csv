@@ -199,3 +199,12 @@ speech.ui.skip_blocked,"Saltarse al riepto es falta de mesura.","Skipping to the
 speech.ui.steel,"En esta corte no se desenvaina.","Steel is not drawn in this hall."
 speech.ui.won,"La corte os da la razón.","The court finds in your favor."
 speech.ui.failed,"La corte no os da la razón.","The court does not find in your favor."
+a3_querella.prompt,Dictad la querella a Muño Gustioz.,Dictate the complaint to Muño Gustioz.
+a3_querella.table,Valencia. La honra se pide por ley.,Valencia. The name is asked by law.
+a3_querella.line_legal,"Que el rey sepa: es querella, no hueste.","Let the king know: it is a complaint, not a host."
+a3_querella.line_mesura,Muño lleva la querella. Yo me quedo.,Muño carries the complaint. I stay.
+a3_querella.line_ira,"Que los infantes paguen ahora, a sangre.","Let the Infantes pay now, in blood."
+a3_querella.line_ride_host,Montad: vamos a Carrión con hueste.,Mount: we ride to Carrión with a host.
+a3_querella.sent,Muño Gustioz lleva la querella a Alfonso.,Muño Gustioz carries the complaint to Alfonso.
+a3_querella.ride_host,La hueste no es ley. Alfonso no oirá esto en Toledo.,A host is not law. Alfonso will not hear this in Toledo.
+a3_querella.toledo_wait,Toledo aún no abre. La querella ya va.,Toledo is not open yet. The complaint already rides.

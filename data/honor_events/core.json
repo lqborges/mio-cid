@@ -191,12 +191,18 @@
       "id": "ride_host_to_carrion",
       "deltas": { "honra": -25 },
       "tags": ["mesura_fail", "illegal"],
+      "flags_set": ["ride_host"],
+      "once": true,
+      "ui_whisper_key": "a3_querella.ride_host",
       "beat": "a3_querella"
     },
     {
       "id": "querella_filed",
       "deltas": { "honra": 6 },
       "tags": ["law"],
+      "flags_set": ["querella_filed", "querella_done"],
+      "once": true,
+      "ui_whisper_key": "a3_querella.sent",
       "beat": "a3_querella"
     },
     {
