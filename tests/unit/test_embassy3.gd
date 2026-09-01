@@ -98,8 +98,8 @@ func _check_scene_loads() -> PackedStringArray:
 	var ledger: Node = _world.find_child("EmbassyLedger", true, false)
 	if ledger and bool(ledger.visible):
 		failures.append("EmbassyLedger must stay hidden until GiftZone / start_gift")
-	if ResourceLoader.exists(TAGUS):
-		failures.append("a2_tagus must not ship in this PR")
+	if not ResourceLoader.exists(TAGUS):
+		failures.append("a2_tagus must ship")
 	return failures
 
 
@@ -344,9 +344,9 @@ func _check_ten_horses_spends_escrow_first() -> PackedStringArray:
 		if String(_runner.current_id) != "a2_tagus":
 			failures.append("ExitZone/travel_next must land on a2_tagus, got %s" % _runner.current_id)
 	if current_scene != scene_before:
-		failures.append("gift must not change_scene when dest is missing")
-	if ResourceLoader.exists(TAGUS):
-		failures.append("a2_tagus must not ship in this PR")
+		failures.append("goto must no-op unless current_scene is embassy3")
+	if not ResourceLoader.exists(TAGUS):
+		failures.append("a2_tagus must ship")
 	if not _fails.is_empty():
 		failures.append("gift must not hard_fail: %s" % ", ".join(_fails))
 	world.free()
@@ -368,8 +368,8 @@ func _check_honest_path_tagus_gated() -> PackedStringArray:
 		failures.append("honest path must not open repay")
 	if bool(_runner.can_travel(&"a2_yusuf", &"a2_tagus", flags)):
 		failures.append("yusuf must not skip embassy3 into Tagus")
-	if ResourceLoader.exists(TAGUS):
-		failures.append("a2_tagus must not ship in this PR")
+	if not ResourceLoader.exists(TAGUS):
+		failures.append("a2_tagus must ship")
 	return failures
 
 
@@ -419,7 +419,7 @@ func _check_cheated_path_repay_gated() -> PackedStringArray:
 		if bool(_runner.can_travel(&"a2_embassy3", &"a2_tagus", after_flags)):
 			failures.append("arcas_cheated must still close embassy3 -> Tagus")
 	if current_scene != scene_before:
-		failures.append("goto must no-op when repay/tagus scenes are missing")
+		failures.append("goto must no-op unless current_scene is embassy3")
 	world.free()
 	return failures
 

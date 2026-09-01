@@ -1,0 +1,21 @@
+# Spoken lines are CSV keys. Infantes arrive as allies. Cannot stop the disaster.
+
+~ start
+=> arrive
+
+~ arrive
+Álvar: a2_bodas.arrive
+Ferrán: a2_bodas.ferran
+Diego: a2_bodas.diego
+Cid: a2_bodas.watch
+=> END
+
+~ train
+Cid: a2_bodas.train
+Ferrán: a2_bodas.train_done
+=> END
+
+~ gift
+Cid: a2_bodas.gift
+Diego: a2_bodas.gift_taken
+=> END

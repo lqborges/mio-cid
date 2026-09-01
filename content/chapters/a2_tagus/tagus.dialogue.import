@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bul6o28dewy4b"
+path="res://.godot/imported/tagus.dialogue-1ed0db2cfb5467e3f2eeafe6a6e643da.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_tagus/tagus.dialogue"
+dest_files=["res://.godot/imported/tagus.dialogue-1ed0db2cfb5467e3f2eeafe6a6e643da.tres"]
+
+[params]
+
+defaults=true

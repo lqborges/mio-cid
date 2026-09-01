@@ -21,6 +21,8 @@ const JERONIMO_SCENE := "res://content/chapters/a2_jeronimo/world.tscn"
 const YUSUF_SCENE := "res://content/chapters/a2_yusuf/world.tscn"
 const EMBASSY3_SCENE := "res://content/chapters/a2_embassy3/world.tscn"
 const REPAY_SCENE := "res://content/chapters/a2_repay_raquel/world.tscn"
+const TAGUS_SCENE := "res://content/chapters/a2_tagus/world.tscn"
+const BODAS_SCENE := "res://content/chapters/a2_bodas/world.tscn"
 
 var graph: Resource
 var current_id: StringName = &"a1_vivar"
@@ -157,6 +159,10 @@ func _scene_path(beat_id: StringName) -> String:
 		return EMBASSY3_SCENE
 	if beat_id == &"a2_repay_raquel":
 		return REPAY_SCENE
+	if beat_id == &"a2_tagus":
+		return TAGUS_SCENE
+	if beat_id == &"a2_bodas":
+		return BODAS_SCENE
 	_ensure_loaded()
 	if graph != null and graph.has_method("get_chapter"):
 		var node: Resource = graph.get_chapter(beat_id)

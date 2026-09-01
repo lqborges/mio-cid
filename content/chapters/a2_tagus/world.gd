@@ -1,28 +1,31 @@
 extends Node3D
-## a2_repay_raquel: Valencia hall. Cheat-path only. Pay is the only option.
+## a2_tagus: Tagus / Toledo marches. Three-day court. Forced yes.
 
-const BEAT_ID := &"a2_repay_raquel"
-const DEST := &"a2_tagus"
-const DEST_SCENE := "res://content/chapters/a2_tagus/world.tscn"
+const BEAT_ID := &"a2_tagus"
+const DEST := &"a2_bodas"
+const DEST_SCENE := "res://content/chapters/a2_bodas/world.tscn"
 const HUB_LOCK := &"hub_lock_cardena"
 const HORSE_FLAG := "horse_companion"
 const NAMED_FLAG := &"babieca_named"
-const CHEAT_FLAG := &"arcas_cheated"
-const REPAY_FLAG := &"repay_done"
 const HORSE_ID := &"babieca"
-const HORSE_KEY := "a2_repay_raquel.horse_name"
-const REPAY_EVENT := &"repay_raquel"
-const ARRIVE_KEY := "a2_repay_raquel.arrive"
-const PLACE_KEY := "a2_repay_raquel.place_name"
-const DIALOGUE_PATH := "res://content/chapters/a2_repay_raquel/repay.dialogue"
+const HORSE_KEY := "a2_tagus.horse_name"
+const PARDON_EVENT := &"pardon"
+const MARRY_EVENT := &"accept_marriages"
+const PARDON_FLAG := &"pardon"
+const MARRY_FLAG := &"marriages_accepted"
+const ARRIVE_KEY := "a2_tagus.arrive"
+const PLACE_KEY := "a2_tagus.place_name"
+const DIALOGUE_PATH := "res://content/chapters/a2_tagus/tagus.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
-const DATA_PATH := "res://data/honor_events/repay_raquel.json"
+const DATA_PATH := "res://data/honor_events/tagus.json"
 
 var last_dialogue_speakers: PackedStringArray = PackedStringArray()
 var last_dialogue_keys: PackedStringArray = PackedStringArray()
 var intro_played: bool = false
+var court_day: int = 1
 var _talking: bool = false
-var _paid: bool = false
+var _pardoned: bool = false
+var _accepted: bool = false
 var _left: bool = false
 var _data: Dictionary = {}
 
@@ -40,8 +43,9 @@ func _ready() -> void:
 	_ensure_roster()
 	_bind_mesnada()
 	_hide_plazo_bar()
-	_connect_pay_zone()
-	_connect_tagus_exit()
+	_connect_court_zone()
+	_connect_rest_zone()
+	_connect_bodas_exit()
 	_show_place_name()
 	_name_horse()
 	_label_npcs()
@@ -50,77 +54,184 @@ func _ready() -> void:
 
 
 func start_cue(cue: String) -> void:
-	if cue == "pay" or cue == "repay":
-		start_pay()
-	elif cue == "leave" or cue == "tagus":
-		travel_to_tagus()
+	if cue == "pardon" or cue == "day1":
+		start_pardon()
+	elif cue == "day2" or cue == "rest":
+		start_day2()
+	elif cue == "ask" or cue == "marriages" or cue == "yes":
+		start_ask()
+	elif cue == "leave" or cue == "bodas":
+		travel_to_bodas()
+	elif cue == "court":
+		start_court()
 
 
-func start_pay(_cue: String = "pay") -> void:
-	if _paid or _talking:
-		return
-	if not _owes_repay():
-		_whisper("a2_repay_raquel.not_owed")
+func start_court() -> void:
+	if court_day <= 1:
+		start_pardon()
+	elif court_day == 2:
+		start_day2()
+	else:
+		start_ask()
+
+
+func start_pardon(_cue: String = "pardon") -> void:
+	if _pardoned or _talking:
 		return
 	_talking = true
 	var resource := _load_dialogue()
 	if resource == null:
 		_talking = false
-		pay()
+		grant_pardon()
 		return
-	if _try_balloon(resource, "pay"):
+	if _try_balloon(resource, "pardon"):
 		return
-	await _walk_lines(resource, "pay")
+	await _walk_lines(resource, "pardon")
 	_talking = false
-	pay()
+	grant_pardon()
 
 
-func run_pay() -> void:
-	# Headless: walk Minaya / Raquel / Vidas, then pay. No refuse.
-	if not _owes_repay():
-		_whisper("a2_repay_raquel.not_owed")
+func run_pardon() -> void:
+	# Headless: walk Alfonso's pardon, then grant it.
+	_talking = true
+	var resource := _load_dialogue()
+	if resource:
+		await _walk_lines(resource, "pardon")
+	_talking = false
+	grant_pardon()
+
+
+func grant_pardon() -> bool:
+	if _pardoned:
+		return false
+	_pardoned = true
+	_apply_honor(PARDON_EVENT)
+	_set_flag(PARDON_FLAG)
+	court_day = maxi(court_day, 2)
+	_advance_court_day()
+	_whisper("a2_tagus.pardon")
+	return true
+
+
+func start_day2(_cue: String = "day2") -> void:
+	if _talking:
+		return
+	if not _pardoned and not _has_flag(PARDON_FLAG):
+		_whisper("a2_tagus.pardon_first")
+		return
+	if court_day >= _court_days():
+		start_ask()
+		return
+	_talking = true
+	var resource := _load_dialogue()
+	if resource == null:
+		_talking = false
+		rest_day2()
+		return
+	if _try_balloon(resource, "day2"):
+		return
+	await _walk_lines(resource, "day2")
+	_talking = false
+	rest_day2()
+
+
+func run_day2() -> void:
+	if not _pardoned and not _has_flag(PARDON_FLAG):
+		_whisper("a2_tagus.pardon_first")
 		return
 	_talking = true
 	var resource := _load_dialogue()
 	if resource:
-		await _walk_lines(resource, "pay")
+		await _walk_lines(resource, "day2")
 	_talking = false
-	pay()
+	rest_day2()
 
 
-func pay() -> bool:
-	if _paid:
+func rest_day2() -> bool:
+	if not _pardoned and not _has_flag(PARDON_FLAG):
+		_whisper("a2_tagus.pardon_first")
 		return false
-	if not _owes_repay():
-		_whisper("a2_repay_raquel.not_owed")
+	if court_day >= _court_days():
 		return false
-	_paid = true
-	_deduct_repay_marks()
-	_apply_honor(REPAY_EVENT)
-	_set_flag(REPAY_FLAG)
-	_whisper("a2_repay_raquel.paid")
+	court_day = _court_days()
+	_advance_court_day()
+	_whisper("a2_tagus.day3")
 	return true
 
 
-func travel_to_tagus() -> bool:
-	if not _paid and not _has_flag(REPAY_FLAG):
-		_whisper("a2_repay_raquel.pay_first")
+func start_ask(_cue: String = "ask") -> void:
+	if _accepted or _talking:
+		return
+	if not _ready_for_ask():
+		_whisper("a2_tagus.ask_first")
+		return
+	_talking = true
+	var resource := _load_dialogue()
+	if resource == null:
+		_talking = false
+		accept_marriages()
+		return
+	if _try_balloon(resource, "ask"):
+		return
+	await _walk_lines(resource, "ask")
+	_talking = false
+	accept_marriages()
+
+
+func run_ask() -> void:
+	# Headless: Alfonso asks; Cid says yes because he is the king.
+	if not _ready_for_ask():
+		if not _pardoned:
+			await run_pardon()
+		if court_day < _court_days():
+			await run_day2()
+	_talking = true
+	var resource := _load_dialogue()
+	if resource:
+		await _walk_lines(resource, "ask")
+	_talking = false
+	accept_marriages()
+
+
+func accept_marriages() -> bool:
+	if _accepted:
+		return false
+	if not _ready_for_ask():
+		_whisper("a2_tagus.ask_first")
+		return false
+	_accepted = true
+	_apply_honor(MARRY_EVENT)
+	_set_flag(MARRY_FLAG)
+	_set_flag(&"tagus_done")
+	_whisper("a2_tagus.yes")
+	return true
+
+
+func refuse_marriages() -> bool:
+	# v1: refusing would break the pardon; there is no refuse option.
+	_whisper("a2_tagus.cannot_refuse")
+	return false
+
+
+func travel_to_bodas() -> bool:
+	if not _accepted and not _has_flag(MARRY_FLAG):
+		_whisper("a2_tagus.yes_first")
 		return false
 	return _travel(DEST)
 
 
-func can_leave_to_tagus() -> bool:
-	if not _paid and not _has_flag(REPAY_FLAG):
+func can_leave_to_bodas() -> bool:
+	if not _accepted and not _has_flag(MARRY_FLAG):
 		return false
 	return _can_travel(DEST)
 
 
-func owes_repay() -> bool:
-	return _owes_repay()
+func is_pardoned() -> bool:
+	return _pardoned or _has_flag(PARDON_FLAG)
 
 
-func is_paid() -> bool:
-	return _paid or _has_flag(REPAY_FLAG)
+func is_accepted() -> bool:
+	return _accepted or _has_flag(MARRY_FLAG)
 
 
 func place_name_text() -> String:
@@ -134,8 +245,16 @@ func horse_display_name() -> String:
 	return _loc(HORSE_KEY)
 
 
-func _owes_repay() -> bool:
-	return _has_flag(CHEAT_FLAG)
+func _ready_for_ask() -> bool:
+	if not _pardoned and not _has_flag(PARDON_FLAG):
+		return false
+	return court_day >= _court_days()
+
+
+func _advance_court_day() -> void:
+	var clock := _autoload("CampaignClock")
+	if clock and clock.has_method("advance_calendar"):
+		clock.advance_calendar(1)
 
 
 func _name_horse() -> void:
@@ -150,48 +269,54 @@ func _name_horse() -> void:
 
 
 func _label_npcs() -> void:
-	var raquel: Label3D = get_node_or_null("Raquel/Name") as Label3D
-	if raquel:
-		raquel.text = _loc("char.raquel")
-	var vidas: Label3D = get_node_or_null("Vidas/Name") as Label3D
-	if vidas:
-		vidas.text = _loc("char.vidas")
-	var alvar: Label3D = get_node_or_null("Mesnada/AlvarFanez/Name") as Label3D
-	if alvar:
-		alvar.text = _loc("char.alvar_fanez")
+	var alfonso: Label3D = get_node_or_null("Alfonso/Name") as Label3D
+	if alfonso:
+		alfonso.text = _loc("char.alfonso")
+	var ferran: Label3D = get_node_or_null("FerranGonzalez/Name") as Label3D
+	if ferran:
+		ferran.text = _loc("char.ferran_gonzalez")
+	var diego: Label3D = get_node_or_null("DiegoGonzalez/Name") as Label3D
+	if diego:
+		diego.text = _loc("char.diego_gonzalez")
 
 
-func _deduct_repay_marks() -> void:
-	if TreasuryService == null or TreasuryService.state == null:
-		return
-	var cost := _tunable_int("repay_marks")
-	TreasuryService.state.marks = maxi(0, int(TreasuryService.state.marks) - cost)
+func _connect_court_zone() -> void:
+	var zone: Area3D = get_node_or_null("CourtZone") as Area3D
+	if zone and not zone.body_entered.is_connected(_on_court_entered):
+		zone.body_entered.connect(_on_court_entered)
 
 
-func _connect_pay_zone() -> void:
-	var zone: Area3D = get_node_or_null("PayZone") as Area3D
-	if zone and not zone.body_entered.is_connected(_on_pay_entered):
-		zone.body_entered.connect(_on_pay_entered)
-
-
-func _on_pay_entered(body: Node) -> void:
+func _on_court_entered(body: Node) -> void:
 	if body == null:
 		return
 	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
-		start_pay()
+		start_court()
 
 
-func _connect_tagus_exit() -> void:
-	var zone: Area3D = get_node_or_null("TagusExit") as Area3D
-	if zone and not zone.body_entered.is_connected(_on_tagus_entered):
-		zone.body_entered.connect(_on_tagus_entered)
+func _connect_rest_zone() -> void:
+	var zone: Area3D = get_node_or_null("RestZone") as Area3D
+	if zone and not zone.body_entered.is_connected(_on_rest_entered):
+		zone.body_entered.connect(_on_rest_entered)
 
 
-func _on_tagus_entered(body: Node) -> void:
+func _on_rest_entered(body: Node) -> void:
 	if body == null:
 		return
 	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
-		travel_to_tagus()
+		start_day2()
+
+
+func _connect_bodas_exit() -> void:
+	var zone: Area3D = get_node_or_null("BodasExit") as Area3D
+	if zone and not zone.body_entered.is_connected(_on_bodas_entered):
+		zone.body_entered.connect(_on_bodas_entered)
+
+
+func _on_bodas_entered(body: Node) -> void:
+	if body == null:
+		return
+	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
+		travel_to_bodas()
 
 
 func _bind_mesnada() -> void:
@@ -266,7 +391,7 @@ func _whisper(key: String) -> void:
 
 func _load_data() -> void:
 	_data = {}
-	for path in PackedStringArray([DATA_PATH, "res://content/chapters/a2_repay_raquel/beats.json"]):
+	for path in PackedStringArray([DATA_PATH, "res://content/chapters/a2_tagus/beats.json"]):
 		if not FileAccess.file_exists(path):
 			continue
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -280,6 +405,10 @@ func _tunable_int(key: String) -> int:
 	if _data.is_empty():
 		_load_data()
 	return int(_data.get(key, 0))
+
+
+func _court_days() -> int:
+	return maxi(1, _tunable_int("court_days"))
 
 
 func _travel(to_id: StringName) -> bool:
@@ -299,7 +428,7 @@ func _travel(to_id: StringName) -> bool:
 	if tree == null or tree.current_scene != self:
 		return true
 	if not ResourceLoader.exists(DEST_SCENE):
-		_whisper("a2_repay_raquel.to_tagus")
+		_whisper("a2_tagus.bodas_wait")
 		return true
 	if runner.has_method("goto"):
 		runner.goto(to_id)
@@ -374,7 +503,12 @@ func _on_dialogue_ended(_resource: Variant = null) -> void:
 	if dm and dm.has_signal("dialogue_ended") and dm.dialogue_ended.is_connected(_on_dialogue_ended):
 		dm.dialogue_ended.disconnect(_on_dialogue_ended)
 	_talking = false
-	pay()
+	if not _pardoned:
+		grant_pardon()
+	elif court_day < _court_days():
+		rest_day2()
+	elif not _accepted:
+		accept_marriages()
 
 
 func _try_balloon(resource: Resource, cue: String) -> bool:

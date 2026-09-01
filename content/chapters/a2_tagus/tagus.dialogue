@@ -1,0 +1,18 @@
+# Spoken lines are CSV keys. Three-day court. Forced yes is the only marriage option.
+
+~ start
+=> pardon
+
+~ pardon
+Alfonso: a2_tagus.pardon
+Cid: a2_tagus.pardon_thanks
+=> END
+
+~ day2
+Alfonso: a2_tagus.day2
+=> END
+
+~ ask
+Alfonso: a2_tagus.ask
+Cid: a2_tagus.yes
+=> END
