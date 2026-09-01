@@ -1,0 +1,99 @@
+# Spoken lines are CSV keys. García first, then the three asks in poem order.
+
+~ start
+=> garcia
+
+~ garcia
+Cid: a3_toledo.garcia_prompt
+Alfonso: a3_toledo.table
+GarciaOrdonez: a3_toledo.garcia_legal
+=> END
+
+~ garcia_legal
+Cid: a3_toledo.garcia_legal
+Alfonso: a3_toledo.garcia_done
+=> END
+
+~ garcia_mesura
+Cid: a3_toledo.garcia_mesura
+Alfonso: a3_toledo.garcia_done
+=> END
+
+~ garcia_ira
+Cid: a3_toledo.garcia_ira
+=> END
+
+~ swords
+Cid: a3_toledo.ask1_prompt
+FerranGonzalez: a3_toledo.ask1_infantes
+=> END
+
+~ swords_legal
+Cid: a3_toledo.ask1_legal
+Alfonso: a3_toledo.ask1_done
+=> END
+
+~ swords_mesura
+Cid: a3_toledo.ask1_mesura
+Alfonso: a3_toledo.ask1_done
+=> END
+
+~ swords_ira
+Cid: a3_toledo.ask1_ira
+=> END
+
+~ dowry
+Cid: a3_toledo.ask2_prompt
+DiegoGonzalez: a3_toledo.ask2_infantes
+=> END
+
+~ dowry_legal
+Cid: a3_toledo.ask2_legal
+Alfonso: a3_toledo.ask2_done
+=> END
+
+~ dowry_mesura
+Cid: a3_toledo.ask2_mesura
+Alfonso: a3_toledo.ask2_done
+=> END
+
+~ dowry_ira
+Cid: a3_toledo.ask2_ira
+=> END
+
+~ riepto
+Cid: a3_toledo.ask3_prompt
+Alfonso: a3_toledo.ask3_legal
+=> END
+
+~ riepto_legal
+Cid: a3_toledo.ask3_legal
+Alfonso: a3_toledo.ask3_done
+=> END
+
+~ riepto_mesura
+Cid: a3_toledo.ask3_mesura
+Alfonso: a3_toledo.ask3_done
+=> END
+
+~ riepto_ira
+Cid: a3_toledo.ask3_ira
+=> END
+
+~ skip_to_riepto
+Cid: a3_toledo.line_skip
+=> END
+
+~ draw_steel
+Cid: a3_toledo.line_steel
+=> END
+
+~ give_swords
+Cid: a3_toledo.give_swords
+PeroBermudez: a3_toledo.tizona_pero
+MartinAntolinez: a3_toledo.colada_martin
+=> END
+
+~ princes
+Alfonso: a3_toledo.princes
+=> END

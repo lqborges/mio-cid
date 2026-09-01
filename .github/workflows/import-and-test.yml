@@ -149,6 +149,9 @@ jobs:
       - name: Run Python a3_querella tests
         run: python3 tests/unit/test_a3_querella.py
 
+      - name: Run Python a3_toledo tests
+        run: python3 tests/unit/test_a3_toledo.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -299,6 +302,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_querella.gd
+
+      - name: Run a3_toledo Cortes headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_toledo.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

@@ -1,0 +1,49 @@
+{
+  "id": "a3_toledo",
+  "steps": [
+    {
+      "id": "garcia_preliminary",
+      "type": "speech_trial",
+      "file": "res://data/speech/garcia_preliminary.json",
+      "ask": "garcia_preliminary",
+      "counts_toward_win": false
+    },
+    {
+      "id": "cortes",
+      "type": "speech_trial",
+      "file": "res://data/speech/toledo.json",
+      "asks": ["swords", "dowry", "riepto"]
+    },
+    {
+      "id": "toledo_ask1_swords",
+      "type": "honor_event"
+    },
+    {
+      "id": "toledo_ask2_dowry",
+      "type": "honor_event"
+    },
+    {
+      "id": "toledo_ask3_riepto",
+      "type": "honor_event"
+    },
+    {
+      "id": "give_swords",
+      "type": "sword_phase",
+      "tizona": "pero_bermudez",
+      "colada": "martin_antolinez",
+      "phase": "IN_CHAMPION_HAND"
+    },
+    {
+      "id": "princes_ask",
+      "type": "cutscene_dialogue",
+      "file": "res://data/speech/navarre_aragon.json",
+      "skill_check": false,
+      "set_flags": ["elvira_betrothed_navarre", "sol_betrothed_aragon"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_valencia_wait"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "id": "princes_ask",
+  "type": "cutscene_dialogue",
+  "skill_check": false,
+  "set_flags": ["elvira_betrothed_navarre", "sol_betrothed_aragon"]
+}

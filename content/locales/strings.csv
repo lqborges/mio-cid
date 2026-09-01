@@ -208,3 +208,37 @@ a3_querella.line_ride_host,Montad: vamos a Carrión con hueste.,Mount: we ride t
 a3_querella.sent,Muño Gustioz lleva la querella a Alfonso.,Muño Gustioz carries the complaint to Alfonso.
 a3_querella.ride_host,La hueste no es ley. Alfonso no oirá esto en Toledo.,A host is not law. Alfonso will not hear this in Toledo.
 a3_querella.toledo_wait,Toledo aún no abre. La querella ya va.,Toledo is not open yet. The complaint already rides.
+char.alfonso,Alfonso,Alfonso
+char.garcia_ordonez,García Ordóñez,García Ordóñez
+a3_toledo.table,Cortes de Toledo. Habla la ley.,Cortes of Toledo. The law speaks.
+a3_toledo.garcia_prompt,García Ordóñez habla contra vos. Responded.,García Ordóñez speaks against you. Answer.
+a3_toledo.garcia_legal,El conde habla. La corte oye al Cid.,The count speaks. The court hears the Cid.
+a3_toledo.garcia_mesura,"Callad, conde. Habla el rey.","Be silent, count. The king speaks."
+a3_toledo.garcia_ira,"¡Mentís, conde de Cabra!","You lie, Count of Cabra!"
+a3_toledo.garcia_done,García calla. Empiezan las demandas.,García is silent. The asks begin.
+a3_toledo.ask1_prompt,Pedid Colada y Tizona.,Ask for Colada and Tizona.
+a3_toledo.ask1_legal,Devuelvan Colada y Tizona.,Return Colada and Tizona.
+a3_toledo.ask1_mesura,"Las espadas, por ley.","The swords, by law."
+a3_toledo.ask1_ira,"Las espadas, ahora, o sangre.","The swords now, or blood."
+a3_toledo.ask1_infantes,Sonríen. Las dan. Ya está.,They smile. They give them. Done.
+a3_toledo.ask1_done,Colada y Tizona vuelven a la corte.,Colada and Tizona return to the court.
+a3_toledo.ask2_prompt,"Pedid los tres mil marcos de arras.","Ask for the three thousand marks of dowry."
+a3_toledo.ask2_legal,"Devuelvan los tres mil marcos.","Return the three thousand marks."
+a3_toledo.ask2_mesura,"Las arras, por ley.","The dowry, by law."
+a3_toledo.ask2_ira,"Los marcos, ahora.","The marks, now."
+a3_toledo.ask2_infantes,Los han gastado. Quedan en vergüenza.,They have spent them. They stand in shame.
+a3_toledo.ask2_done,"Tres mil marcos: la afrenta de la bolsa.","Three thousand marks: the purse's shame."
+a3_toledo.ask3_prompt,La afrenta. El riepto.,The affront. The riepto.
+a3_toledo.ask3_legal,"Por la afrenta de Corpes, riepto.","For the affront of Corpes, riepto."
+a3_toledo.ask3_mesura,Mis capitanes los retan. Yo no desenvaino.,My captains challenge them. I do not draw.
+a3_toledo.ask3_ira,Yo mismo los corto aquí.,I cut them down here myself.
+a3_toledo.ask3_infantes,Los infantes tartamudean.,The Infantes stammer.
+a3_toledo.ask3_done,El riepto queda. Tres semanas.,The riepto stands. Three weeks.
+a3_toledo.line_skip,Saltad al riepto.,Skip to the riepto.
+a3_toledo.line_steel,Desenvainad en la corte.,Draw steel in the court.
+a3_toledo.give_swords,Tizona a Pero Bermúdez. Colada a Martín Antolínez.,Tizona to Pero Bermúdez. Colada to Martín Antolínez.
+a3_toledo.tizona_pero,Tizona va a Pero Bermúdez.,Tizona goes to Pero Bermúdez.
+a3_toledo.colada_martin,Colada va a Martín Antolínez.,Colada goes to Martín Antolínez.
+a3_toledo.princes,Navarra pide a Elvira. Aragón pide a Sol.,Navarre asks for Elvira. Aragon asks for Sol.
+a3_toledo.wait,Valencia aún no abre. Tres semanas.,Valencia is not open yet. Three weeks.
+fail.steel_in_cortes,En esta corte no se desenvaina. Recargad.,Steel is not drawn in this hall. Reload.

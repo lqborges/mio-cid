@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for a3_querella one-ask SpeechTrial.
+"""Structural tests for a3_toledo Cortes de Toledo.
 
-Run: python3 tests/unit/test_a3_querella.py
+Run: python3 tests/unit/test_a3_toledo.py
 """
 
 from __future__ import annotations
@@ -34,8 +34,10 @@ DENY = (
     "holy_war",
 )
 
-CHAPTER = "content/chapters/a3_querella"
-WIN_FLAGS = ("querella_filed", "querella_done")
+CHAPTER = "content/chapters/a3_toledo"
+BETROTHAL = ("elvira_betrothed_navarre", "sol_betrothed_aragon")
+ASK_IDS = ("swords", "dowry", "riepto")
+ASK_EVENTS = ("toledo_ask1_swords", "toledo_ask2_dowry", "toledo_ask3_riepto")
 
 
 def _read(rel: str) -> str:
@@ -103,19 +105,25 @@ def _zone_aabb(
     )
 
 
-class TestA3QuerellaSpeechTrial(unittest.TestCase):
+class TestA3ToledoCortes(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/querella.dialogue",
+            f"{CHAPTER}/toledo.dialogue",
             f"{CHAPTER}/beats.json",
+            "data/speech/toledo.json",
+            "data/speech/garcia_preliminary.json",
+            "data/speech/navarre_aragon.json",
             "data/speech/querella.json",
             "data/honor_events/core.json",
-            "data/characters/muno_gustioz.json",
+            "data/items/colada.json",
+            "data/items/tizona.json",
+            "data/characters/garcia_ordonez.json",
             "content/art/characters/cid/cid.tscn",
             "game/ui/speech_trial.tscn",
             "game/systems/speech/speech_trial.gd",
+            "content/chapters/a3_querella/world.tscn",
             "content/chapters/a3_corpes/world.tscn",
             "content/chapters/a3_despedida/world.tscn",
             "content/chapters/a3_bucar/world.tscn",
@@ -123,7 +131,6 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             "content/chapters/a2_embassy2/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertTrue((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_valencia_wait/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_carrion/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a1_vivar/world.tscn").is_file())
@@ -151,11 +158,18 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             "HallBench",
             "Cid",
             "Horse",
-            "Jimena",
-            "MunoGustioz",
+            "Alfonso",
+            "GarciaOrdonez",
+            "FerranGonzalez",
+            "DiegoGonzalez",
+            "Elvira",
+            "Sol",
+            "PeroBermudez",
+            "MartinAntolinez",
             "Mesnada",
-            "DictateZone",
+            "CourtZone",
             "PlaceName",
+            "GarciaTrial",
             "SpeechTrial",
             "SpeechTrialUI",
         ):
@@ -164,9 +178,9 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         self.assertNotIn("GPUParticles3D", scene)
         self.assertNotIn("DummyEnemy", scene)
         self.assertNotIn("Timer", scene)
-        dictate_at = scene.find('[node name="DictateZone"')
-        self.assertGreaterEqual(dictate_at, 0)
-        self.assertIn("collision_mask = 130", scene[dictate_at : dictate_at + 280])
+        court_at = scene.find('[node name="CourtZone"')
+        self.assertGreaterEqual(court_at, 0)
+        self.assertIn("collision_mask = 130", scene[court_at : court_at + 280])
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -178,131 +192,184 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
         horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
         horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
-        zmin, zmax = _zone_aabb(scene, "DictateZone", "Box_dictate")
-        origin = _origin(scene, "DictateZone")
-        size = _subresource_size(scene, "Box_dictate")
+        zmin, zmax = _zone_aabb(scene, "CourtZone", "Box_court")
+        origin = _origin(scene, "CourtZone")
+        size = _subresource_size(scene, "Box_court")
         self.assertFalse(
             _aabb_overlap(cid_min, cid_max, zmin, zmax),
-            f"DictateZone {origin} size {size} overlaps Cid spawn {cid}",
+            f"CourtZone {origin} size {size} overlaps Cid spawn {cid}",
         )
         self.assertFalse(
             _aabb_overlap(horse_min, horse_max, zmin, zmax),
-            f"DictateZone overlaps Horse spawn {horse}",
+            f"CourtZone overlaps Horse spawn {horse}",
         )
         self.assertGreater(abs(cid[2] - origin[2]), size[2] / 2.0 + cid_radius)
 
-    def test_world_script_speech_trial(self) -> None:
+    def test_world_script_speech_trials(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("func start_dictate", source)
-        self.assertIn("func run_legal", source)
-        self.assertIn("func run_mesura", source)
-        self.assertIn("func run_ride_host", source)
-        self.assertIn("func run_ira", source)
-        gd = _read("tests/unit/test_a3_querella.gd")
-        self.assertIn("func _check_ira_does_not_commit", gd)
-        self.assertIn("querella_filed", source)
-        self.assertIn("ride_host_to_carrion", source)
-        self.assertIn("querella_sent", source)
+        self.assertIn("func start_garcia", source)
+        self.assertIn("func start_asks", source)
+        self.assertIn("func run_garcia_legal", source)
+        self.assertIn("func run_skip_to_riepto", source)
+        self.assertIn("func run_draw_steel", source)
+        self.assertIn("func give_swords_to_champions", source)
+        self.assertIn("func play_navarre_aragon", source)
+        self.assertIn("IN_COURT", source)
+        self.assertIn("IN_CHAMPION_HAND", source)
+        self.assertIn("GameState.sword", source)
+        self.assertIn("&\"tizona\"", source)
+        self.assertIn("&\"colada\"", source)
         self.assertIn("ResourceLoader.exists", source)
-        self.assertIn("a3_toledo", source)
+        self.assertIn("a3_valencia_wait", source)
         self.assertIn("can_travel", source)
         self.assertIn("autosave", source)
         self.assertIn("current_scene != self", source)
         self.assertIn("goto", source)
         self.assertIn("func _ready", source)
         self.assertIn("set_chapter_locked", source)
-        self.assertIn("SpeechTrial", source)
+        self.assertIn("GarciaTrial", source)
         self.assertIn("win_threshold", source)
         self.assertNotIn("set_chapter_asleep", source)
         self.assertNotIn("OptionsService", source)
         self.assertNotIn("func _enter_tree", source)
         leave = source.split("func _finish_beat", 1)[1].split("func _dest_ready", 1)[0]
         self.assertIn("not _dest_ready() or not _travel", leave)
-        self.assertIn("if _host_ridden:", leave)
-        host_block = leave.split("if _host_ridden:", 1)[1].split(
-            "if not _dest_ready()", 1
-        )[0]
-        self.assertIn("return", host_block)
-        self.assertNotIn("WAIT_KEY", host_block)
-        submit = source.split("func _submit", 1)[1].split("func _load_querella", 1)[0]
-        self.assertIn("if _filed or _host_ridden:", submit)
-        travel_try = source.split("func try_travel_toledo", 1)[1].split(
-            "func can_leave_to_toledo", 1
-        )[0]
-        self.assertIn("if not _filed or _host_ridden:", travel_try)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a3_querella/world.tscn", runner)
-        self.assertIn('&"a3_querella"', runner)
+        self.assertIn("TOLEDO_SCENE", runner)
+        self.assertIn("res://content/chapters/a3_toledo/world.tscn", runner)
+        self.assertIn('&"a3_toledo"', runner)
+        self.assertIn("QUERELLA_SCENE", runner)
         self.assertIn("EMBASSY2_SCENE", runner)
         self.assertIn("LEON_SCENE", runner)
         self.assertIn("BUCAR_SCENE", runner)
         self.assertIn("DESPEDIDA_SCENE", runner)
         self.assertIn("CORPES_SCENE", runner)
-        corpes = _read("content/chapters/a3_corpes/world.gd")
-        self.assertNotIn("ride_host", corpes)
-        self.assertNotIn("ride_host_to_carrion", corpes)
 
-    def test_speech_trial_one_ask(self) -> None:
-        payload = json.loads(_read("data/speech/querella.json"))
-        asks = payload["asks"]
-        self.assertEqual(len(asks), 1)
-        self.assertEqual(asks[0]["id"], "querella_dictate")
+    def test_garcia_is_separate_trial(self) -> None:
+        garcia = json.loads(_read("data/speech/garcia_preliminary.json"))
+        toledo = json.loads(_read("data/speech/toledo.json"))
+        self.assertEqual(len(garcia["asks"]), 1)
+        self.assertEqual(garcia["asks"][0]["id"], "garcia_preliminary")
+        self.assertFalse(garcia["asks"][0]["counts_toward_win"])
+        self.assertIn("win_threshold", garcia)
+        self.assertNotIn("win_threshold", garcia["asks"][0])
+        asks = toledo["asks"]
+        self.assertEqual(len(asks), 3)
+        self.assertEqual([row["id"] for row in asks], list(ASK_IDS))
+        for row in asks:
+            self.assertNotEqual(row["id"], "garcia_preliminary")
+            self.assertTrue(row.get("counts_toward_win", True))
+        source = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("garcia_trial", source)
+        self.assertIn("GarciaTrial", source)
+        self.assertIn("garcia_preliminary.json", source)
+        self.assertIn("toledo.json", source)
+        scene = _read(f"{CHAPTER}/world.tscn")
+        self.assertIn('[node name="GarciaTrial"', scene)
+        self.assertIn('[node name="SpeechTrial"', scene)
+        self.assertNotEqual(
+            scene.find('[node name="GarciaTrial"'),
+            scene.find('[node name="SpeechTrial"'),
+        )
+
+    def test_three_asks_poem_order(self) -> None:
+        payload = json.loads(_read("data/speech/toledo.json"))
         self.assertIn("win_threshold", payload)
-        self.assertNotIn("win_threshold", asks[0])
-        lines = {row["id"]: row for row in asks[0]["lines"]}
-        for line_id in ("legal", "mesura", "ira", "ride_host"):
-            self.assertIn(line_id, lines, line_id)
-        self.assertIn("legal", lines["legal"]["tags"])
-        self.assertIn("mesura", lines["mesura"]["tags"])
-        self.assertIn("ira", lines["ira"]["tags"])
-        self.assertIn("ride_host", lines["ride_host"]["tags"])
-        self.assertGreaterEqual(
-            float(lines["legal"]["legal"]) - float(lines["legal"]["ira"]),
-            float(payload["win_threshold"]),
-        )
-        self.assertGreaterEqual(
-            float(lines["mesura"]["legal"]) - float(lines["mesura"]["ira"]),
-            float(payload["win_threshold"]),
-        )
-        self.assertLess(
-            float(lines["ira"]["legal"]) - float(lines["ira"]["ira"]),
-            0.0,
-        )
-        self.assertGreaterEqual(
-            float(lines["ride_host"]["legal"]) - float(lines["ride_host"]["ira"]),
-            0.0,
-        )
-        source = _read("game/systems/speech/speech_trial.gd")
-        self.assertIn("var net := line.legal - line.ira", source)
-        self.assertRegex(source, re.compile(r"^class_name SpeechTrial$", re.MULTILINE))
+        self.assertGreaterEqual(float(payload["win_threshold"]), 12.0)
+        asks = payload["asks"]
+        self.assertEqual(len(asks), 3)
+        self.assertEqual(asks[0]["id"], "swords")
+        self.assertEqual(asks[1]["id"], "dowry")
+        self.assertEqual(asks[2]["id"], "riepto")
+        skip_found = False
+        steel_found = False
+        for ask in asks:
+            self.assertNotIn("win_threshold", ask)
+            lines = {row["id"]: row for row in ask["lines"]}
+            self.assertIn("legal", lines)
+            self.assertIn("ira", lines)
+            legal_net = float(lines["legal"]["legal"]) - float(lines["legal"]["ira"])
+            self.assertGreater(legal_net, 0.0)
+            ira_net = float(lines["ira"]["legal"]) - float(lines["ira"]["ira"])
+            self.assertLess(ira_net, 0.0)
+            for row in ask["lines"]:
+                if "skip_to_riepto" in row.get("tags", []):
+                    skip_found = True
+                if "draw_steel" in row.get("tags", []):
+                    steel_found = True
+        self.assertTrue(skip_found)
+        self.assertTrue(steel_found)
+        runtime = _read("game/systems/speech/speech_trial.gd")
+        self.assertIn("var net := line.legal - line.ira", runtime)
+        self.assertIn("third_ask_allowed = false", runtime)
+        self.assertIn("steel_in_cortes", runtime)
+        self.assertRegex(runtime, re.compile(r"^class_name SpeechTrial$", re.MULTILINE))
         project = _read("project.godot")
         self.assertNotIn("SpeechTrial=", project)
+        self.assertIn("toledo.dialogue", project)
         self.assertIn("querella.dialogue", project)
+
+    def test_swords_in_court_then_champion_hand(self) -> None:
+        source = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("IN_COURT", source)
+        self.assertIn("IN_CHAMPION_HAND", source)
+        self.assertIn("set_phase_name", source)
+        self.assertIn("pero", source.lower())
+        self.assertIn("martin", source.lower())
+        give = source.split("func give_swords_to_champions", 1)[1].split(
+            "func play_navarre_aragon", 1
+        )[0]
+        self.assertIn("tizona", give)
+        self.assertIn("IN_CHAMPION_HAND", give)
+        self.assertIn("colada", give)
+        court = source.split("func _return_swords_to_court", 1)[1].split(
+            "func _set_sword_phase", 1
+        )[0]
+        self.assertIn("IN_COURT", court)
+        colada = json.loads(_read("data/items/colada.json"))
+        tizona = json.loads(_read("data/items/tizona.json"))
+        self.assertEqual(colada["wielded_in_lists_by"], "martin_antolinez")
+        self.assertEqual(tizona["wielded_in_lists_by"], "pero_bermudez")
+        item = _read("game/systems/inventory/sword_item.gd")
+        self.assertIn("IN_COURT", item)
+        self.assertIn("IN_CHAMPION_HAND", item)
+        self.assertIn("can_player_wield", item)
+
+    def test_navarre_aragon_is_not_a_speech_trial(self) -> None:
+        payload = json.loads(_read("data/speech/navarre_aragon.json"))
+        self.assertEqual(payload["id"], "princes_ask")
+        self.assertEqual(payload["type"], "cutscene_dialogue")
+        self.assertFalse(payload["skill_check"])
+        self.assertNotEqual(payload["type"], "speech_trial")
+        self.assertNotIn("asks", payload)
+        self.assertNotIn("win_threshold", payload)
+        for flag in BETROTHAL:
+            self.assertIn(flag, payload["set_flags"])
+        source = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("navarre_aragon.json", source)
+        self.assertIn("elvira_betrothed_navarre", source)
+        self.assertIn("sol_betrothed_aragon", source)
+        self.assertIn("skill_check", source)
+        beats = json.loads(_read(f"{CHAPTER}/beats.json"))
+        types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
+        self.assertIn("cutscene_dialogue", types)
 
     def test_honor_events(self) -> None:
         payload = json.loads(_read("data/honor_events/core.json"))
         events = {row["id"]: row for row in payload["events"]}
-        ride = events["ride_host_to_carrion"]
-        filed = events["querella_filed"]
-        self.assertEqual(ride["beat"], "a3_querella")
-        self.assertEqual(filed["beat"], "a3_querella")
-        self.assertEqual(ride["deltas"]["honra"], -25)
-        self.assertEqual(filed["deltas"]["honra"], 6)
-        self.assertIn("mesura_fail", ride["tags"])
-        self.assertIn("illegal", ride["tags"])
-        self.assertIn("law", filed["tags"])
-        self.assertIn("ride_host", ride.get("flags_set", []))
-        self.assertIn("querella_filed", filed.get("flags_set", []))
-        traits = json.loads(_read("data/mesura_traits.json"))
-        rows = {row["id"]: row for row in traits["traits"]}
+        self.assertEqual(events["toledo_ask1_swords"]["deltas"]["honra"], 4)
+        self.assertEqual(events["toledo_ask2_dowry"]["deltas"]["honra"], 8)
+        self.assertEqual(events["toledo_ask3_riepto"]["deltas"]["honra"], 12)
+        self.assertIn("joke", events["toledo_ask1_swords"]["tags"])
+        self.assertIn("speech", events["toledo_ask1_swords"]["tags"])
         self.assertEqual(
-            rows["querella_not_hueste"]["unlocks_at"]["honor_event"],
-            "querella_filed",
+            events["toledo_ask1_swords"].get("clear_stain"), "uncurable_by_combat"
         )
-        bus = _read("game/autoload/event_bus.gd")
-        self.assertIn("signal querella_sent", bus)
+        self.assertIn("humiliation_them", events["toledo_ask2_dowry"]["tags"])
+        for event_id in ASK_EVENTS:
+            self.assertEqual(events[event_id]["beat"], "a3_toledo")
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -310,47 +377,57 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "a3_querella.prompt",
-            "a3_querella.table",
-            "a3_querella.line_legal",
-            "a3_querella.line_mesura",
-            "a3_querella.line_ira",
-            "a3_querella.line_ride_host",
-            "a3_querella.sent",
-            "a3_querella.ride_host",
-            "a3_querella.toledo_wait",
-            "char.muno_gustioz",
+            "a3_toledo.table",
+            "a3_toledo.garcia_prompt",
+            "a3_toledo.garcia_legal",
+            "a3_toledo.ask1_prompt",
+            "a3_toledo.ask1_legal",
+            "a3_toledo.ask2_prompt",
+            "a3_toledo.ask2_legal",
+            "a3_toledo.ask3_prompt",
+            "a3_toledo.ask3_legal",
+            "a3_toledo.line_skip",
+            "a3_toledo.line_steel",
+            "a3_toledo.give_swords",
+            "a3_toledo.princes",
+            "a3_toledo.wait",
+            "char.garcia_ordonez",
+            "char.alfonso",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        self.assertIn("querella", rows["a3_querella.prompt"]["es"].lower())
-        self.assertIn("muño", rows["a3_querella.prompt"]["es"].lower())
-        self.assertIn("hueste", rows["a3_querella.line_legal"]["es"].lower())
-        self.assertIn("carrión", rows["a3_querella.line_ride_host"]["es"].lower())
-        self.assertNotIn("the name is empty", rows["a3_querella.prompt"]["es"].lower())
+        self.assertIn("colada", rows["a3_toledo.ask1_legal"]["es"].lower())
+        self.assertIn("tizona", rows["a3_toledo.ask1_legal"]["es"].lower())
+        self.assertIn("tres mil", rows["a3_toledo.ask2_prompt"]["es"].lower())
+        self.assertIn("riepto", rows["a3_toledo.ask3_prompt"]["es"].lower())
+        self.assertIn("pero", rows["a3_toledo.give_swords"]["es"].lower())
+        self.assertIn("martín", rows["a3_toledo.give_swords"]["es"].lower())
+        self.assertNotIn("the name is empty", rows["a3_toledo.garcia_prompt"]["es"].lower())
         poem = _read("content/locales/poem_formulas.csv")
-        self.assertIn("a3_querella.place_name,Valencia,", poem)
+        self.assertIn("a3_toledo.place_name,Toledo,", poem)
 
     def test_dialogue_and_beats(self) -> None:
-        text = _read(f"{CHAPTER}/querella.dialogue")
-        self.assertIn("~ dictate", text)
-        self.assertIn("~ legal", text)
-        self.assertIn("~ mesura", text)
-        self.assertIn("~ ira", text)
-        self.assertIn("a3_querella.line_ira", text)
-        self.assertIn("~ ride_host", text)
-        self.assertIn("MunoGustioz:", text)
+        text = _read(f"{CHAPTER}/toledo.dialogue")
+        self.assertIn("~ garcia", text)
+        self.assertIn("~ swords", text)
+        self.assertIn("~ dowry", text)
+        self.assertIn("~ riepto", text)
+        self.assertIn("~ skip_to_riepto", text)
+        self.assertIn("~ draw_steel", text)
+        self.assertIn("~ give_swords", text)
+        self.assertIn("~ princes", text)
         self.assertIn("Cid:", text)
-        self.assertIn("a3_querella.prompt", text)
+        self.assertIn("Alfonso:", text)
+        self.assertIn("a3_toledo.garcia_prompt", text)
         self.assertNotIn("{{", text)
         lowered = text.lower()
         for banned in DENY:
             self.assertNotIn(banned, lowered, banned)
         payload = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(payload["id"], "a3_querella")
+        self.assertEqual(payload["id"], "a3_toledo")
         nexts = [step.get("next") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("a3_toledo", nexts)
+        self.assertIn("a3_valencia_wait", nexts)
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
         self.assertIn("speech_trial", types)
         self.assertIn("honor_event", types)
@@ -360,80 +437,57 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             for step in payload["steps"]
             if isinstance(step, dict) and step.get("type") == "honor_event"
         ]
-        self.assertEqual(honor_ids, ["querella_filed"])
-        flags = []
-        for step in payload["steps"]:
-            if isinstance(step, dict):
-                flags.extend(step.get("set_flags", []))
-        for flag in WIN_FLAGS:
-            self.assertIn(flag, flags, flag)
-        reds = [step.get("red") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("ride_host", reds)
+        self.assertEqual(list(honor_ids), list(ASK_EVENTS))
 
-    def test_graph_gates_toledo(self) -> None:
+    def test_graph_toledo_to_wait(self) -> None:
         self.assertEqual(validate_main([]), 0)
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a3_corpes", "a3_querella"), pairs)
         self.assertIn(("a3_querella", "a3_toledo"), pairs)
-        self.assertNotIn(("a3_corpes", "a3_toledo"), pairs)
-        locked = ["hub_lock_cardena"]
-        self.assertTrue(can_travel(graph, "a3_corpes", "a3_querella", locked))
-        self.assertFalse(can_travel(graph, "a3_querella", "a3_toledo", locked))
-        self.assertTrue(
-            can_travel(graph, "a3_querella", "a3_toledo", locked + ["querella_filed"])
-        )
-        self.assertFalse(
-            can_travel(
-                graph,
-                "a3_querella",
-                "a3_toledo",
-                locked + ["querella_filed", "ride_host"],
-            )
-        )
-        self.assertFalse(
-            can_travel(graph, "a3_querella", "a3_toledo", locked + ["ride_host"])
-        )
-        dest_out = next(
-            edge
-            for edge in graph["edges"]
-            if edge["from"] == "a3_querella" and edge["to"] == "a3_toledo"
-        )
-        self.assertIn("querella_filed", dest_out.get("req_flags", []))
-        self.assertIn("ride_host", dest_out.get("forbid_flags", []))
-        node = next(n for n in graph["nodes"] if n["id"] == "a3_querella")
-        self.assertEqual(node["scene"], "res://content/chapters/a3_querella/world.tscn")
+        self.assertIn(("a3_toledo", "a3_valencia_wait"), pairs)
+        self.assertNotIn(("a3_querella", "a3_valencia_wait"), pairs)
+        locked = ["hub_lock_cardena", "querella_filed"]
+        self.assertTrue(can_travel(graph, "a3_querella", "a3_toledo", locked))
+        self.assertTrue(can_travel(graph, "a3_toledo", "a3_valencia_wait", locked))
+        node = next(n for n in graph["nodes"] if n["id"] == "a3_toledo")
+        self.assertEqual(node["scene"], "res://content/chapters/a3_toledo/world.tscn")
 
-    def test_ci_keeps_corpes_speechtrial_and_runs_querella_after_import(self) -> None:
+    def test_ci_keeps_querella_speechtrial_and_runs_toledo_after_import(self) -> None:
         workflow = _read(".github/workflows/import-and-test.yml")
         self.assertIn("Run Python a3_corpes tests", workflow)
         self.assertIn("Run Python a3_querella tests", workflow)
+        self.assertIn("Run Python a3_toledo tests", workflow)
         self.assertIn("tests/unit/test_a3_corpes.py", workflow)
         self.assertIn("tests/unit/test_a3_querella.py", workflow)
+        self.assertIn("tests/unit/test_a3_toledo.py", workflow)
         self.assertIn("Run a3_corpes aftermath headless test", workflow)
         self.assertIn("Run SpeechTrial headless test", workflow)
         self.assertIn("Run a3_querella SpeechTrial headless test", workflow)
+        self.assertIn("Run a3_toledo Cortes headless test", workflow)
         self.assertIn("res://tests/unit/test_a3_corpes.gd", workflow)
         self.assertIn("res://tests/unit/test_speech_trial.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_querella.gd", workflow)
+        self.assertIn("res://tests/unit/test_a3_toledo.gd", workflow)
         imported = workflow.find("Import project")
-        self.assertLess(imported, workflow.find("res://tests/unit/test_a3_querella.gd"))
+        self.assertLess(imported, workflow.find("res://tests/unit/test_a3_toledo.gd"))
         self.assertLess(
-            workflow.find("Run Python a3_corpes tests"),
             workflow.find("Run Python a3_querella tests"),
+            workflow.find("Run Python a3_toledo tests"),
         )
         self.assertLess(
-            workflow.find("res://tests/unit/test_speech_trial.gd"),
             workflow.find("res://tests/unit/test_a3_querella.gd"),
+            workflow.find("res://tests/unit/test_a3_toledo.gd"),
         )
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/querella.dialogue",
+            f"{CHAPTER}/toledo.dialogue",
             f"{CHAPTER}/beats.json",
-            "data/speech/querella.json",
+            "data/speech/toledo.json",
+            "data/speech/garcia_preliminary.json",
+            "data/speech/navarre_aragon.json",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
@@ -474,7 +528,7 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a3_querella.gd",
+                "res://tests/unit/test_a3_toledo.gd",
             ],
             check=False,
             capture_output=True,

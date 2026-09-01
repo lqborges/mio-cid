@@ -123,9 +123,11 @@ class TestA3DespedidaSwordsAndRoad(unittest.TestCase):
             "content/chapters/a2_embassy2/world.tscn",
             "content/chapters/a3_corpes/world.tscn",
             "content/chapters/a3_querella/world.tscn",
+            "content/chapters/a3_toledo/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_valencia_wait/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_carrion/world.tscn").is_file())
 
     def test_scene_is_cheap_greybox_hall_and_road(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
