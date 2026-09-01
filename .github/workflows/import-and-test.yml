@@ -128,8 +128,11 @@ jobs:
       - name: Run Python a2 siege tests
         run: python3 tests/unit/test_a2_siege.py
 
-      - name: Run Python a2 Valencia hub tests
+      - name: Run Python a2 Jerónimo hub tests
         run: python3 tests/unit/test_a2_jeronimo.py
+
+      - name: Run Python embassy2 tests
+        run: python3 tests/unit/test_embassy2.py
 
       - name: Run Python a3_leon tests
         run: python3 tests/unit/test_a3_leon.py
@@ -248,10 +251,15 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a2_siege.gd
 
-      - name: Run a2 Valencia hub headless test
+      - name: Run a2 Jerónimo hub headless test
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a2_jeronimo.gd
+
+      - name: Run embassy2 Avengalvón escort headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy2.gd
 
       - name: Run a3_leon lion scene headless test
         if: steps.godot.outputs.found == 'true'

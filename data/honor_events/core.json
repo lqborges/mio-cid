@@ -95,6 +95,13 @@
       "beat": "a1_embassy1"
     },
     {
+      "id": "embassy2_gift",
+      "deltas": { "honor": 12 },
+      "tags": ["gift_up"],
+      "beat": "a2_embassy2",
+      "flags_set": ["embassy2_done"]
+    },
+    {
       "id": "captain_deserted",
       "deltas": { "onores": -4, "honra": -4 },
       "tags": ["desertion"]

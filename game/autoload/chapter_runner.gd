@@ -18,6 +18,7 @@ const TEVAR_SCENE := "res://content/chapters/a1_tevar/world.tscn"
 const MURVIEDRO_SCENE := "res://content/chapters/a2_murviedro/world.tscn"
 const SIEGE_SCENE := "res://content/chapters/a2_siege/world.tscn"
 const JERONIMO_SCENE := "res://content/chapters/a2_jeronimo/world.tscn"
+const EMBASSY2_SCENE := "res://content/chapters/a2_embassy2/world.tscn"
 const LEON_SCENE := "res://content/chapters/a3_leon/world.tscn"
 const BUCAR_SCENE := "res://content/chapters/a3_bucar/world.tscn"
 
@@ -150,6 +151,8 @@ func _scene_path(beat_id: StringName) -> String:
 		return SIEGE_SCENE
 	if beat_id == &"a2_jeronimo":
 		return JERONIMO_SCENE
+	if beat_id == &"a2_embassy2":
+		return EMBASSY2_SCENE
 	if beat_id == &"a3_leon":
 		return LEON_SCENE
 	if beat_id == &"a3_bucar":
