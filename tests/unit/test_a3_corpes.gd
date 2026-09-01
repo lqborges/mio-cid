@@ -116,8 +116,8 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("plazo bar must stay hidden in Valencia")
 	if not ResourceLoader.exists(DESPEDIDA):
 		failures.append("a3_despedida world must keep shipping")
-	if ResourceLoader.exists(QUERELLA):
-		failures.append("a3_querella must not ship in this beat")
+	if not ResourceLoader.exists(QUERELLA):
+		failures.append("a3_querella must keep shipping")
 	return failures
 
 
@@ -369,18 +369,18 @@ func _check_missing_querella_still_completes() -> PackedStringArray:
 	var scene_before: Node = current_scene
 	world.run_hear_only()
 	world.run_mesura()
-	if ResourceLoader.exists(QUERELLA):
-		failures.append("a3_querella must not ship")
-	if bool(world.get("_left")):
-		failures.append("must not _left into missing a3_querella")
-	if _runner and String(_runner.current_id) == "a3_querella":
-		failures.append("must not travel into missing a3_querella")
+	if not ResourceLoader.exists(QUERELLA):
+		failures.append("a3_querella must ship")
+	if not bool(world.get("_left")):
+		failures.append("mesura must _left when a3_querella exists")
+	if _runner and String(_runner.current_id) != "a3_querella":
+		failures.append("must travel() to a3_querella, got %s" % _runner.current_id)
 	if current_scene != scene_before:
 		failures.append("mesura must not change_scene when current_scene != world")
 	if _completed.count("a3_corpes") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _completed.count("a3_corpes") < 1:
-		failures.append("missing dest must still complete a3_corpes once")
+		failures.append("travel must complete a3_corpes once")
 	world.free()
 	return failures
 
@@ -404,8 +404,10 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(QUERELLA):
-		failures.append("a3_querella must not ship in this beat")
+	if not ResourceLoader.exists(QUERELLA):
+		failures.append("a3_querella world must keep shipping")
+	if ResourceLoader.exists("res://content/chapters/a3_toledo/world.tscn"):
+		failures.append("a3_toledo must not ship in this beat")
 	if not ResourceLoader.exists(WORLD):
 		failures.append("a3_corpes world must exist")
 	if not ResourceLoader.exists(DESPEDIDA):

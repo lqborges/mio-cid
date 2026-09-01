@@ -316,7 +316,9 @@
     },
     {
       "from": "a3_querella",
-      "to": "a3_toledo"
+      "to": "a3_toledo",
+      "req_flags": ["querella_filed"],
+      "forbid_flags": ["ride_host"]
     },
     {
       "from": "a3_toledo",

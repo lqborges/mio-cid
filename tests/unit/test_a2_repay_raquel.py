@@ -124,7 +124,8 @@ class TestA2RepayRaquel(unittest.TestCase):
         self.assertTrue((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a3_querella/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_querella/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
 
     def test_hall_greybox_and_separate_lenders(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")

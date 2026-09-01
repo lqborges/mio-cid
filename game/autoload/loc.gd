@@ -14,13 +14,17 @@ func _ready() -> void:
 
 
 func text(key: String) -> String:
+	return text_in(key, locale)
+
+
+func text_in(key: String, loc: String) -> String:
 	if _table.is_empty():
 		_reload()
 	if not _table.has(key):
 		return key
 	var row: Dictionary = _table[key]
-	var value := str(row.get(locale, ""))
-	if value.is_empty() and locale != DEFAULT_LOCALE:
+	var value := str(row.get(loc, ""))
+	if value.is_empty() and loc != DEFAULT_LOCALE:
 		value = str(row.get(DEFAULT_LOCALE, ""))
 	return value if not value.is_empty() else key
 

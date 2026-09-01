@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://doorrdd7narla"
+path="res://.godot/imported/querella.dialogue-4b731281d34066a9f6217ac12e4034c0.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_querella/querella.dialogue"
+dest_files=["res://.godot/imported/querella.dialogue-4b731281d34066a9f6217ac12e4034c0.tres"]
+
+[params]
+
+defaults=true

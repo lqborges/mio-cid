@@ -159,6 +159,9 @@ jobs:
       - name: Run Python a3_corpes tests
         run: python3 tests/unit/test_a3_corpes.py
 
+      - name: Run Python a3_querella tests
+        run: python3 tests/unit/test_a3_querella.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -328,6 +331,16 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_corpes.gd
+
+      - name: Run SpeechTrial headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_speech_trial.gd
+
+      - name: Run a3_querella SpeechTrial headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_querella.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

@@ -1,0 +1,27 @@
+# Spoken lines are CSV keys. Dictate the querella. Mesura is law.
+
+~ start
+=> dictate
+
+~ dictate
+Cid: a3_querella.prompt
+MunoGustioz: a3_querella.table
+=> END
+
+~ legal
+Cid: a3_querella.line_legal
+MunoGustioz: a3_querella.sent
+=> END
+
+~ mesura
+Cid: a3_querella.line_mesura
+MunoGustioz: a3_querella.sent
+=> END
+
+~ ira
+Cid: a3_querella.line_ira
+=> END
+
+~ ride_host
+Cid: a3_querella.line_ride_host
+=> END
