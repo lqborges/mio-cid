@@ -104,12 +104,15 @@ func _check_nameplates() -> PackedStringArray:
 		if label == null:
 			failures.append("missing nameplate %s" % path)
 			continue
-		if not label.fixed_size:
-			failures.append("%s nameplate must be fixed_size (screen-space)" % path)
-		if label.font_size > 22:
+		if label.fixed_size:
+			failures.append("%s nameplate must not use fixed_size (it blows up on the isometric camera)" % path)
+		if label.font_size > 32:
 			failures.append("%s nameplate font_size %s is too large" % [path, label.font_size])
 		if label.pixel_size > 0.006:
 			failures.append("%s nameplate pixel_size %s is too large" % [path, label.pixel_size])
+		var world_h := float(label.font_size) * float(label.pixel_size)
+		if world_h > 0.18:
+			failures.append("%s nameplate world height %s is too tall" % [path, world_h])
 	return failures
 
 

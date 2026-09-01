@@ -179,13 +179,11 @@ shape = SubResource("CapsuleShape_alvar")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
 pixel_size = 0.005
 billboard = 1
-fixed_size = true
-no_depth_test = true
 text = "Álvar"
 modulate = Color(0.91, 0.85, 0.72, 1)
 outline_modulate = Color(0.18, 0.16, 0.13, 1)
-font_size = 16
-outline_size = 8
+font_size = 28
+outline_size = 6
 
 [node name="Martin" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0, -1.2)
@@ -205,13 +203,11 @@ shape = SubResource("CapsuleShape_martin")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.05, 0)
 pixel_size = 0.005
 billboard = 1
-fixed_size = true
-no_depth_test = true
 text = "Martín"
 modulate = Color(0.91, 0.85, 0.72, 1)
 outline_modulate = Color(0.18, 0.16, 0.13, 1)
-font_size = 16
-outline_size = 8
+font_size = 28
+outline_size = 6
 
 [node name="Frontier" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 11)

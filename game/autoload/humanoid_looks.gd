@@ -41,18 +41,18 @@ func _consider(node: Node) -> void:
 		fit_nameplate(nameplate as Label3D)
 
 
-## Screen-space billboard so "Álvar" / "Martín" stay character-sized, not world-huge.
+## Billboard sized to a person: ~0.14 m letters (~16 px at the isometric camera).
 static func fit_nameplate(label: Label3D) -> void:
 	if label == null or not is_instance_valid(label):
 		return
 	if label.has_meta("nameplate_fit"):
 		return
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.fixed_size = true
+	label.fixed_size = false
 	label.pixel_size = 0.005
-	label.font_size = 16
-	label.outline_size = maxi(label.outline_size, 8)
-	label.no_depth_test = true
+	label.font_size = 28
+	label.outline_size = maxi(label.outline_size, 6)
+	label.no_depth_test = false
 	label.render_priority = 1
 	label.set_meta("nameplate_fit", true)
 

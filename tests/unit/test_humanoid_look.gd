@@ -82,10 +82,12 @@ func _check_nameplate_fit() -> PackedStringArray:
 		looks.call("ensure", label)
 	elif looks and looks.has_method("fit_nameplate"):
 		looks.call("fit_nameplate", label)
-	if not label.fixed_size:
-		failures.append("nameplate fit must set fixed_size")
-	if label.font_size > 22:
+	if label.fixed_size:
+		failures.append("nameplate fit must not set fixed_size")
+	if label.font_size > 32:
 		failures.append("nameplate font_size stayed huge: %s" % label.font_size)
+	if float(label.font_size) * float(label.pixel_size) > 0.18:
+		failures.append("nameplate world height stayed huge")
 	label.free()
 	return failures
 
