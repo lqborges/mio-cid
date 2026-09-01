@@ -117,6 +117,18 @@ func camp_on_river() -> void:
 	_travel_to_arcas()
 
 
+func _physics_process(_delta: float) -> void:
+	if _camped:
+		_travel_to_arcas()
+		return
+	var cid: Node3D = get_node_or_null("Cid") as Node3D
+	if cid == null:
+		return
+	# Spawn is z=6.5. The old Camp box (layer 1) blocked before RiverCamp (z~8.5).
+	if cid.global_position.z >= 9.4:
+		camp_on_river()
+
+
 func _travel_to_arcas() -> void:
 	var tree := get_tree()
 	if tree == null or tree.current_scene != self:

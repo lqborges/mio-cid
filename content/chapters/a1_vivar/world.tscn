@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a1_vivar/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
 [ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="5_bridge"]
 [ext_resource type="Script" path="res://content/chapters/a1_vivar/companion.gd" id="6_comp"]
+[ext_resource type="Script" path="res://content/chapters/a1_vivar/gate.gd" id="7_gate"]
 
 [sub_resource type="Environment" id="Environment_solar"]
 background_mode = 1
@@ -32,6 +33,10 @@ roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="Mat_house"]
 albedo_color = Color(0.46, 0.40, 0.32, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_sill"]
+albedo_color = Color(0.62, 0.48, 0.28, 1)
 roughness = 1.0
 
 [sub_resource type="StandardMaterial3D" id="Mat_alvar"]
@@ -65,7 +70,10 @@ radius = 0.4
 height = 1.8
 
 [sub_resource type="BoxShape3D" id="Box_frontier"]
-size = Vector3(5.2, 2.4, 3.2)
+size = Vector3(6.0, 2.4, 6.0)
+
+[sub_resource type="BoxShape3D" id="Box_gate"]
+size = Vector3(3.6, 2.2, 1.6)
 
 [node name="Vivar" type="Node3D"]
 script = ExtResource("1_world")
@@ -209,8 +217,34 @@ outline_modulate = Color(0.18, 0.16, 0.13, 1)
 font_size = 28
 outline_size = 6
 
+[node name="GateSill" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, 10)
+size = Vector3(4.2, 0.08, 1.8)
+material = SubResource("Mat_sill")
+use_collision = false
+
+[node name="Gate" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+collision_layer = 8
+collision_mask = 0
+script = ExtResource("7_gate")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("Box_gate")
+
+[node name="Name" type="Label3D" parent="Gate"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+text = "Frontera"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+outline_size = 6
+
 [node name="Frontier" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 10.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 9.4)
 collision_layer = 0
 collision_mask = 2
 monitoring = true

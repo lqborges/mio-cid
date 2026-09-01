@@ -697,7 +697,12 @@ func _update_interact_prompt() -> void:
 	var target := _focus_interactable()
 	_prompt_label.visible = target != null
 	if target:
-		_prompt_label.text = _loc_text("hud.interact_hint", "E — Hablar")
+		var key := "hud.interact_hint"
+		if target.has_method("interact_prompt_key"):
+			var custom := str(target.call("interact_prompt_key"))
+			if not custom.is_empty():
+				key = custom
+		_prompt_label.text = _loc_text(key, "E — Hablar")
 
 
 func _ensure_interact_prompt() -> void:

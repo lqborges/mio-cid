@@ -29,6 +29,7 @@ func _run() -> void:
 		failures.append_array(_check_shutters_seen())
 		failures.append_array(_check_steel_on_burgaleses_gated())
 		failures.append_array(_check_talk_npcs_not_camp_click())
+		failures.append_array(_check_river_camp_reachable())
 		_world.free()
 		_world = null
 	_finish(failures)
@@ -203,6 +204,26 @@ func _check_talk_npcs_not_camp_click() -> PackedStringArray:
 		var near: Variant = cid.call("_nearest_interactable")
 		if near != null and String((near as Node).name) == "Camp":
 			failures.append("Cid must not treat Camp as the nearest talk target at spawn")
+	if camp is CollisionObject3D and (camp as CollisionObject3D).collision_layer == 1:
+		failures.append("Camp layer 1 blocks Cid from RiverCamp")
+	return failures
+
+
+func _check_river_camp_reachable() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_world.set("_camped", false)
+	var cid: Node3D = _world.get_node_or_null("Cid") as Node3D
+	if cid == null:
+		failures.append("Cid missing for river-camp reach")
+		return failures
+	var spawn_z := cid.global_position.z
+	if spawn_z >= 9.4:
+		failures.append("Cid spawn must stay north of the river-camp poll")
+	cid.global_position = Vector3(0.0, 0.05, 9.6)
+	if _world.has_method("_physics_process"):
+		_world._physics_process(0.016)
+	if not bool(_world.get("_camped")):
+		failures.append("Cid at the river tents must camp_on_river (physics poll)")
 	return failures
 
 

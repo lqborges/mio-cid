@@ -52,6 +52,7 @@ hud.shout,Grito,Shout
 hud.dodge,Esquiva,Dodge
 hud.interact,Hablar,Talk
 hud.interact_hint,E — Hablar,E — Talk
+hud.leave_hint,E — Salir,E — Leave
 ui.pause.title,Pausa,Pause
 ui.pause.resume,Continuar,Resume
 ui.pause.menu,Menú principal,Main menu

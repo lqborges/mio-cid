@@ -51,14 +51,25 @@ func run_first_names() -> void:
 
 func leave_solar() -> void:
 	# Crossing the gate is a plazo rest-skip, never a feeding night.
-	if _left:
-		return
-	_left = true
-	if CampaignClock and CampaignClock.has_method("advance_plazo"):
-		CampaignClock.advance_plazo(1)
-	if EventBus and EventBus.has_signal("beat_completed"):
-		EventBus.beat_completed.emit(BEAT_ID)
+	if not _left:
+		if CampaignClock and CampaignClock.has_method("advance_plazo"):
+			CampaignClock.advance_plazo(1)
+		if EventBus and EventBus.has_signal("beat_completed"):
+			EventBus.beat_completed.emit(BEAT_ID)
+		_left = true
 	_travel_to_burgos()
+
+
+func _physics_process(_delta: float) -> void:
+	if _left:
+		_travel_to_burgos()
+		return
+	var cid: Node3D = get_node_or_null("Cid") as Node3D
+	if cid == null:
+		return
+	# South opening: x in the wall gap. A layer-1 gate used to stop Cid at ~8.8.
+	if absf(cid.global_position.x) <= 2.8 and cid.global_position.z >= 8.0:
+		leave_solar()
 
 
 func _travel_to_burgos() -> void:
@@ -67,19 +78,9 @@ func _travel_to_burgos() -> void:
 		return
 	if ChapterRunner == null:
 		return
-	if not ChapterRunner.has_flag(SEEN_FLAG):
-		_set_seen()
-	var dest := &"a1_burgos"
-	if ChapterRunner.has_method("can_travel"):
-		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
-		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
-			return
-		if ChapterRunner.has_method("goto"):
-			ChapterRunner.goto(dest)
-		return
 	_set_seen()
 	if ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(dest)
+		ChapterRunner.goto(&"a1_burgos")
 
 
 func _on_frontier_entered(body: Node) -> void:

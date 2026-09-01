@@ -34,6 +34,7 @@ func _run() -> void:
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(await _check_first_names_set_seen())
 		failures.append_array(_check_advance_plazo_does_not_feed())
+		failures.append_array(_check_south_gate_leave())
 		_world.free()
 		_world = null
 	_finish(failures)
@@ -60,6 +61,13 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("world missing Álvar companion")
 	if _world.get_node_or_null("Martin") == null:
 		failures.append("world missing Martín companion")
+	var gate: Node = _world.get_node_or_null("Gate")
+	if gate == null or not gate.has_method("interact"):
+		failures.append("world missing Gate leave interact")
+	if gate and not gate.is_in_group("interactable"):
+		failures.append("Gate must be interactable")
+	if gate is CollisionObject3D and (gate as CollisionObject3D).collision_layer == 1:
+		failures.append("Gate layer 1 blocks Cid (mask 5) and traps the solar")
 	if _world.find_child("Chest", true, false) != null:
 		failures.append("empty solar still has a Chest")
 	return failures
@@ -277,6 +285,27 @@ func _check_advance_plazo_does_not_feed() -> PackedStringArray:
 		failures.append("advance_plazo must not touch unfed_streak")
 	if int(_clock.days_elapsed) != 3:
 		failures.append("advance_plazo must not advance days_elapsed")
+	return failures
+
+
+func _check_south_gate_leave() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_world.set("_left", false)
+	var cid: Node3D = _world.get_node_or_null("Cid") as Node3D
+	if cid == null:
+		failures.append("Cid missing for south-gate leave")
+		return failures
+	cid.global_position = Vector3(0.0, 0.05, 8.4)
+	if _world.has_method("_physics_process"):
+		_world._physics_process(0.016)
+	if not bool(_world.get("_left")):
+		failures.append("Cid at the south opening must leave_solar (physics poll)")
+	_world.set("_left", false)
+	var gate: Node = _world.get_node_or_null("Gate")
+	if gate and gate.has_method("interact"):
+		gate.call("interact")
+		if not bool(_world.get("_left")):
+			failures.append("Gate.interact must call leave_solar")
 	return failures
 
 
