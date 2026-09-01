@@ -218,6 +218,15 @@ class TestA2BodasInfantes(unittest.TestCase):
         self.assertIn("train_combat_cap", source)
         self.assertIn("_tunable_int", source)
         self.assertIn("goto", source)
+        self.assertIn("_pending_cue", source)
+        start_gift = source.split("func start_gift", 1)[1].split("func run_gift", 1)[0]
+        self.assertIn('_pending_cue = "gift"', start_gift)
+        start_train = source.split("func start_train", 1)[1].split("func run_train", 1)[0]
+        self.assertIn('_pending_cue = "train"', start_train)
+        ended = source.split("func _on_dialogue_ended", 1)[1].split("func _try_balloon", 1)[0]
+        self.assertIn('cue == "train"', ended)
+        self.assertIn('cue == "gift"', ended)
+        self.assertNotIn("if not _trained", ended)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("22", source)
         self.assertNotIn("flute", source.lower())

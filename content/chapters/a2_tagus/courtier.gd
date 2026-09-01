@@ -7,6 +7,9 @@ extends StaticBody3D
 
 func interact() -> void:
 	var host := _chapter()
+	if host and host.has_method("start_cue"):
+		host.start_cue(cue)
+		return
 	if host and host.has_method("start_court"):
 		host.start_court()
 

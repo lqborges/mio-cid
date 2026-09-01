@@ -182,6 +182,19 @@ class TestA2TagusPardon(unittest.TestCase):
                 _aabb_overlap(horse_min, horse_max, zmin, zmax),
                 f"{node_name} overlaps Horse spawn {horse}",
             )
+        tent = _origin(scene, "TentA")
+        rest = _origin(scene, "RestZone")
+        rest_size = _subresource_size(scene, "Box_rest")
+        self.assertGreater(
+            rest[2],
+            tent[2],
+            "RestZone must sit in front of TentA's +Z door, not inside the tent body",
+        )
+        self.assertLess(
+            rest_size[2],
+            3.2,
+            "RestZone must be shorter than TentA so the trigger is the porch",
+        )
 
     def test_honor_events_pardon_then_yes(self) -> None:
         payload = json.loads(_read("data/honor_events/tagus.json"))
@@ -226,6 +239,10 @@ class TestA2TagusPardon(unittest.TestCase):
         self.assertNotIn("func choose_refuse", source)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("ChoiceUI", source)
+        self.assertNotIn("Headless:", source)
+        courtier = _read(f"{CHAPTER}/courtier.gd")
+        self.assertIn("start_cue", courtier)
+        self.assertIn("cue", courtier)
         dialogue = _read(f"{CHAPTER}/tagus.dialogue")
         self.assertIn("~ pardon", dialogue)
         self.assertIn("~ ask", dialogue)

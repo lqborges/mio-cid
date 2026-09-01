@@ -92,7 +92,6 @@ func start_pardon(_cue: String = "pardon") -> void:
 
 
 func run_pardon() -> void:
-	# Headless: walk Alfonso's pardon, then grant it.
 	_talking = true
 	var resource := _load_dialogue()
 	if resource:
@@ -179,7 +178,6 @@ func start_ask(_cue: String = "ask") -> void:
 
 
 func run_ask() -> void:
-	# Headless: Alfonso asks; Cid says yes because he is the king.
 	if not _ready_for_ask():
 		if not _pardoned:
 			await run_pardon()

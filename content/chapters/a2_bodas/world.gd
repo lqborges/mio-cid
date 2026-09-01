@@ -27,6 +27,7 @@ var _joined: bool = false
 var _trained: bool = false
 var _gifted: bool = false
 var _left: bool = false
+var _pending_cue: String = ""
 var _data: Dictionary = {}
 
 
@@ -73,15 +74,18 @@ func start_train(_cue: String = "train") -> void:
 		return
 	join_infantes()
 	_talking = true
+	_pending_cue = "train"
 	var resource := _load_dialogue()
 	if resource == null:
 		_talking = false
+		_pending_cue = ""
 		train_infantes()
 		return
 	if _try_balloon(resource, "train"):
 		return
 	await _walk_lines(resource, "train")
 	_talking = false
+	_pending_cue = ""
 	train_infantes()
 
 
@@ -113,19 +117,22 @@ func train_infantes() -> void:
 
 
 func start_gift(_cue: String = "gift") -> void:
-	if _talking:
+	if _talking or _gifted:
 		return
 	join_infantes()
 	_talking = true
+	_pending_cue = "gift"
 	var resource := _load_dialogue()
 	if resource == null:
 		_talking = false
+		_pending_cue = ""
 		gift_infantes()
 		return
 	if _try_balloon(resource, "gift"):
 		return
 	await _walk_lines(resource, "gift")
 	_talking = false
+	_pending_cue = ""
 	gift_infantes()
 
 
@@ -480,9 +487,11 @@ func _on_dialogue_ended(_resource: Variant = null) -> void:
 	if dm and dm.has_signal("dialogue_ended") and dm.dialogue_ended.is_connected(_on_dialogue_ended):
 		dm.dialogue_ended.disconnect(_on_dialogue_ended)
 	_talking = false
-	if not _trained:
+	var cue := _pending_cue
+	_pending_cue = ""
+	if cue == "train":
 		train_infantes()
-	elif not _gifted:
+	elif cue == "gift":
 		gift_infantes()
 
 

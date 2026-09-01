@@ -112,7 +112,7 @@ height = 1.68
 size = Vector3(4, 2, 4)
 
 [sub_resource type="BoxShape3D" id="Box_rest"]
-size = Vector3(3.4, 2.2, 3.2)
+size = Vector3(2.4, 2.0, 1.8)
 
 [sub_resource type="BoxShape3D" id="Box_bodas"]
 size = Vector3(4, 2, 2)
@@ -220,9 +220,9 @@ size = Vector3(3.4, 2.2, 3.2)
 material = SubResource("Mat_tent")
 
 [node name="Door" type="CSGBox3D" parent="TentA"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 1.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 1.6)
 operation = 2
-size = Vector3(1.2, 1.6, 0.6)
+size = Vector3(1.8, 2.0, 0.8)
 material = SubResource("Mat_tent")
 
 [node name="TentB" type="CSGBox3D" parent="."]
@@ -425,7 +425,7 @@ monitorable = false
 shape = SubResource("Box_court")
 
 [node name="RestZone" type="Area3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 1.0, -2.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 1.0, 0.4)
 collision_layer = 0
 collision_mask = 130
 monitoring = true

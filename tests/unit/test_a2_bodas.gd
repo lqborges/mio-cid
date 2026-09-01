@@ -55,6 +55,7 @@ func _run() -> void:
 		_world.free()
 		_world = null
 	failures.append_array(await _check_infantes_join_and_train())
+	failures.append_array(await _check_balloon_applies_finished_cue())
 	failures.append_array(_check_leon_gated())
 	failures.append_array(_check_graph_spine())
 	_finish(failures)
@@ -257,6 +258,79 @@ func _check_infantes_join_and_train() -> PackedStringArray:
 		await world.run_gift()
 	if _treasury and int(_treasury.state.marks) != 160:
 		failures.append("gift marks want 160 (200-40) got %s" % _treasury.state.marks)
+	world.free()
+	return failures
+
+
+func _check_balloon_applies_finished_cue() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	failures.append_array(await _check_gift_balloon_without_prior_train())
+	failures.append_array(await _check_train_balloon_without_prior_gift())
+	return failures
+
+
+func _check_gift_balloon_without_prior_train() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	if _treasury:
+		_treasury.state.marks = 200
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("gift balloon: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	var roster: Variant = _honor.roster if _honor else null
+	var ferran: Variant = roster.member(&"ferran_gonzalez") if roster else null
+	var diego: Variant = roster.member(&"diego_gonzalez") if roster else null
+	if world.has_method("start_gift"):
+		await world.start_gift()
+	if not bool(world.get("_gifted")):
+		world.set("_pending_cue", "gift")
+		world.call("_on_dialogue_ended")
+	if not bool(world.get("_gifted")):
+		failures.append("gift balloon must apply gift_infantes")
+	if bool(world.get("_trained")):
+		failures.append("gift balloon must not train")
+	if ferran and not is_equal_approx(float(ferran.combat), 22.0):
+		failures.append("gift balloon ferran combat want 22 got %s" % ferran.combat)
+	if diego and not is_equal_approx(float(diego.combat), 20.0):
+		failures.append("gift balloon diego combat want 20 got %s" % diego.combat)
+	if _treasury and int(_treasury.state.marks) != 160:
+		failures.append("gift balloon marks want 160 (200-40) got %s" % _treasury.state.marks)
+	world.free()
+	return failures
+
+
+func _check_train_balloon_without_prior_gift() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	if _treasury:
+		_treasury.state.marks = 200
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("train balloon: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	var roster: Variant = _honor.roster if _honor else null
+	var ferran: Variant = roster.member(&"ferran_gonzalez") if roster else null
+	var diego: Variant = roster.member(&"diego_gonzalez") if roster else null
+	if world.has_method("start_train"):
+		await world.start_train()
+	if not bool(world.get("_trained")):
+		world.set("_pending_cue", "train")
+		world.call("_on_dialogue_ended")
+	if not bool(world.get("_trained")):
+		failures.append("train balloon must apply train_infantes")
+	if bool(world.get("_gifted")):
+		failures.append("train balloon must not gift")
+	if ferran and not is_equal_approx(float(ferran.combat), 22.0):
+		failures.append("train balloon ferran combat want 22 got %s" % ferran.combat)
+	if diego and not is_equal_approx(float(diego.combat), 21.0):
+		failures.append("train balloon diego combat want 21 got %s" % diego.combat)
+	if _treasury and int(_treasury.state.marks) != 200:
+		failures.append("train balloon must not spend marks, got %s" % _treasury.state.marks)
 	world.free()
 	return failures
 
