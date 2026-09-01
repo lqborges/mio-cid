@@ -324,16 +324,25 @@ func _check_ten_horses_spends_escrow_first() -> PackedStringArray:
 		var label: Label = whisper.get_node_or_null("Line") as Label
 		if label:
 			line = label.text
-	if line.is_empty() or (not line.to_lower().contains("perdón") and not line.to_lower().contains("perdon") and not line.to_lower().contains("tajo")):
+	if line.is_empty() or (not line.to_lower().contains("perdón") and not line.to_lower().contains("perdon")):
 		failures.append("return whisper must say pardon is possible, got %s" % line)
+	if line.to_lower().contains("aún no abre") or line.to_lower().contains("aun no abre"):
+		failures.append("pardon whisper must not be overwritten by Tagus wait, got %s" % line)
+	if bool(world.get("_left")):
+		failures.append("complete_return must not auto-travel; ExitZone owns leave")
 	if _runner:
-		if String(_runner.current_id) != "a2_tagus":
-			failures.append("honest gift travel must land on a2_tagus, got %s" % _runner.current_id)
+		if String(_runner.current_id) != "a2_embassy3":
+			failures.append("honest gift must keep current_id on a2_embassy3 until exit, got %s" % _runner.current_id)
 		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
 		if "embassy3_done" not in flags:
 			failures.append("gift must set embassy3_done")
 		if "pardon" in flags:
 			failures.append("embassy 3 must not set pardon as granted")
+	if world.has_method("travel_next"):
+		world.call("travel_next")
+	if _runner:
+		if String(_runner.current_id) != "a2_tagus":
+			failures.append("ExitZone/travel_next must land on a2_tagus, got %s" % _runner.current_id)
 	if current_scene != scene_before:
 		failures.append("gift must not change_scene when dest is missing")
 	if ResourceLoader.exists(TAGUS):
@@ -385,28 +394,32 @@ func _check_cheated_path_repay_gated() -> PackedStringArray:
 	var ev: HonorEvent = world.call("run_gift", &"ten_horses")
 	if ev == null or String(ev.id) != "embassy3_gift":
 		failures.append("cheated ten_horses must apply embassy3_gift, got %s" % (ev.id if ev else "?"))
-	if _runner:
-		if String(_runner.current_id) != "a2_repay_raquel":
-			failures.append("cheated gift travel must land on a2_repay_raquel, got %s" % _runner.current_id)
-		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
-		if "embassy3_done" not in flags:
-			failures.append("cheated gift must set embassy3_done")
-		if bool(_runner.can_travel(&"a2_embassy3", &"a2_tagus", flags)):
-			failures.append("arcas_cheated must still close embassy3 -> Tagus")
-	if current_scene != scene_before:
-		failures.append("goto must no-op when repay/tagus scenes are missing")
 	var whisper: Node = world.find_child("HallWhisper", true, false)
 	var line := ""
 	if whisper:
 		var label: Label = whisper.get_node_or_null("Line") as Label
 		if label:
 			line = label.text
-	if ResourceLoader.exists(REPAY):
-		# Scene may already exist from an earlier beat; still no hop unless current_scene==world.
-		pass
-	elif line.is_empty() or (not line.to_lower().contains("raquel") and not line.to_lower().contains("vidas") and not line.to_lower().contains("tajo")):
-		# travel() runs while current_scene != world, so the wait whisper is only for a live hop.
-		pass
+	if line.is_empty() or (not line.to_lower().contains("perdón") and not line.to_lower().contains("perdon")):
+		failures.append("cheated return whisper must say pardon is possible, got %s" % line)
+	if bool(world.get("_left")):
+		failures.append("cheated complete_return must not auto-travel; ExitZone owns leave")
+	if _runner:
+		if String(_runner.current_id) != "a2_embassy3":
+			failures.append("cheated gift must keep current_id on a2_embassy3 until exit, got %s" % _runner.current_id)
+		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		if "embassy3_done" not in flags:
+			failures.append("cheated gift must set embassy3_done")
+	if world.has_method("travel_next"):
+		world.call("travel_next")
+	if _runner:
+		if String(_runner.current_id) != "a2_repay_raquel":
+			failures.append("cheated ExitZone/travel_next must land on a2_repay_raquel, got %s" % _runner.current_id)
+		var after_flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
+		if bool(_runner.can_travel(&"a2_embassy3", &"a2_tagus", after_flags)):
+			failures.append("arcas_cheated must still close embassy3 -> Tagus")
+	if current_scene != scene_before:
+		failures.append("goto must no-op when repay/tagus scenes are missing")
 	world.free()
 	return failures
 

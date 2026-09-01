@@ -187,12 +187,24 @@ class TestEmbassy3GiftToKing(unittest.TestCase):
         self.assertIn("GiftToKing.from_file", world)
         self.assertIn("func attempt_gift", world)
         self.assertIn("func run_gift", world)
+        self.assertIn("func travel_next", world)
         self.assertIn("_skip_cinematic", world)
         self.assertIn("embassy3_done", world)
         self.assertIn("a2_tagus", world)
         self.assertIn("a2_repay_raquel", world)
         self.assertIn("ResourceLoader.exists", world)
         self.assertIn("goto", world)
+        complete = re.search(
+            r"func complete_return\(\) -> void:\n(?P<body>.*?)(?=\nfunc |\Z)",
+            world,
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(complete)
+        self.assertIn("_alvar_return", complete.group("body"))
+        self.assertNotIn("_leave_for_next", complete.group("body"))
+        director = _read("game/chapters/beat_director.gd")
+        self.assertIn('"embassy_ledger"', director)
+        self.assertIn('"whisper"', director)
         self.assertNotIn("func _enter_tree", world)
         self.assertRegex(world, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", world, re.MULTILINE))
@@ -305,7 +317,10 @@ class TestEmbassy3GiftToKing(unittest.TestCase):
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
         self.assertIn("embassy_ledger", types)
         self.assertIn("cinematic", types)
-        self.assertIn("travel_spawn", types)
+        self.assertIn("whisper", types)
+        self.assertNotIn("travel_spawn", types)
+        nexts = [step.get("next") for step in payload["steps"] if isinstance(step, dict)]
+        self.assertNotIn("a2_tagus", nexts)
         flags = []
         for step in payload["steps"]:
             if isinstance(step, dict):

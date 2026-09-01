@@ -25,11 +25,6 @@
       "id": "pardon",
       "type": "whisper",
       "set_flags": ["embassy3_done"]
-    },
-    {
-      "id": "leave",
-      "type": "travel_spawn",
-      "next": "a2_tagus"
     }
   ]
 }

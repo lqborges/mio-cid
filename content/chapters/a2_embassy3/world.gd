@@ -10,7 +10,6 @@ const HUB_LOCK := &"hub_lock_cardena"
 const HORSE_FLAG := "horse_companion"
 const DONE_FLAG := "embassy3_done"
 const GIFT_PATH := "res://data/gifts/embassy_3.json"
-const DIALOGUE_PATH := "res://content/chapters/a2_embassy3/embassy3.dialogue"
 const PROMPT_KEY := "a2_embassy3.prompt"
 const LEAVE_KEY := "a2_embassy3.alvar_leave"
 const RETURN_KEY := "a2_embassy3.alvar_return"
@@ -59,7 +58,6 @@ func start_gift(_cue: String = "gift") -> void:
 
 
 func run_gift(choice_id: StringName) -> HonorEvent:
-	# Headless: skip the leave cinematic so tests stay green.
 	_skip_cinematic = true
 	if not _gifted:
 		start_gift()
@@ -67,7 +65,6 @@ func run_gift(choice_id: StringName) -> HonorEvent:
 
 
 func attempt_gift(choice_id: StringName) -> HonorEvent:
-	# Tests must call resolve even when the ledger greys the row.
 	_skip_cinematic = true
 	_load_gift()
 	var honor := _honor_state()
@@ -115,7 +112,7 @@ func complete_return() -> void:
 		return
 	_alvar_return()
 	_set_return_flags()
-	_leave_for_next()
+	# WHY: pardon whisper is the beat; travel/goto waits for ExitZone.
 
 
 func travel_next() -> bool:
@@ -128,6 +125,7 @@ func travel_next() -> bool:
 
 
 func dest_id() -> StringName:
+	# WHY: graph join (Tagus vs repay) lives here; beats.json must not hardcode next.
 	return _dest_id()
 
 
@@ -464,61 +462,3 @@ func _loc(key: String) -> String:
 	if Loc and Loc.has_method("text"):
 		return str(Loc.text(key))
 	return key
-
-
-func _walk_lines(resource: Resource, cue: String) -> void:
-	var dm := _dialogue_manager()
-	if dm == null or not dm.has_method("get_next_dialogue_line"):
-		return
-	var line: Variant = await dm.get_next_dialogue_line(resource, cue)
-	while line != null:
-		var next_id := ""
-		if typeof(line) == TYPE_OBJECT and "next_id" in line:
-			next_id = str(line.next_id)
-		if next_id.is_empty() or next_id == "end":
-			break
-		line = await dm.get_next_dialogue_line(resource, next_id)
-
-
-func _load_dialogue() -> Resource:
-	if ResourceLoader.exists(DIALOGUE_PATH):
-		var loaded: Variant = load(DIALOGUE_PATH)
-		if loaded is Resource and loaded.has_method("get_next_dialogue_line"):
-			return loaded
-	if not FileAccess.file_exists(DIALOGUE_PATH):
-		return null
-	var text := FileAccess.get_file_as_string(DIALOGUE_PATH)
-	if text.is_empty():
-		return null
-	var compiler: Script = load("res://addons/dialogue_manager/compiler/compiler.gd") as Script
-	if compiler == null:
-		return null
-	var result: Variant = compiler.call("compile_string", text, DIALOGUE_PATH)
-	if result == null:
-		return null
-	if "errors" in result and result.errors.size() > 0:
-		return null
-	var resource_script: Script = load("res://addons/dialogue_manager/dialogue_resource.gd") as Script
-	if resource_script == null:
-		return null
-	var resource: Resource = resource_script.new()
-	if "using_states" in result:
-		resource.set("using_states", result.using_states)
-	if "cues" in result:
-		resource.set("cues", result.cues)
-	if "first_cue" in result:
-		resource.set("first_cue", result.first_cue)
-	if "character_names" in result:
-		resource.set("character_names", result.character_names)
-	if "lines" in result:
-		resource.set("lines", result.lines)
-	return resource
-
-
-func _dialogue_manager() -> Object:
-	if Engine.has_singleton("DialogueManager"):
-		return Engine.get_singleton("DialogueManager")
-	var tree := get_tree()
-	if tree == null:
-		return null
-	return tree.root.get_node_or_null("DialogueManager")

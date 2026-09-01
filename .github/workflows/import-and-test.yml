@@ -131,6 +131,9 @@ jobs:
       - name: Run Python a2 Yusuf day-1 tests
         run: python3 tests/unit/test_a2_yusuf.py
 
+      - name: Run Python embassy3 tests
+        run: python3 tests/unit/test_embassy3.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -246,6 +249,15 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a2_yusuf.gd
+
+      - name: Run Python embassy3 tests (post-import)
+        if: steps.godot.outputs.found == 'true'
+        run: python3 tests/unit/test_embassy3.py
+
+      - name: Run embassy3 GiftToKing headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy3.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'
