@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://3vm32lajvjmx"
+path="res://.godot/imported/despedida.dialogue-6ef64e1d55e303eedb18248f6c4f0ebf.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_despedida/despedida.dialogue"
+dest_files=["res://.godot/imported/despedida.dialogue-6ef64e1d55e303eedb18248f6c4f0ebf.tres"]
+
+[params]
+
+defaults=true

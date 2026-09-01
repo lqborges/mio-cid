@@ -1,0 +1,28 @@
+# Spoken lines are CSV keys. Daughters leave; swords gifted; Avengalvón lives.
+
+~ start
+=> depart
+
+~ depart
+Jimena: a3_despedida.prompt
+Cid: a3_despedida.agree
+=> END
+
+~ swords
+Cid: a3_despedida.swords
+=> END
+
+~ leave
+Elvira: a3_despedida.daughters_leave
+Sol: a3_despedida.daughters_leave
+Jimena: a3_despedida.jimena_stay
+=> END
+
+~ ambush
+Ferran: a3_despedida.ambush
+=> END
+
+~ lets_go
+Avengalvon: a3_despedida.lets_go
+Cid: a3_despedida.road
+=> END

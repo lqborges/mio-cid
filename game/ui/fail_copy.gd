@@ -11,6 +11,7 @@ const COPY := {
 	&"alfonso_host": "the name is empty",
 	&"alfonso_wrath": "the name is empty",
 	&"plazo_expired": "the name is empty",
+	&"avengalvon_dead": "the name is empty",
 }
 
 @onready var _line: Label = $Center/Line
@@ -26,10 +27,19 @@ func _ready() -> void:
 func show_reason(reason: StringName) -> void:
 	last_reason = reason
 	if _line:
-		_line.text = str(COPY.get(reason, COPY[&"name_empty"]))
+		_line.text = _copy_for(reason)
 	if _reason:
 		_reason.visible = OS.is_debug_build()
 		_reason.text = String(reason) if _reason.visible else ""
+
+
+func _copy_for(reason: StringName) -> String:
+	var key := "fail.%s" % String(reason)
+	if Loc != null and Loc.has_method("text"):
+		var value := str(Loc.text(key))
+		if not value.is_empty() and value != key:
+			return value
+	return str(COPY.get(reason, COPY[&"name_empty"]))
 
 
 func _on_reload() -> void:
