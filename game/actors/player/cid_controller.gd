@@ -48,6 +48,7 @@ var _queued_interact: bool = false
 var _queued_dump: bool = false
 var _leap_airborne: bool = false
 var _block_click_move: bool = false
+var _click_move_from_hud: bool = false
 var _prompt_layer: CanvasLayer = null
 var _prompt_label: Label = null
 var _horse: HorseCompanionScript = null
@@ -162,6 +163,19 @@ func _chapter_is_carrion() -> bool:
 	return String(runner.current_id) == "a3_carrion"
 
 
+func _input(event: InputEvent) -> void:
+	if chapter_asleep or chapter_locked:
+		return
+	if not _is_click_move_press(event):
+		return
+	if not _world_click_blocked():
+		return
+	_click_move_from_hud = true
+	_click_target = null
+	_queued_click_pos = null
+	_mark_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
@@ -186,7 +200,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mark_handled()
 		return
 	if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
-		if _world_click_blocked():
+		if _world_click_blocked() or _click_move_from_hud:
+			_click_move_from_hud = true
+			_click_target = null
+			_queued_click_pos = null
 			_mark_handled()
 			return
 		if _is_world_walk_tap(event):
@@ -411,9 +428,11 @@ func _movement_wish() -> Vector3:
 		return _camera_aligned(stick)
 	if not Input.is_action_pressed("click_move"):
 		_block_click_move = false
+		_click_move_from_hud = false
 	if (
 		Input.is_action_pressed("click_move")
 		and not _block_click_move
+		and not _click_move_from_hud
 		and not _world_click_blocked()
 	):
 		_click_target = _ground_point_from_mouse()
@@ -441,7 +460,7 @@ func _update_facing(wish: Vector3) -> void:
 		if wish.length_squared() > 0.0:
 			_facing = wish
 		return
-	if _touch_hud_blocks_pointer() or _gui_blocks_pointer():
+	if _touch_hud_blocks_pointer() or _gui_blocks_pointer() or _mouse_over_hud():
 		if wish.length_squared() > 0.0:
 			_facing = wish
 		return
@@ -483,6 +502,7 @@ func _clear_action_queues() -> void:
 	_queued_click_pos = null
 	_click_target = null
 	_block_click_move = false
+	_click_move_from_hud = false
 	_dodge_left = 0.0
 	_leap_airborne = false
 
@@ -716,7 +736,25 @@ func _gui_blocks_pointer() -> bool:
 
 
 func _world_click_blocked() -> bool:
-	return _gui_blocks_pointer() or _dialogue_open()
+	return _gui_blocks_pointer() or _mouse_over_hud() or _dialogue_open()
+
+
+func _mouse_over_hud() -> bool:
+	if not is_inside_tree():
+		return false
+	var vp := get_viewport()
+	if vp == null:
+		return false
+	var mouse := vp.get_mouse_position()
+	for node in get_tree().get_nodes_in_group("hud_click_sink"):
+		if not (node is Control):
+			continue
+		var ctl := node as Control
+		if not ctl.is_visible_in_tree():
+			continue
+		if ctl.get_global_rect().has_point(mouse):
+			return true
+	return false
 
 
 func _is_pointer_event(event: InputEvent) -> bool:
@@ -772,6 +810,15 @@ func _is_world_walk_tap(event: InputEvent) -> bool:
 		var mb := event as InputEventMouseButton
 		return mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 	return false
+
+
+func _is_click_move_press(event: InputEvent) -> bool:
+	if _is_world_walk_tap(event):
+		return true
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		return mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT
+	return event.is_action_pressed("click_move")
 
 
 func _event_screen_pos(event: InputEvent) -> Vector2:

@@ -17,7 +17,13 @@ const TICK_OFF := Color(0.28, 0.24, 0.20)
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(176, 88)
+	add_to_group("hud_click_sink")
 	set_process(true)
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton or event is InputEventScreenTouch:
+		accept_event()
 
 
 func _process(_delta: float) -> void:

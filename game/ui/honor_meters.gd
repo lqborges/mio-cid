@@ -41,9 +41,15 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = PANEL_SIZE
 	clip_contents = false
+	add_to_group("hud_click_sink")
 	_bind_state()
 	if EventBus:
 		EventBus.honor_logged.connect(_on_honor_logged)
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton or event is InputEventScreenTouch:
+		accept_event()
 
 
 func _bind_state() -> void:
@@ -103,22 +109,14 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	var font_size := 12
 	var label := _meter_label(meter)
 	var text_w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	if text_w > col_w - 2.0:
+	if text_w > col_w - 4.0:
 		font_size = 11
-		text_w = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	var text_x := origin.x + (col_w - text_w) * 0.5
-	var min_x := origin.x + 1.0
-	var max_x := origin.x + col_w - text_w - 1.0
-	if max_x < min_x:
-		text_x = min_x
-	else:
-		text_x = clampf(text_x, min_x, max_x)
 	draw_string(
 		font,
-		Vector2(text_x, height - 10.0),
+		Vector2(origin.x, height - 10.0),
 		label,
-		HORIZONTAL_ALIGNMENT_LEFT,
-		-1,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		col_w,
 		font_size,
 		PARCHMENT,
 	)

@@ -82,6 +82,8 @@ func _check_hud_labels_and_click_sink() -> PackedStringArray:
 	var hud := meters as Control
 	if hud.mouse_filter != Control.MOUSE_FILTER_STOP:
 		failures.append("HonorMeters must STOP mouse so HUD is a click sink")
+	if not hud.is_in_group("hud_click_sink"):
+		failures.append("HonorMeters must join hud_click_sink")
 	if hud.has_method("_meter_label"):
 		var onores := str(hud.call("_meter_label", &"onores"))
 		if onores != "Honores":

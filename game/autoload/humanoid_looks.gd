@@ -52,8 +52,8 @@ static func fit_nameplate(label: Label3D) -> void:
 	label.pixel_size = 0.005
 	label.font_size = 28
 	label.outline_size = maxi(label.outline_size, 6)
-	label.no_depth_test = false
-	label.render_priority = 1
+	label.no_depth_test = true
+	label.render_priority = 2
 	label.set_meta("nameplate_fit", true)
 
 

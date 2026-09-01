@@ -126,10 +126,14 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("Honores", meters)
         self.assertNotIn('"onores": "onores"', meters)
         self.assertIn("MOUSE_FILTER_STOP", meters)
+        self.assertIn("hud_click_sink", meters)
+        self.assertIn("func _gui_input", meters)
         self.assertIn("MOUSE_FILTER_STOP", _read("game/ui/plazo_bar.gd"))
+        self.assertIn("hud_click_sink", _read("game/ui/plazo_bar.gd"))
         self.assertIn("PauseMenu", _read("project.godot"))
         self.assertIn("func open", _read("game/ui/pause_menu.gd"))
         self.assertIn("ui_cancel", _read("game/ui/pause_menu.gd"))
+        self.assertIn("func _input", _read("game/ui/pause_menu.gd"))
 
     def test_nueva_partida_loads_vivar(self) -> None:
         menu = _read("game/ui/main_menu.gd")
