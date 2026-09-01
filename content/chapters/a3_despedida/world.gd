@@ -285,8 +285,6 @@ func _avengalvon_alive() -> bool:
 	var body: Node = _avengalvon()
 	if body == null:
 		return roster != null and roster.has_method("member") and roster.member(AVENGALVON_ID) != null
-	if body.has_method("get") and "character_id" in body:
-		pass
 	var hurt: Node = body.get_node_or_null("HurtBox")
 	if hurt and "hp" in hurt and float(hurt.hp) <= 0.0:
 		return false
