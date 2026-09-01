@@ -1,0 +1,34 @@
+{
+  "id": "a2_tagus",
+  "court_days": 3,
+  "steps": [
+    {
+      "id": "arrive",
+      "type": "cinematic",
+      "camera": "place_name"
+    },
+    {
+      "id": "pardon",
+      "type": "honor_event"
+    },
+    {
+      "id": "day2",
+      "type": "cinematic"
+    },
+    {
+      "id": "ask",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_tagus/tagus.dialogue",
+      "start": "ask"
+    },
+    {
+      "id": "accept_marriages",
+      "type": "honor_event"
+    },
+    {
+      "id": "hub",
+      "type": "blocking",
+      "set_flags": ["tagus_done"]
+    }
+  ]
+}

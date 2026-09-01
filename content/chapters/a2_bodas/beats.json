@@ -1,0 +1,23 @@
+{
+  "id": "a2_bodas",
+  "gift_marks": 40,
+  "train_combat_cap": 22,
+  "steps": [
+    {
+      "id": "arrive",
+      "type": "cinematic",
+      "camera": "place_name"
+    },
+    {
+      "id": "join",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_bodas/bodas.dialogue",
+      "start": "arrive"
+    },
+    {
+      "id": "hub",
+      "type": "blocking",
+      "set_flags": ["bodas_done", "infantes_joined"]
+    }
+  ]
+}

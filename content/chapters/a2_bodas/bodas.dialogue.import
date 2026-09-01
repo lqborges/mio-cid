@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bgp4yaaue1ry1"
+path="res://.godot/imported/bodas.dialogue-da29651181c248a94cd24422795ea2b1.tres"
+
+[deps]
+
+source_file="res://content/chapters/a2_bodas/bodas.dialogue"
+dest_files=["res://.godot/imported/bodas.dialogue-da29651181c248a94cd24422795ea2b1.tres"]
+
+[params]
+
+defaults=true

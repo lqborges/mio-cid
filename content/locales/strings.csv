@@ -171,3 +171,31 @@ a2_repay_raquel.arrive,En el palacio de Valencia esperan Raquel y Vidas.,In the 
 a2_repay_raquel.not_owed,No hay deuda. Las arcas no se llenaron de arena.,There is no debt. The chests were not filled with sand.
 a2_repay_raquel.pay_first,Primero pagad a Raquel y a Vidas.,Pay Raquel and Vidas first.
 a2_repay_raquel.to_tagus,Hacia el Tajo,Toward the Tagus
+char.alfonso,Alfonso,Alfonso
+char.ferran_gonzalez,Ferrán González,Ferrán González
+char.diego_gonzalez,Diego González,Diego González
+a2_tagus.arrive,Cortes de tres días junto al Tajo. Alfonso espera.,Three days of court by the Tagus. Alfonso waits.
+a2_tagus.pardon,"Os perdono, Cid. Volved a mi gracia.","I pardon you, Cid. Return to my grace."
+a2_tagus.pardon_thanks,"Gracias, señor. Sois el rey.","Thank you, lord. You are the king."
+a2_tagus.pardon_first,Primero el perdón del rey.,The king's pardon first.
+a2_tagus.day2,Segundo día de cortes. El rey habla con los infantes.,Second day of court. The king speaks with the Infantes.
+a2_tagus.day3,Tercer día. El rey pide las bodas.,Third day. The king asks the marriages.
+a2_tagus.ask,Dadme a Elvira y a Sol para Ferrán y Diego de Carrión.,Give me Elvira and Sol for Ferrán and Diego of Carrión.
+a2_tagus.yes,No las quiero. Pero sois el rey. Digo que sí.,I do not want them. But you are the king. I say yes.
+a2_tagus.cannot_refuse,Rehusar rompe el perdón. Al rey no se rehusa.,Refusing breaks the pardon. One does not refuse the king.
+a2_tagus.ask_first,Primero el perdón y las tres jornadas.,The pardon and the three days first.
+a2_tagus.yes_first,Primero responded al rey.,Answer the king first.
+a2_tagus.to_bodas,Hacia Valencia,Toward Valencia
+a2_tagus.bodas_wait,Valencia aún no abre el camino.,Valencia does not yet open the road.
+a2_bodas.arrive,"Los infantes llegan a Valencia. Nacidos altos, de lanza flaca.","The Infantes arrive in Valencia. High birth, thin lances."
+a2_bodas.ferran,Soy Ferrán González. La boda es honra.,I am Ferrán González. The marriage is standing.
+a2_bodas.diego,Soy Diego González. Dadnos oro.,I am Diego González. Give us gold.
+a2_bodas.watch,Mirad. El desastre se ve y no se detiene.,Look. The disaster is visible and cannot be stopped.
+a2_bodas.train,Entrenad. No mejoraréis lo bastante.,Train. You will not improve enough.
+a2_bodas.train_done,Ferrán y Diego ensayan. Siguen siendo de poco combate.,Ferrán and Diego drill. They remain of little combat.
+a2_bodas.gift,Oro para los infantes. No compra mesura.,Gold for the Infantes. It does not buy mesura.
+a2_bodas.gift_taken,Tomamos el oro. No tomamos mesura.,We take the gold. We do not take mesura.
+a2_bodas.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
+a2_bodas.leon_wait,El león aún no ha salido.,The lion has not come out yet.
+a2_bodas.to_leon,Hacia el palacio,Toward the palace
+

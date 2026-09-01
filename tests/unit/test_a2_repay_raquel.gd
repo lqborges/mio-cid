@@ -233,7 +233,7 @@ func _check_pay_clears_stain() -> PackedStringArray:
 		failures.append("tagus exit must wait for payment")
 	await world.run_pay()
 	if current_scene != scene_before:
-		failures.append("payment must not change_scene; Tagus is not shipped")
+		failures.append("payment must not change_scene; TagusExit owns leave")
 	if not bool(world.get("_paid")):
 		failures.append("run_pay must pay Raquel and Vidas")
 	if "repay_raquel" not in _logged:
@@ -284,7 +284,7 @@ func _check_pay_clears_stain() -> PackedStringArray:
 	if _runner and String(_runner.current_id) != "a2_tagus":
 		failures.append("hall exit must land on a2_tagus, got %s" % _runner.current_id)
 	if current_scene != scene_before:
-		failures.append("goto must no-op when a2_tagus is missing")
+		failures.append("goto must no-op unless current_scene is the hall")
 	world.free()
 	return failures
 
@@ -343,11 +343,13 @@ func _check_graph_and_join() -> PackedStringArray:
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if not ResourceLoader.exists(EMBASSY3):
-		failures.append("a2_embassy3 must ship in this slice")
-	if ResourceLoader.exists(TAGUS):
-		failures.append("a2_tagus must not ship in this PR")
-	if ResourceLoader.exists("res://content/chapters/a2_bodas/world.tscn"):
-		failures.append("a2_bodas must not ship in this PR")
+		failures.append("a2_embassy3 must ship on this diamond")
+	if not ResourceLoader.exists(TAGUS):
+		failures.append("a2_tagus must ship")
+	if not ResourceLoader.exists("res://content/chapters/a2_bodas/world.tscn"):
+		failures.append("a2_bodas must ship")
+	if ResourceLoader.exists("res://content/chapters/a3_leon/world.tscn"):
+		failures.append("a3_leon must not ship in this PR")
 	return failures
 
 

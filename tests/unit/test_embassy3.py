@@ -119,7 +119,7 @@ class TestEmbassy3GiftToKing(unittest.TestCase):
             "content/art/characters/captain/captain.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_tagus/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a2_tagus/world.tscn").is_file())
 
     def test_gift_json_same_shape_higher_delta_escrow(self) -> None:
         payload = json.loads(_read("data/gifts/embassy_3.json"))

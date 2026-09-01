@@ -1,0 +1,458 @@
+[gd_scene load_steps=34 format=3]
+
+[ext_resource type="Script" path="res://content/chapters/a2_tagus/world.gd" id="1_world"]
+[ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
+[ext_resource type="PackedScene" path="res://game/ui/plazo_bar.tscn" id="3_plazo"]
+[ext_resource type="PackedScene" path="res://game/ui/honor_meters.tscn" id="4_meters"]
+[ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="PackedScene" path="res://game/ui/mesura_hud.tscn" id="6_mesura"]
+[ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="7_captain"]
+[ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="8_horse"]
+[ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="9_ai"]
+[ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="10_bridge"]
+[ext_resource type="Script" path="res://content/chapters/a2_tagus/courtier.gd" id="11_court"]
+
+[sub_resource type="Environment" id="Environment_tagus"]
+background_mode = 1
+background_color = Color(0.42, 0.50, 0.38, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.58, 0.56, 0.46, 1)
+ambient_light_energy = 0.44
+tonemap_mode = 0
+ssr_enabled = false
+ssao_enabled = false
+ssil_enabled = false
+sdfgi_enabled = false
+glow_enabled = false
+fog_enabled = false
+volumetric_fog_enabled = false
+
+[sub_resource type="StandardMaterial3D" id="Mat_floor"]
+albedo_color = Color(0.46, 0.44, 0.34, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.52, 0.48, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_tent"]
+albedo_color = Color(0.40, 0.32, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ember"]
+albedo_color = Color(0.55, 0.28, 0.12, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_tree"]
+albedo_color = Color(0.22, 0.34, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_path"]
+albedo_color = Color(0.44, 0.38, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood"]
+albedo_color = Color(0.40, 0.30, 0.20, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_banner"]
+albedo_color = Color(0.52, 0.22, 0.16, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_river"]
+albedo_color = Color(0.22, 0.38, 0.46, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_royal"]
+albedo_color = Color(0.28, 0.22, 0.42, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_ferran"]
+albedo_color = Color(0.48, 0.34, 0.22, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_diego"]
+albedo_color = Color(0.36, 0.32, 0.28, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_alfonso"]
+radius = 0.4
+height = 1.85
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_royal")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_alfonso"]
+radius = 0.4
+height = 1.85
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_ferran"]
+radius = 0.38
+height = 1.7
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_ferran")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_ferran"]
+radius = 0.38
+height = 1.7
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_diego"]
+radius = 0.38
+height = 1.68
+radial_segments = 8
+rings = 4
+material = SubResource("Mat_diego")
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape_diego"]
+radius = 0.38
+height = 1.68
+
+[sub_resource type="BoxShape3D" id="Box_court"]
+size = Vector3(4, 2, 4)
+
+[sub_resource type="BoxShape3D" id="Box_rest"]
+size = Vector3(2.4, 2.0, 1.8)
+
+[sub_resource type="BoxShape3D" id="Box_bodas"]
+size = Vector3(4, 2, 2)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_tagus"]
+vertices = PackedVector3Array(-16, 0.05, -16, 16, 0.05, -16, 16, 0.05, 16, -16, 0.05, 16)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[node name="TagusCourt" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tagus")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.813798, -0.440969, 0.379105, 0, 0.651556, 0.758601, -0.581153, -0.617346, 0.530236, 0, 16, 0)
+light_color = Color(1.0, 0.86, 0.62, 1)
+light_energy = 0.62
+shadow_enabled = false
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+size = Vector3(34, 1, 34)
+material = SubResource("Mat_floor")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="River" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.6, -0.2, 0)
+size = Vector3(6, 0.4, 32)
+material = SubResource("Mat_river")
+
+[node name="WallNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -16.4)
+size = Vector3(30, 3.6, 1.6)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallSouth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 16.4)
+size = Vector3(30, 3.2, 1.6)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="WallWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.4, 1.5, 0)
+size = Vector3(1.6, 3.4, 32)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Path" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 2)
+size = Vector3(3.4, 0.08, 24)
+material = SubResource("Mat_path")
+
+[node name="Pavilion" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -12.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="Pavilion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+size = Vector3(8.4, 3.2, 4.6)
+material = SubResource("Mat_stone")
+
+[node name="Door" type="CSGBox3D" parent="Pavilion"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 2.3)
+operation = 2
+size = Vector3(2.2, 2.2, 0.8)
+material = SubResource("Mat_stone")
+
+[node name="Dais" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -8)
+size = Vector3(3.2, 0.4, 2.2)
+material = SubResource("Mat_wood")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Gate" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 16.2)
+size = Vector3(3.2, 1.2, 1.2)
+material = SubResource("Mat_wood")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="TentA" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 0, -2.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Outer" type="CSGBox3D" parent="TentA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+size = Vector3(3.4, 2.2, 3.2)
+material = SubResource("Mat_tent")
+
+[node name="Door" type="CSGBox3D" parent="TentA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 1.6)
+operation = 2
+size = Vector3(1.8, 2.0, 0.8)
+material = SubResource("Mat_tent")
+
+[node name="TentB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.2, 0.9, -1.8)
+size = Vector3(2.8, 1.8, 2.6)
+material = SubResource("Mat_tent")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="EmberPit" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.12, -3.8)
+radius = 0.55
+height = 0.24
+sides = 8
+material = SubResource("Mat_ember")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="Cypress" type="CSGCylinder3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.4, 2.4, -9.2)
+radius = 0.55
+height = 4.8
+sides = 8
+cone = true
+material = SubResource("Mat_tree")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RockA" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.2, 0.32, 3.2)
+size = Vector3(1.3, 0.64, 1.0)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="RockB" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.6, 0.28, 4.0)
+size = Vector3(1.1, 0.56, 0.9)
+material = SubResource("Mat_stone")
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
+navigation_mesh = SubResource("NavigationMesh_tagus")
+
+[node name="PlaceName" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, -10.4)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="Cid" parent="." instance=ExtResource("2_cid")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 6)
+
+[node name="Horse" parent="." instance=ExtResource("8_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, 6.6)
+
+[node name="Name" type="Label3D" parent="Horse"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+
+[node name="AlvarFanez" parent="." instance=ExtResource("7_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.05, 7.2)
+member_id = &"alvar_fanez"
+
+[node name="Alfonso" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -8)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("11_court")
+character_id = &"alfonso"
+cue = "pardon"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Alfonso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+mesh = SubResource("CapsuleMesh_alfonso")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Alfonso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+shape = SubResource("CapsuleShape_alfonso")
+
+[node name="Name" type="Label3D" parent="Alfonso"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 32
+
+[node name="FerranGonzalez" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.8, 0, -6.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("11_court")
+character_id = &"ferran_gonzalez"
+cue = "ask"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="FerranGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("CapsuleMesh_ferran")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="FerranGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("CapsuleShape_ferran")
+
+[node name="Name" type="Label3D" parent="FerranGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+
+[node name="DiegoGonzalez" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 0, -6.4)
+collision_layer = 1
+collision_mask = 0
+script = ExtResource("11_court")
+character_id = &"diego_gonzalez"
+cue = "ask"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DiegoGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
+mesh = SubResource("CapsuleMesh_diego")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DiegoGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84, 0)
+shape = SubResource("CapsuleShape_diego")
+
+[node name="Name" type="Label3D" parent="DiegoGonzalez"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+pixel_size = 0.012
+billboard = 1
+text = ""
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+
+[node name="Mesnada" type="Node3D" parent="."]
+script = ExtResource("9_ai")
+leader_path = NodePath("../Cid")
+spawn_lanza_bodies = true
+
+[node name="Banner" type="Node3D" parent="Mesnada"]
+visible = false
+
+[node name="Pole" type="CSGCylinder3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+radius = 0.045
+height = 2.2
+sides = 6
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="Cloth" type="CSGBox3D" parent="Mesnada/Banner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 1.75, 0)
+size = Vector3(0.65, 0.4, 0.04)
+material = SubResource("Mat_banner")
+cast_shadow = 0
+
+[node name="MartinAntolinez" parent="Mesnada" instance=ExtResource("7_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0.05, 8.4)
+member_id = &"martin_antolinez"
+
+[node name="PeroBermudez" parent="Mesnada" instance=ExtResource("7_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 0.05, 8.4)
+member_id = &"pero_bermudez"
+
+[node name="MunoGustioz" parent="Mesnada" instance=ExtResource("7_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 0.05, 9.4)
+member_id = &"muno_gustioz"
+
+[node name="FelezMunoz" parent="Mesnada" instance=ExtResource("7_captain")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0.05, 9.4)
+member_id = &"felez_munoz"
+
+[node name="CourtZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -8)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CourtZone"]
+shape = SubResource("Box_court")
+
+[node name="RestZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.4, 1.0, 0.4)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RestZone"]
+shape = SubResource("Box_rest")
+
+[node name="BodasExit" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 14.6)
+collision_layer = 0
+collision_mask = 130
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BodasExit"]
+shape = SubResource("Box_bodas")
+
+[node name="DialogueBridge" type="Node" parent="."]
+script = ExtResource("10_bridge")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="HonorMeters" parent="HUD" instance=ExtResource("4_meters")]
+
+[node name="PlazoBar" parent="HUD" instance=ExtResource("3_plazo")]
+
+[node name="MesuraHud" parent="HUD" instance=ExtResource("6_mesura")]
+
+[node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]

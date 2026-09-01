@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for PR-26b repay Raquel and Vidas.
+"""Structural tests for Tagus pardon and forced-yes marriages.
 
-Run: python3 tests/unit/test_a2_repay_raquel.py
+Run: python3 tests/unit/test_a2_tagus.py
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ DENY = (
     "holy_war",
 )
 
-CHAPTER = "content/chapters/a2_repay_raquel"
+CHAPTER = "content/chapters/a2_tagus"
 
 
 def _read(rel: str) -> str:
@@ -102,27 +102,28 @@ def _zone_aabb(
     )
 
 
-class TestA2RepayRaquel(unittest.TestCase):
+class TestA2TagusPardon(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/repay.dialogue",
+            f"{CHAPTER}/tagus.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/lenders.gd",
-            "data/honor_events/repay_raquel.json",
-            "data/characters/raquel.json",
-            "data/characters/vidas.json",
+            f"{CHAPTER}/courtier.gd",
+            "data/honor_events/tagus.json",
+            "data/characters/alfonso.json",
+            "data/characters/ferran_gonzalez.json",
+            "data/characters/diego_gonzalez.json",
             "content/art/characters/cid/cid.tscn",
             "content/art/characters/horse/horse.tscn",
+            "content/chapters/a2_embassy3/world.tscn",
+            "content/chapters/a2_repay_raquel/world.tscn",
+            "content/chapters/a2_bodas/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertTrue((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
-        self.assertTrue((ROOT / "content/chapters/a2_tagus/world.tscn").is_file())
-        self.assertTrue((ROOT / "content/chapters/a2_bodas/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_leon/world.tscn").is_file())
 
-    def test_hall_greybox_and_separate_lenders(self) -> None:
+    def test_greybox_three_day_court(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         self.assertIn("cid.tscn", scene)
         self.assertIn("horse.tscn", scene)
@@ -137,26 +138,23 @@ class TestA2RepayRaquel(unittest.TestCase):
         self.assertIn("shadow_enabled = false", scene)
         self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
         self.assertIn("CSGCombiner3D", scene)
-        self.assertIn('[node name="Hall"', scene)
-        self.assertIn('[node name="Raquel"', scene)
-        self.assertIn('[node name="Vidas"', scene)
-        self.assertIn('[node name="PayZone"', scene)
-        self.assertIn('[node name="TagusExit"', scene)
-        self.assertIn("AlvarFanez", scene)
-        self.assertIn('character_id = &"raquel"', scene)
-        self.assertIn('character_id = &"vidas"', scene)
-        self.assertNotEqual(
-            scene.find('character_id = &"raquel"'),
-            scene.find('character_id = &"vidas"'),
-        )
+        self.assertIn("CSGCylinder3D", scene)
+        self.assertIn('[node name="Alfonso"', scene)
+        self.assertIn('[node name="FerranGonzalez"', scene)
+        self.assertIn('[node name="DiegoGonzalez"', scene)
+        self.assertIn('[node name="CourtZone"', scene)
+        self.assertIn('[node name="RestZone"', scene)
+        self.assertIn('[node name="BodasExit"', scene)
+        self.assertIn('[node name="Pavilion"', scene)
+        self.assertIn('[node name="River"', scene)
+        self.assertIn('[node name="TentA"', scene)
+        self.assertIn('character_id = &"alfonso"', scene)
         self.assertNotIn("ChoiceUI", scene)
         self.assertNotIn("GPUParticles3D", scene)
-        pay_at = scene.find('[node name="PayZone"')
-        exit_at = scene.find('[node name="TagusExit"')
-        self.assertGreaterEqual(pay_at, 0)
-        self.assertGreaterEqual(exit_at, 0)
-        self.assertIn("collision_mask = 130", scene[pay_at : pay_at + 280])
-        self.assertIn("collision_mask = 130", scene[exit_at : exit_at + 280])
+        for node_name in ("CourtZone", "RestZone", "BodasExit"):
+            at = scene.find(f'[node name="{node_name}"')
+            self.assertGreaterEqual(at, 0, node_name)
+            self.assertIn("collision_mask = 130", scene[at : at + 280], node_name)
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -169,8 +167,9 @@ class TestA2RepayRaquel(unittest.TestCase):
         horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
         horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
         for node_name, shape_id in (
-            ("PayZone", "Box_pay"),
-            ("TagusExit", "Box_tagus"),
+            ("CourtZone", "Box_court"),
+            ("RestZone", "Box_rest"),
+            ("BodasExit", "Box_bodas"),
         ):
             zmin, zmax = _zone_aabb(scene, node_name, shape_id)
             size = _subresource_size(scene, shape_id)
@@ -183,50 +182,81 @@ class TestA2RepayRaquel(unittest.TestCase):
                 _aabb_overlap(horse_min, horse_max, zmin, zmax),
                 f"{node_name} overlaps Horse spawn {horse}",
             )
+        tent = _origin(scene, "TentA")
+        rest = _origin(scene, "RestZone")
+        rest_size = _subresource_size(scene, "Box_rest")
+        self.assertGreater(
+            rest[2],
+            tent[2],
+            "RestZone must sit in front of TentA's +Z door, not inside the tent body",
+        )
+        self.assertLess(
+            rest_size[2],
+            3.2,
+            "RestZone must be shorter than TentA so the trigger is the porch",
+        )
 
-    def test_honor_event_clears_stain(self) -> None:
-        payload = json.loads(_read("data/honor_events/repay_raquel.json"))
-        self.assertEqual(payload["repay_marks"], 600)
+    def test_honor_events_pardon_then_yes(self) -> None:
+        payload = json.loads(_read("data/honor_events/tagus.json"))
+        self.assertEqual(payload["court_days"], 3)
         events = {row["id"]: row for row in payload["events"]}
-        row = events["repay_raquel"]
-        self.assertEqual(row["beat"], "a2_repay_raquel")
-        self.assertEqual(row["deltas"]["honra"], 8)
-        self.assertNotIn("honor", row["deltas"])
-        self.assertNotIn("onores", row["deltas"])
-        self.assertEqual(row.get("clear_stain"), "arcas_cheat")
-        self.assertIn("repay_done", row["flags_set"])
-        self.assertIn("kept_word", row["tags"])
-        self.assertFalse(row.get("hard_fail", False))
+        pardon = events["pardon"]
+        self.assertEqual(pardon["beat"], "a2_tagus")
+        self.assertEqual(pardon["deltas"]["honor"], 30)
+        self.assertNotIn("honra", pardon["deltas"])
+        self.assertNotIn("onores", pardon["deltas"])
+        self.assertIn("pardon", pardon["flags_set"])
+        self.assertIn("king", pardon["tags"])
+        self.assertFalse(pardon.get("hard_fail", False))
+        marry = events["accept_marriages"]
+        self.assertEqual(marry["beat"], "a2_tagus")
+        self.assertEqual(marry["deltas"]["honor"], 5)
+        self.assertEqual(marry["deltas"]["honra"], -4)
+        self.assertIn("marriages_accepted", marry["flags_set"])
+        self.assertIn("bitter", marry["tags"])
         core = json.loads(_read("data/honor_events/core.json"))
         core_events = {item["id"]: item for item in core["events"]}
-        core_row = core_events["repay_raquel"]
-        self.assertEqual(core_row["deltas"]["honra"], 8)
-        self.assertEqual(core_row.get("clear_stain"), "arcas_cheat")
-        self.assertIn("repay_done", core_row["flags_set"])
+        self.assertEqual(core_events["pardon"]["deltas"]["honor"], 30)
+        self.assertEqual(core_events["accept_marriages"]["deltas"]["honor"], 5)
+        self.assertEqual(core_events["accept_marriages"]["deltas"]["honra"], -4)
 
-    def test_world_script_pay_only(self) -> None:
+    def test_world_script_forced_yes(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
-        self.assertIn("func pay", source)
-        self.assertIn("func run_pay", source)
-        self.assertIn("func travel_to_tagus", source)
-        self.assertIn("repay_raquel", source)
-        self.assertIn("repay_done", source)
-        self.assertIn("arcas_cheated", source)
-        self.assertIn("repay_marks", source)
+        self.assertIn("func grant_pardon", source)
+        self.assertIn("func run_pardon", source)
+        self.assertIn("func run_ask", source)
+        self.assertIn("func accept_marriages", source)
+        self.assertIn("func refuse_marriages", source)
+        self.assertIn("func travel_to_bodas", source)
+        self.assertIn("court_day", source)
+        self.assertIn("court_days", source)
         self.assertIn("_tunable_int", source)
+        self.assertIn("advance_calendar", source)
+        self.assertIn("ResourceLoader.exists", source)
+        self.assertIn("goto", source)
         self.assertNotIn("func choose_refuse", source)
-        self.assertNotIn("func choose_cheat", source)
         self.assertNotIn("func _enter_tree", source)
-        self.assertNotIn("600", source)
-        self.assertNotIn("a2_embassy3", source)
-        dialogue = _read(f"{CHAPTER}/repay.dialogue")
-        self.assertIn("Raquel:", dialogue)
-        self.assertIn("Vidas:", dialogue)
-        self.assertIn("Álvar:", dialogue)
+        self.assertNotIn("ChoiceUI", source)
+        self.assertNotIn("Headless:", source)
+        courtier = _read(f"{CHAPTER}/courtier.gd")
+        self.assertIn("start_cue", courtier)
+        self.assertIn("cue", courtier)
+        dialogue = _read(f"{CHAPTER}/tagus.dialogue")
+        self.assertIn("~ pardon", dialogue)
+        self.assertIn("~ ask", dialogue)
+        self.assertIn("Alfonso:", dialogue)
+        self.assertIn("Cid:", dialogue)
         self.assertNotIn("~ refuse", dialogue)
-        self.assertNotIn("Raquel y Vidas:", dialogue)
+        beats = json.loads(_read(f"{CHAPTER}/beats.json"))
+        self.assertEqual(beats["id"], "a2_tagus")
+        self.assertEqual(beats["court_days"], 3)
+        types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
+        self.assertIn("honor_event", types)
+        self.assertIn("dialogue", types)
+        nexts = [step.get("next") for step in beats["steps"] if isinstance(step, dict)]
+        self.assertNotIn("a2_bodas", nexts)
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -234,93 +264,63 @@ class TestA2RepayRaquel(unittest.TestCase):
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "char.raquel",
-            "char.vidas",
-            "a2_repay_raquel.minaya",
-            "a2_repay_raquel.raquel",
-            "a2_repay_raquel.vidas",
-            "a2_repay_raquel.pay",
-            "a2_repay_raquel.paid",
-            "a2_repay_raquel.arrive",
-            "a2_repay_raquel.not_owed",
-            "a2_repay_raquel.pay_first",
+            "char.alfonso",
+            "char.ferran_gonzalez",
+            "char.diego_gonzalez",
+            "a2_tagus.arrive",
+            "a2_tagus.pardon",
+            "a2_tagus.ask",
+            "a2_tagus.yes",
+            "a2_tagus.cannot_refuse",
+            "a2_tagus.day2",
+            "a2_tagus.day3",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        self.assertIn("pagad", rows["a2_repay_raquel.raquel"]["es"].lower())
-        self.assertIn("arena", rows["a2_repay_raquel.vidas"]["es"].lower())
-        self.assertIn("Raquel", rows["a2_repay_raquel.minaya"]["es"])
-        self.assertIn("Vidas", rows["a2_repay_raquel.minaya"]["es"])
-        self.assertIn("honra", rows["a2_repay_raquel.paid"]["es"].lower())
+        self.assertIn("perdono", rows["a2_tagus.pardon"]["es"].lower())
+        yes = rows["a2_tagus.yes"]["es"].lower()
+        self.assertIn("rey", yes)
+        self.assertTrue("sí" in yes or "si" in yes)
+        self.assertIn("perdón", rows["a2_tagus.cannot_refuse"]["es"].lower())
         poem = _read("content/locales/poem_formulas.csv")
-        self.assertIn("a2_repay_raquel.place_name,Valencia,", poem)
-        self.assertIn("a2_repay_raquel.horse_name,Babieca,", poem)
+        self.assertIn("a2_tagus.place_name,Tajo,", poem)
+        self.assertIn("a2_tagus.horse_name,Babieca,", poem)
 
     def test_graph_and_join_and_validate(self) -> None:
         self.assertEqual(validate_main([]), 0)
-        beats = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(beats["id"], "a2_repay_raquel")
-        self.assertEqual(beats["repay_marks"], 600)
-        types = [step.get("type") for step in beats["steps"] if isinstance(step, dict)]
-        self.assertIn("dialogue", types)
-        self.assertIn("honor_event", types)
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a2_embassy3", "a2_repay_raquel"), pairs)
+        self.assertIn(("a2_embassy3", "a2_tagus"), pairs)
         self.assertIn(("a2_repay_raquel", "a2_tagus"), pairs)
-        self.assertNotIn(("a2_yusuf", "a2_repay_raquel"), pairs)
-        self.assertNotIn(("a2_embassy2", "a2_repay_raquel"), pairs)
+        self.assertIn(("a2_tagus", "a2_bodas"), pairs)
+        honest = ["embassy3_done"]
+        self.assertTrue(can_travel(graph, "a2_embassy3", "a2_tagus", honest))
         cheated = ["arcas_cheated", "embassy3_done"]
-        self.assertTrue(can_travel(graph, "a2_embassy3", "a2_repay_raquel", cheated))
         self.assertFalse(can_travel(graph, "a2_embassy3", "a2_tagus", cheated))
         self.assertFalse(can_travel(graph, "a2_repay_raquel", "a2_tagus", cheated))
         repaid = cheated + ["repay_done"]
         self.assertTrue(can_travel(graph, "a2_repay_raquel", "a2_tagus", repaid))
-        honest = ["embassy3_done"]
-        self.assertFalse(can_travel(graph, "a2_embassy3", "a2_repay_raquel", honest))
-        self.assertTrue(can_travel(graph, "a2_embassy3", "a2_tagus", honest))
-        refuse = ["embassy3_done"]
-        self.assertFalse(
-            can_travel(graph, "a2_embassy3", "a2_repay_raquel", refuse),
-            "refuse-branch cannot open a2_repay_raquel",
-        )
-        node = next(n for n in graph["nodes"] if n["id"] == "a2_repay_raquel")
-        self.assertEqual(
-            node["scene"], "res://content/chapters/a2_repay_raquel/world.tscn"
-        )
-        repay_edge = next(
-            edge
-            for edge in graph["edges"]
-            if edge["from"] == "a2_embassy3" and edge["to"] == "a2_repay_raquel"
-        )
-        self.assertEqual(
-            repay_edge.get("req_flags"), ["embassy3_done", "arcas_cheated"]
-        )
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a2_repay_raquel/world.tscn", runner)
-        self.assertIn('&"a2_repay_raquel"', runner)
-        travel = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("func travel_to_tagus", travel)
-        self.assertIn("can_travel", travel)
-        self.assertIn("goto", travel)
+        self.assertIn("res://content/chapters/a2_tagus/world.tscn", runner)
+        self.assertIn('&"a2_tagus"', runner)
+        director = _read("game/chapters/beat_director.gd")
+        self.assertIn('"honor_event"', director)
+        self.assertIn('"whisper"', director)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/repay.dialogue",
+            f"{CHAPTER}/tagus.dialogue",
             f"{CHAPTER}/beats.json",
-            f"{CHAPTER}/lenders.gd",
-            "data/honor_events/repay_raquel.json",
+            f"{CHAPTER}/courtier.gd",
+            "data/honor_events/tagus.json",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
             for token in DENY:
                 self.assertNotIn(token, lowered, f"{rel} has {token}")
-        world = _read(f"{CHAPTER}/world.gd").lower()
-        self.assertNotIn("flute", world)
-        self.assertNotIn("corpse", world)
 
     def test_godot_headless_if_available(self) -> None:
         godot = None
@@ -356,7 +356,7 @@ class TestA2RepayRaquel(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a2_repay_raquel.gd",
+                "res://tests/unit/test_a2_tagus.gd",
             ],
             check=False,
             capture_output=True,

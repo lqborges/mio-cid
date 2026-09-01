@@ -1,0 +1,23 @@
+{
+  "court_days": 3,
+  "events": [
+    {
+      "id": "pardon",
+      "deltas": { "honor": 30 },
+      "tags": ["king"],
+      "flags_set": ["pardon"],
+      "beat": "a2_tagus",
+      "once": true,
+      "ui_whisper_key": "a2_tagus.pardon"
+    },
+    {
+      "id": "accept_marriages",
+      "deltas": { "honor": 5, "honra": -4 },
+      "tags": ["king", "bitter", "foreboding"],
+      "flags_set": ["marriages_accepted"],
+      "beat": "a2_tagus",
+      "once": true,
+      "ui_whisper_key": "a2_tagus.yes"
+    }
+  ]
+}
