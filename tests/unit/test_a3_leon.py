@@ -123,7 +123,7 @@ class TestA3LeonLionScene(unittest.TestCase):
             "content/art/characters/cid/cid.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
 
     def test_scene_is_cheap_greybox_hall(self) -> None:
@@ -264,6 +264,8 @@ class TestA3LeonLionScene(unittest.TestCase):
         self.assertIn("set_chapter_asleep", source)
         self.assertIn("panic", source)
         self.assertIn("BUCAR_SCENE", source)
+        leave = source.split("func _finish_beat", 1)[1].split("func _dest_ready", 1)[0]
+        self.assertIn("not _dest_ready() or not _travel", leave)
         self.assertNotIn("func _enter_tree", source)
         self.assertNotIn("tizona", source.lower())
         self.assertNotIn("flute", source.lower())

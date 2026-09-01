@@ -294,7 +294,8 @@
     },
     {
       "from": "a3_bucar",
-      "to": "a3_despedida"
+      "to": "a3_despedida",
+      "set_flags": ["tizona_acquired"]
     },
     {
       "from": "a3_despedida",

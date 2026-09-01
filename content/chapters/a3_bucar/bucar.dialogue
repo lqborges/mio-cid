@@ -1,0 +1,21 @@
+# Spoken lines are CSV keys. Infantes flee; captains cover; Tizona stays a plot sword.
+
+~ start
+=> battle
+
+~ battle
+Cid: a3_bucar.battle
+=> END
+
+~ flee
+Alvar: a3_bucar.flee
+=> END
+
+~ cover
+Pero: a3_bucar.cover
+=> END
+
+~ win
+Cid: a3_bucar.tizona_kept
+Alvar: a3_bucar.win
+=> END
