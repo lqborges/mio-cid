@@ -155,9 +155,10 @@ class TestA1BurgosGreybox(unittest.TestCase):
         self.assertIn("res://content/chapters/a1_burgos/world.tscn", source)
         self.assertIn("&\"a1_burgos\"", source)
         vivar = _read("content/chapters/a1_vivar/world.gd")
-        self.assertIn("can_travel", vivar)
+        self.assertIn("_set_seen", vivar)
         self.assertIn("a1_burgos", vivar)
         self.assertIn("_travel_to_burgos", vivar)
+        self.assertIn('ChapterRunner.goto(&"a1_burgos")', vivar)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

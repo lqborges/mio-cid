@@ -82,7 +82,7 @@ class TestA1VivarPrologue(unittest.TestCase):
         scene = _read(f"{CHAPTER}/world.tscn")
         gate = scene.split('[node name="Gate"', 1)[1].split("[node name=", 1)[0]
         self.assertIn("collision_layer = 8", gate)
-        self.assertIn("gate.gd", gate)
+        self.assertIn('path="res://content/chapters/a1_vivar/gate.gd"', scene)
         self.assertIn("collision_layer = 8", _read(f"{CHAPTER}/gate.gd"))
         self.assertNotIn("camp_night(", source)
         self.assertNotIn("rest_camp(", source)
