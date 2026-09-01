@@ -180,3 +180,17 @@ a3_despedida.ambush,Los infantes quieren matar a Avengalvón en el camino.,The i
 a3_despedida.lets_go,Avengalvón los deja ir. Él vive.,Avengalvón lets them go. He lives.
 a3_despedida.need_agree,Hasta que no acordéis la despedida; las espadas no se dan.,Until you agree to the departure; the swords are not given.
 fail.avengalvon_dead,Avengalvón debía vivir. Recargad.,Avengalvón had to live. Reload.
+char.diego_tellez,Diego Téllez,Diego Téllez
+a3_corpes.warning,"Aviso: lo que sigue es un crimen, no una batalla. No estáis en Robledo.","Warning: what follows is a crime, not a battle. You are not at Robledo."
+a3_corpes.choice_see,Ver el robledo vacío,See the empty oak grove
+a3_corpes.choice_hear,"Oír a Félez, no ver","Hear Félez, do not see"
+a3_corpes.table,Estáis en Valencia. El crimen fue lejos.,You are in Valencia. The crime was far off.
+a3_corpes.linen,Un lienzo roto en la rama. El robledo está vacío.,A torn strip of linen on the branch. The grove is empty.
+a3_corpes.report,Félez Muñoz las halló. Las golpearon y las dejaron. Viven.,Félez Muñoz found them. They were beaten and left. They live.
+a3_corpes.diego_escort,Diego Téllez las guardó hasta San Esteban.,Diego Téllez kept them as far as San Esteban.
+a3_corpes.alive,Elvira y Sol viven. Están en Valencia.,Elvira and Sol live. They are in Valencia.
+a3_corpes.choice_prompt,¿Mesura o ira?,Mesura or rage?
+a3_corpes.choice_mesura,Contener la ira,Hold mesura
+a3_corpes.choice_rage,Soltar la ira,Dump the rage
+a3_corpes.mesura_done,Contengo la ira. La honra se pide por ley.,I hold the rage. The name is asked by law.
+a3_corpes.rage_done,La ira cuesta honra. No es hueste. Es querella.,Rage costs honra. It is not a host. It is a complaint.

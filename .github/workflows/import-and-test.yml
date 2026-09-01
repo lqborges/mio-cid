@@ -143,6 +143,9 @@ jobs:
       - name: Run Python a3_despedida tests
         run: python3 tests/unit/test_a3_despedida.py
 
+      - name: Run Python a3_corpes tests
+        run: python3 tests/unit/test_a3_corpes.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -278,6 +281,11 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_despedida.gd
+
+      - name: Run a3_corpes aftermath headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_corpes.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

@@ -1,0 +1,44 @@
+{
+  "id": "a3_corpes",
+  "steps": [
+    {
+      "id": "warning",
+      "type": "choice",
+      "white": "see_grove",
+      "red": "hear_only"
+    },
+    {
+      "id": "grove",
+      "type": "cinematic"
+    },
+    {
+      "id": "report",
+      "type": "dialogue",
+      "file": "res://content/chapters/a3_corpes/corpes.dialogue",
+      "start": "report",
+      "set_flags": [
+        "corpes_happened",
+        "corpes_news",
+        "elvira_alive",
+        "sol_alive",
+        "felez_found_them"
+      ]
+    },
+    {
+      "id": "honor",
+      "type": "honor_event",
+      "event": "corpes_news"
+    },
+    {
+      "id": "mesura_or_rage",
+      "type": "choice",
+      "white": "mesura_hold",
+      "red": "corpes_rage_dump"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_querella"
+    }
+  ]
+}

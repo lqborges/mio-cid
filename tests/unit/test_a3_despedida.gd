@@ -105,8 +105,8 @@ func _check_scene_loads() -> PackedStringArray:
 	var plazo: Node = _world.find_child("PlazoBar", true, false)
 	if plazo and bool(plazo.visible):
 		failures.append("plazo bar must stay hidden in Valencia")
-	if ResourceLoader.exists(CORPES):
-		failures.append("a3_corpes must not ship in this PR")
+	if not ResourceLoader.exists(CORPES):
+		failures.append("a3_corpes world must ship")
 	if not ResourceLoader.exists(BUCAR):
 		failures.append("a3_bucar world must keep shipping")
 	if not ResourceLoader.exists(LEON):
@@ -312,7 +312,7 @@ func _check_agree_gifts_swords() -> PackedStringArray:
 	if bool(world.get("_let_go")):
 		failures.append("gift must not skip to the road let-go")
 	if bool(world.get("_left")):
-		failures.append("gift must not travel to missing Corpes")
+		failures.append("gift must not travel to Corpes")
 	var elvira: Node = world.get_node_or_null("Elvira")
 	if elvira:
 		if elvira.process_mode != Node.PROCESS_MODE_DISABLED:
@@ -417,16 +417,16 @@ func _check_ambush_lets_him_go() -> PackedStringArray:
 			failures.append("let-go must set avengalvon_alive_despedida")
 		if "swords_gifted" not in flags:
 			failures.append("ambush path must still gift the swords")
-		if String(_runner.current_id) == "a3_corpes":
-			failures.append("must not travel into missing a3_corpes")
-	if bool(world.get("_left")):
-		failures.append("must not _left into missing a3_corpes")
+		if String(_runner.current_id) != "a3_corpes":
+			failures.append("let-go must travel() to a3_corpes, got %s" % _runner.current_id)
+	if not bool(world.get("_left")):
+		failures.append("let-go must _left when a3_corpes exists")
 	if current_scene != scene_before:
 		failures.append("let-go must not change_scene when current_scene != world")
 	if _completed.count("a3_despedida") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _completed.count("a3_despedida") < 1:
-		failures.append("missing dest must still complete a3_despedida once")
+		failures.append("travel must complete a3_despedida once")
 	var cid: Node = world.get_node_or_null("Cid")
 	var mesura: Node = cid.get_node_or_null("Mesura") if cid else null
 	if mesura and mesura.has_method("has_trait") and not bool(mesura.call("has_trait", &"keep_avengalvon")):
@@ -495,8 +495,10 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(CORPES):
-		failures.append("a3_corpes must not ship in this PR")
+	if not ResourceLoader.exists(CORPES):
+		failures.append("a3_corpes world must ship")
+	if ResourceLoader.exists("res://content/chapters/a3_querella/world.tscn"):
+		failures.append("a3_querella must not ship in this beat")
 	if not ResourceLoader.exists(WORLD):
 		failures.append("a3_despedida world must exist")
 	if not ResourceLoader.exists(BUCAR):

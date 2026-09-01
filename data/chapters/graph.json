@@ -305,7 +305,14 @@
     },
     {
       "from": "a3_corpes",
-      "to": "a3_querella"
+      "to": "a3_querella",
+      "set_flags": [
+        "corpes_happened",
+        "corpes_news",
+        "elvira_alive",
+        "sol_alive",
+        "felez_found_them"
+      ]
     },
     {
       "from": "a3_querella",
