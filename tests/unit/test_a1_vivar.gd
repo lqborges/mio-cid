@@ -150,11 +150,10 @@ func _check_pause_menu() -> PackedStringArray:
 		failures.append("pause menu missing Menu")
 	if pause.get_node_or_null("Panel/Center/Quit") == null:
 		failures.append("pause menu missing Quit")
-	var tree := get_tree()
-	if tree and not tree.paused:
+	if not paused:
 		failures.append("pause menu must pause the tree")
 	pause.call("resume")
-	if tree and tree.paused:
+	if paused:
 		failures.append("resume must unpause the tree")
 	return failures
 
