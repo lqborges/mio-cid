@@ -11,6 +11,10 @@ var _waiting: bool = false
 @onready var _body: Label = $Panel/Line
 
 
+func _ready() -> void:
+	add_to_group("talk_balloon")
+
+
 func start(resource: Resource, cue: String = "", extra_game_states: Array = []) -> void:
 	dialogue_resource = resource
 	temporary_game_states = extra_game_states

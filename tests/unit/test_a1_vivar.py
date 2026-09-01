@@ -41,6 +41,7 @@ class TestA1VivarPrologue(unittest.TestCase):
             f"{CHAPTER}/companion.gd",
             "game/ui/plazo_bar.tscn",
             "game/ui/talk_balloon.tscn",
+            "game/ui/pause_menu.gd",
             "content/art/characters/cid/cid.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
@@ -62,6 +63,9 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("Martin", scene)
         self.assertIn("Álvar", scene)
         self.assertIn("Martín", scene)
+        self.assertNotIn("font_size = 42", scene)
+        self.assertIn("font_size = 28", scene)
+        self.assertNotIn("fixed_size = true", scene)
         self.assertNotIn("type=\"OmniLight3D\"", scene)
         lowered = scene.lower()
         self.assertNotIn("chest", lowered)
@@ -107,6 +111,29 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("Álvar", rows["a1_vivar.call_alvar"]["es"])
         self.assertIn("Martín", rows["a1_vivar.call_martin"]["es"])
         self.assertIn("vacío", rows["a1_vivar.alvar_here"]["es"])
+
+    def test_hud_loc_and_pause_copy(self) -> None:
+        with (ROOT / "content/locales/strings.csv").open(encoding="utf-8", newline="") as handle:
+            rows = {row["key"]: row for row in csv.DictReader(handle)}
+        self.assertEqual(rows["hud.onores"]["es"], "Honores")
+        self.assertEqual(rows["hud.honor"]["es"], "Honor")
+        self.assertEqual(rows["hud.honra"]["es"], "Honra")
+        self.assertEqual(rows["hud.interact_hint"]["es"], "E — Hablar")
+        self.assertEqual(rows["ui.pause.resume"]["es"], "Continuar")
+        self.assertEqual(rows["ui.pause.menu"]["es"], "Menú principal")
+        self.assertEqual(rows["ui.pause.quit"]["es"], "Salir")
+        meters = _read("game/ui/honor_meters.gd")
+        self.assertIn("Honores", meters)
+        self.assertNotIn('"onores": "onores"', meters)
+        self.assertIn("MOUSE_FILTER_STOP", meters)
+        self.assertIn("hud_click_sink", meters)
+        self.assertIn("func _gui_input", meters)
+        self.assertIn("MOUSE_FILTER_STOP", _read("game/ui/plazo_bar.gd"))
+        self.assertIn("hud_click_sink", _read("game/ui/plazo_bar.gd"))
+        self.assertIn("PauseMenu", _read("project.godot"))
+        self.assertIn("func open", _read("game/ui/pause_menu.gd"))
+        self.assertIn("ui_cancel", _read("game/ui/pause_menu.gd"))
+        self.assertIn("func _input", _read("game/ui/pause_menu.gd"))
 
     def test_nueva_partida_loads_vivar(self) -> None:
         menu = _read("game/ui/main_menu.gd")

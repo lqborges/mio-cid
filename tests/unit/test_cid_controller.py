@@ -22,6 +22,7 @@ INPUT_ACTIONS = (
     "click_move",
     "interact",
     "slam",
+    "pause",
     "leap",
     "shout",
     "weapon_swap",
@@ -50,6 +51,10 @@ class TestCidController(unittest.TestCase):
         self.assertNotIn("MOUSE_MODE_CAPTURED", source)
         self.assertIn("_lock_isometric_camera", source)
         self.assertIn("click_move", source)
+        self.assertIn("_world_click_blocked", source)
+        self.assertIn("_mouse_over_hud", source)
+        self.assertIn("_click_move_from_hud", source)
+        self.assertIn("_try_interact_node", source)
         self.assertIn("dodge", source)
         self.assertIn("chapter_asleep", source)
         self.assertIn("chapter_locked", source)

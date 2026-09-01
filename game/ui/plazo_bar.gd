@@ -13,9 +13,15 @@ var days_left: int = 9
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(176, 36)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = Vector2(232, 36)
+	add_to_group("hud_click_sink")
 	_sync_from_clock()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton or event is InputEventScreenTouch:
+		accept_event()
 	# Clock is a stub until PR-05a; skip per-frame polling when the field is absent.
 	set_process(CampaignClock != null and "plazo_days_left" in CampaignClock)
 	if EventBus:

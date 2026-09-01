@@ -67,7 +67,7 @@ class TestHorseCompanion(unittest.TestCase):
         self.assertIn('HORSE_COMPANION_FLAG := "horse_companion"', source)
         self.assertIn("packed.append(HORSE_COMPANION_FLAG)", source)
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
-        self.assertIsNone(re.search(r"^var ", source, re.MULTILINE))
+        self.assertEqual(re.findall(r"^var (\w+)", source, re.MULTILINE), ["_swords"])
         self.assertRegex(source, re.compile(r"^extends Node", re.MULTILINE))
         chapter = _read("game/autoload/chapter_runner.gd")
         self.assertRegex(chapter, re.compile(r"^extends Node", re.MULTILINE))

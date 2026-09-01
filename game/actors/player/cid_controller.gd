@@ -12,6 +12,7 @@ extends CharacterBody3D
 @export var leap_cooldown: float = 0.7
 @export var shout_cooldown: float = 1.0
 @export var click_arrive_distance: float = 0.4
+@export var interact_range: float = 5.0
 @export var camera_height: float = 11.0
 @export var camera_offset: float = 8.0
 @export var camera_look_y: float = 1.0
@@ -46,6 +47,10 @@ var _queued_swap: bool = false
 var _queued_interact: bool = false
 var _queued_dump: bool = false
 var _leap_airborne: bool = false
+var _block_click_move: bool = false
+var _click_move_from_hud: bool = false
+var _prompt_layer: CanvasLayer = null
+var _prompt_label: Label = null
 var _horse: HorseCompanionScript = null
 ## Chapter sleep (lion hall). Walk_speed 0 is not enough: dodge uses dodge_speed.
 var chapter_asleep: bool = false
@@ -64,6 +69,7 @@ func _ready() -> void:
 	_lock_isometric_camera()
 	_horse = _find_horse()
 	_ensure_touch_hud()
+	_ensure_interact_prompt()
 	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
 	if looks and looks.has_method("ensure"):
 		looks.call("ensure", self)
@@ -157,6 +163,19 @@ func _chapter_is_carrion() -> bool:
 	return String(runner.current_id) == "a3_carrion"
 
 
+func _input(event: InputEvent) -> void:
+	if chapter_asleep or chapter_locked:
+		return
+	if not _is_click_move_press(event):
+		return
+	if not _world_click_blocked():
+		return
+	_click_move_from_hud = true
+	_click_target = null
+	_queued_click_pos = null
+	_mark_handled()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
@@ -171,10 +190,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		_mark_handled()
 		return
-	# World taps emulate LMB (slam). HUD actions / keys / joy still pass.
+	# World taps walk / talk. Slam stays on the key / pad / touch button.
 	if _pointer_event_blocked(event):
+		if _is_world_walk_tap(event) and not _world_click_blocked():
+			_queued_click_pos = _event_screen_pos(event)
+		_mark_handled()
+		return
+	if _is_pointer_event(event) and _world_click_blocked():
+		_mark_handled()
+		return
+	if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
+		if _world_click_blocked() or _click_move_from_hud:
+			_click_move_from_hud = true
+			_click_target = null
+			_queued_click_pos = null
+			_mark_handled()
+			return
 		if _is_world_walk_tap(event):
 			_queued_click_pos = _event_screen_pos(event)
+		else:
+			_queued_click_pos = get_viewport().get_mouse_position()
 		_mark_handled()
 		return
 	if event.is_action_pressed("dodge"):
@@ -198,12 +233,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("rage_dump"):
 		_queued_dump = true
 		_mark_handled()
-	elif event.is_action_pressed("click_move"):
-		if _touch_hud_blocks_pointer():
-			_mark_handled()
-			return
-		_queued_click_pos = get_viewport().get_mouse_position()
-		_mark_handled()
 
 
 func _physics_process(delta: float) -> void:
@@ -219,6 +248,7 @@ func _physics_process(delta: float) -> void:
 		_apply_sleep_pose()
 		move_and_slide()
 		_lock_isometric_camera()
+		_update_interact_prompt()
 		return
 	if chapter_locked:
 		_clear_action_queues()
@@ -227,6 +257,7 @@ func _physics_process(delta: float) -> void:
 		_apply_gravity(delta)
 		move_and_slide()
 		_lock_isometric_camera()
+		_update_interact_prompt()
 		return
 	_update_mesura_hold()
 	if _horse == null or not is_instance_valid(_horse):
@@ -283,6 +314,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if _leap_airborne and is_on_floor() and velocity.y <= 0.0:
 		_leap_airborne = false
+	_update_interact_prompt()
 
 
 func _consume_queues(wish: Vector3) -> void:
@@ -374,16 +406,35 @@ func _apply_dodge_xz(delta: float) -> void:
 func _resolve_queued_click() -> void:
 	if _queued_click_pos == null:
 		return
-	_click_target = _ground_point_from_mouse(_queued_click_pos)
+	var screen: Vector2 = _queued_click_pos
 	_queued_click_pos = null
+	if _world_click_blocked():
+		return
+	var pick := _pick_from_screen(screen)
+	var collider := pick.get("collider") as Node
+	if _try_interact_node(collider):
+		_click_target = null
+		_block_click_move = true
+		return
+	if pick.has("position"):
+		_click_target = pick.position
 
 
 func _movement_wish() -> Vector3:
 	var stick := _stick()
 	if stick.length() > 0.12:
 		_click_target = null
+		_block_click_move = false
 		return _camera_aligned(stick)
-	if Input.is_action_pressed("click_move") and not _touch_hud_blocks_pointer():
+	if not Input.is_action_pressed("click_move"):
+		_block_click_move = false
+		_click_move_from_hud = false
+	if (
+		Input.is_action_pressed("click_move")
+		and not _block_click_move
+		and not _click_move_from_hud
+		and not _world_click_blocked()
+	):
 		_click_target = _ground_point_from_mouse()
 	if _click_target != null:
 		var to := (_click_target as Vector3) - global_position
@@ -409,7 +460,7 @@ func _update_facing(wish: Vector3) -> void:
 		if wish.length_squared() > 0.0:
 			_facing = wish
 		return
-	if _touch_hud_blocks_pointer():
+	if _touch_hud_blocks_pointer() or _gui_blocks_pointer() or _mouse_over_hud():
 		if wish.length_squared() > 0.0:
 			_facing = wish
 		return
@@ -450,6 +501,8 @@ func _clear_action_queues() -> void:
 	_queued_interact = false
 	_queued_click_pos = null
 	_click_target = null
+	_block_click_move = false
+	_click_move_from_hud = false
 	_dodge_left = 0.0
 	_leap_airborne = false
 
@@ -487,12 +540,19 @@ func _camera_aligned(stick: Vector2) -> Vector3:
 
 
 func _ground_point_from_mouse(screen_pos: Variant = null) -> Vector3:
-	var fallback := global_position + _facing
+	var mouse: Vector2 = screen_pos if screen_pos is Vector2 else get_viewport().get_mouse_position()
+	var pick := _pick_from_screen(mouse)
+	if pick.has("position"):
+		return pick.position
+	return global_position + _facing
+
+
+func _pick_from_screen(screen_pos: Vector2) -> Dictionary:
+	var fallback := {"position": global_position + _facing}
 	if camera == null:
 		return fallback
-	var mouse: Vector2 = screen_pos if screen_pos is Vector2 else get_viewport().get_mouse_position()
-	var origin := camera.project_ray_origin(mouse)
-	var dir := camera.project_ray_normal(mouse)
+	var origin := camera.project_ray_origin(screen_pos)
+	var dir := camera.project_ray_normal(screen_pos)
 	var space := get_world_3d().direct_space_state
 	if space != null:
 		var query := PhysicsRayQueryParameters3D.create(origin, origin + dir * 400.0)
@@ -500,11 +560,11 @@ func _ground_point_from_mouse(screen_pos: Variant = null) -> Vector3:
 		query.exclude = [get_rid()]
 		var hit := space.intersect_ray(query)
 		if not hit.is_empty():
-			return hit.position
+			return hit
 	var plane := Plane(Vector3.UP, global_position.y)
 	var pt: Variant = plane.intersects_ray(origin, dir)
 	if pt != null:
-		return pt
+		return {"position": pt}
 	return fallback
 
 
@@ -538,17 +598,171 @@ func _tick_cooldowns(delta: float) -> void:
 
 
 func _try_interact() -> void:
-	if interact_ray == null or not interact_ray.is_colliding():
+	if _try_interact_node(_interact_ray_node()):
 		return
-	var node := interact_ray.get_collider() as Node
+	_try_interact_node(_nearest_interactable())
+
+
+func _try_interact_node(node: Node) -> bool:
+	var owner := _interact_owner(node)
+	if owner == null:
+		return false
+	if owner.has_method("interact"):
+		owner.call("interact")
+		return true
+	if owner.has_method("action"):
+		owner.call("action")
+		return true
+	return false
+
+
+func _interact_ray_node() -> Node:
+	if interact_ray == null or not interact_ray.is_colliding():
+		return null
+	return interact_ray.get_collider() as Node
+
+
+func _interact_owner(node: Node) -> Node:
 	while node:
-		if node.has_method("interact"):
-			node.call("interact")
-			return
-		if node.has_method("action"):
-			node.call("action")
-			return
+		if node.has_method("interact") or node.has_method("action"):
+			return node
 		node = node.get_parent()
+	return null
+
+
+func _nearest_interactable() -> Node:
+	var best: Node = null
+	var best_d := interact_range
+	if not is_inside_tree():
+		return null
+	for node in get_tree().get_nodes_in_group("interactable"):
+		if not (node is Node3D):
+			continue
+		var d := (node as Node3D).global_position.distance_to(global_position)
+		if d <= best_d:
+			best_d = d
+			best = node
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return best
+	var sphere := SphereShape3D.new()
+	sphere.radius = interact_range
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = sphere
+	query.transform = Transform3D(Basis(), global_position + Vector3(0.0, 1.0, 0.0))
+	query.collision_mask = 1
+	query.exclude = [get_rid()]
+	for hit in space.intersect_shape(query, 24):
+		var owner := _interact_owner(hit.get("collider") as Node)
+		if owner == null or not (owner is Node3D):
+			continue
+		var d := (owner as Node3D).global_position.distance_to(global_position)
+		if d <= best_d:
+			best_d = d
+			best = owner
+	return best
+
+
+func _focus_interactable() -> Node:
+	var ray_owner := _interact_owner(_interact_ray_node())
+	if ray_owner:
+		return ray_owner
+	return _nearest_interactable()
+
+
+func _update_interact_prompt() -> void:
+	if _prompt_label == null:
+		return
+	if _dialogue_open() or chapter_asleep or chapter_locked:
+		_prompt_label.visible = false
+		return
+	var target := _focus_interactable()
+	_prompt_label.visible = target != null
+	if target:
+		_prompt_label.text = _loc_text("hud.interact_hint", "E — Hablar")
+
+
+func _ensure_interact_prompt() -> void:
+	if _prompt_label != null or not is_inside_tree():
+		return
+	_prompt_layer = CanvasLayer.new()
+	_prompt_layer.name = "InteractPrompt"
+	_prompt_layer.layer = 25
+	_prompt_label = Label.new()
+	_prompt_label.name = "Hint"
+	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_label.add_theme_color_override("font_color", Color(0.91, 0.85, 0.72))
+	_prompt_label.add_theme_font_size_override("font_size", 18)
+	_prompt_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_prompt_label.offset_left = -200.0
+	_prompt_label.offset_right = 200.0
+	_prompt_label.offset_top = -84.0
+	_prompt_label.offset_bottom = -48.0
+	_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_label.visible = false
+	_prompt_layer.add_child(_prompt_label)
+	add_child(_prompt_layer)
+
+
+func _loc_text(key: String, fallback: String) -> String:
+	var loc := get_node_or_null("/root/Loc")
+	if loc == null or not loc.has_method("text"):
+		return fallback
+	var t := str(loc.call("text", key))
+	if t.is_empty() or t == key:
+		return fallback
+	return t
+
+
+func _dialogue_open() -> bool:
+	if not is_inside_tree():
+		return false
+	for node in get_tree().get_nodes_in_group("talk_balloon"):
+		if node is CanvasLayer and (node as CanvasLayer).visible:
+			return true
+		if node is Control and (node as Control).is_visible_in_tree():
+			return true
+	return false
+
+
+func _gui_blocks_pointer() -> bool:
+	var vp := get_viewport()
+	if vp == null:
+		return false
+	var hovered := vp.gui_get_hovered_control()
+	if hovered == null:
+		return false
+	return hovered.mouse_filter != Control.MOUSE_FILTER_IGNORE
+
+
+func _world_click_blocked() -> bool:
+	return _gui_blocks_pointer() or _mouse_over_hud() or _dialogue_open()
+
+
+func _mouse_over_hud() -> bool:
+	if not is_inside_tree():
+		return false
+	var vp := get_viewport()
+	if vp == null:
+		return false
+	var mouse := vp.get_mouse_position()
+	for node in get_tree().get_nodes_in_group("hud_click_sink"):
+		if not (node is Control):
+			continue
+		var ctl := node as Control
+		if not ctl.is_visible_in_tree():
+			continue
+		if ctl.get_global_rect().has_point(mouse):
+			return true
+	return false
+
+
+func _is_pointer_event(event: InputEvent) -> bool:
+	return (
+		event is InputEventMouse
+		or event is InputEventScreenTouch
+		or event is InputEventScreenDrag
+	)
 
 
 func _consume_mounted_queues() -> void:
@@ -596,6 +810,15 @@ func _is_world_walk_tap(event: InputEvent) -> bool:
 		var mb := event as InputEventMouseButton
 		return mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
 	return false
+
+
+func _is_click_move_press(event: InputEvent) -> bool:
+	if _is_world_walk_tap(event):
+		return true
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		return mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT
+	return event.is_action_pressed("click_move")
 
 
 func _event_screen_pos(event: InputEvent) -> Vector2:

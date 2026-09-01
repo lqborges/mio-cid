@@ -29,11 +29,32 @@ func _walk(node: Node) -> void:
 func _consider(node: Node) -> void:
 	if node == null or not is_instance_valid(node):
 		return
+	if node is Label3D and String(node.name) == "Name":
+		fit_nameplate(node as Label3D)
 	if _should_attach(node):
 		_attach(node)
 	var visual := node.get_node_or_null("Visual")
 	if visual and _should_attach(visual):
 		_attach(visual)
+	var nameplate := node.get_node_or_null("Name")
+	if nameplate is Label3D:
+		fit_nameplate(nameplate as Label3D)
+
+
+## Billboard sized to a person: ~0.14 m letters (~16 px at the isometric camera).
+static func fit_nameplate(label: Label3D) -> void:
+	if label == null or not is_instance_valid(label):
+		return
+	if label.has_meta("nameplate_fit"):
+		return
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.fixed_size = false
+	label.pixel_size = 0.005
+	label.font_size = 28
+	label.outline_size = maxi(label.outline_size, 6)
+	label.no_depth_test = true
+	label.render_priority = 2
+	label.set_meta("nameplate_fit", true)
 
 
 func _should_attach(host: Node) -> bool:
