@@ -194,3 +194,8 @@ a3_corpes.choice_mesura,Contener la ira,Hold mesura
 a3_corpes.choice_rage,Soltar la ira,Dump the rage
 a3_corpes.mesura_done,Contengo la ira. La honra se pide por ley.,I hold the rage. The name is asked by law.
 a3_corpes.rage_done,La ira cuesta honra. No es hueste. Es querella.,Rage costs honra. It is not a host. It is a complaint.
+speech.ui.retry,"Este tribunal no es una taberna.","This court is not a tavern."
+speech.ui.skip_blocked,"Saltarse al riepto es falta de mesura.","Skipping to the riepto is a failure of mesura."
+speech.ui.steel,"En esta corte no se desenvaina.","Steel is not drawn in this hall."
+speech.ui.won,"La corte os da la razón.","The court finds in your favor."
+speech.ui.failed,"La corte no os da la razón.","The court does not find in your favor."
