@@ -305,6 +305,9 @@ func _restore_living_seated(body: Node) -> void:
 		live = (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 	live.albedo_color = body.get_meta("alive_albedo")
 	mesh.material_override = live
+	var humanoid: Node = body.get_node_or_null("Visual/Humanoid")
+	if humanoid and humanoid.has_method("tint_cloth"):
+		humanoid.call("tint_cloth", body.get_meta("alive_albedo"))
 
 
 func _disable_host_except_ramon() -> void:

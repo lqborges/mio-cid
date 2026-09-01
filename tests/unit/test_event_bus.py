@@ -24,6 +24,8 @@ AUTOLOAD_ORDER = [
     "TreasuryService",
     "GameState",
     "Loc",
+    "MobileLook",
+    "HumanoidLooks",
     "DialogueManager",
 ]
 AUTOLOAD_SCRIPTS = {
@@ -35,6 +37,8 @@ AUTOLOAD_SCRIPTS = {
     "TreasuryService": "game/autoload/treasury_service.gd",
     "GameState": "game/autoload/game_state.gd",
     "Loc": "game/autoload/loc.gd",
+    "MobileLook": "game/autoload/mobile_look.gd",
+    "HumanoidLooks": "game/autoload/humanoid_looks.gd",
     "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
 }
 # ChapterRunner is implemented in PR-06. No remaining autoload stubs.

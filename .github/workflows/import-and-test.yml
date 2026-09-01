@@ -215,6 +215,11 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_cid_controller.gd
 
+      - name: Run TouchHud headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_touch_hud.gd
+
       - name: Run DialogueBridge headless test
         if: steps.godot.outputs.found == 'true'
         run: |

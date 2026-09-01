@@ -26,6 +26,8 @@ CampaignClock="*res://game/autoload/campaign_clock.gd"
 TreasuryService="*res://game/autoload/treasury_service.gd"
 GameState="*res://game/autoload/game_state.gd"
 Loc="*res://game/autoload/loc.gd"
+MobileLook="*res://game/autoload/mobile_look.gd"
+HumanoidLooks="*res://game/autoload/humanoid_looks.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 
 [display]
@@ -33,7 +35,9 @@ DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="viewport"
+window/stretch/mode.mobile="canvas_items"
 window/stretch/aspect="keep"
+window/stretch/aspect.mobile="expand"
 
 [editor_plugins]
 
@@ -166,5 +170,8 @@ locale/fallback="es"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d.mobile=1
+anti_aliasing/quality/screen_space_aa.mobile=1
 ; Default GL Compatibility so Intel HD 4000 (Envy) boots on Win10.
 ; Laptop (Iris Xe): --rendering-method forward_plus --rendering-driver vulkan
+; Android: canvas_items + 2x MSAA + FXAA so 3D is native, not a 720p stretch.

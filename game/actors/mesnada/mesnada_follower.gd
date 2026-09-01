@@ -35,6 +35,9 @@ func _ready() -> void:
 	if _agent != null:
 		_agent.avoidance_enabled = false
 	_shadows_off()
+	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", self)
 	if kind != &"captain":
 		set_lod(&"capsule")
 	var parent := get_parent()
@@ -70,8 +73,11 @@ func set_lod(level: StringName) -> void:
 		_mesh_capsule.visible = show_any and show_capsule and not show_skinned
 		_mesh_capsule.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if _facing_marker != null:
-		_facing_marker.visible = show_any and kind == &"captain" and level != &"hidden"
+		_facing_marker.visible = false
 		_facing_marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var humanoid: Node = get_node_or_null("Visual/Humanoid")
+	if humanoid:
+		humanoid.visible = show_any
 
 
 func desired_xz(from: Vector3, to: Vector3, speed: float, arrive: float, reverse: bool = false) -> Vector3:

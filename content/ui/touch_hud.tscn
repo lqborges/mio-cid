@@ -1,0 +1,98 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/ui/touch_hud.gd" id="1_touch"]
+
+[node name="TouchHud" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_touch")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Stick" type="Panel" parent="Root"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 556.0
+offset_right = 164.0
+offset_bottom = 696.0
+mouse_filter = 0
+
+[node name="Knob" type="Panel" parent="Root/Stick"]
+layout_mode = 0
+offset_left = 40.6
+offset_top = 40.6
+offset_right = 99.4
+offset_bottom = 99.4
+mouse_filter = 2
+
+[node name="Mesura" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 474.0
+offset_right = 96.0
+offset_bottom = 546.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Mesura"
+
+[node name="Slam" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1184.0
+offset_top = 538.0
+offset_right = 1256.0
+offset_bottom = 610.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Golpe"
+
+[node name="Leap" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1102.0
+offset_top = 456.0
+offset_right = 1174.0
+offset_bottom = 528.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Salto"
+
+[node name="Shout" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1020.0
+offset_top = 538.0
+offset_right = 1092.0
+offset_bottom = 610.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Grito"
+
+[node name="Dodge" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1102.0
+offset_top = 620.0
+offset_right = 1174.0
+offset_bottom = 692.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Esquiva"
+
+[node name="Interact" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1102.0
+offset_top = 644.0
+offset_right = 1174.0
+offset_bottom = 716.0
+focus_mode = 0
+mouse_filter = 0
+action_mode = 0
+text = "Hablar"

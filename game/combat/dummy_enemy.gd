@@ -15,6 +15,9 @@ const TUNABLES_PATH := "res://data/combat/tunables.json"
 func _ready() -> void:
 	add_to_group("combat_dummy")
 	floor_snap_length = 0.25
+	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", self)
 	if mesh != null:
 		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_stash_live()
@@ -50,6 +53,9 @@ func revive() -> void:
 		var mat := mesh.get_active_material(0)
 		if mat is StandardMaterial3D:
 			(mat as StandardMaterial3D).albedo_color = get_meta("live_albedo")
+		var humanoid := get_node_or_null("Visual/Humanoid")
+		if humanoid and humanoid.has_method("tint_cloth"):
+			humanoid.call("tint_cloth", get_meta("live_albedo"))
 
 
 func _stash_live() -> void:
@@ -116,3 +122,6 @@ func _on_died() -> void:
 			var local := mat.duplicate() as StandardMaterial3D
 			local.albedo_color = Color(0.28, 0.26, 0.24)
 			mesh.set_surface_override_material(0, local)
+	var humanoid := get_node_or_null("Visual/Humanoid")
+	if humanoid and humanoid.has_method("tint_cloth"):
+		humanoid.call("tint_cloth", Color(0.28, 0.26, 0.24))

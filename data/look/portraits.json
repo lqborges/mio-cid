@@ -1,0 +1,283 @@
+{
+  "cid": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "cloak": true,
+    "skin": [0.74, 0.56, 0.42],
+    "hair": [0.12, 0.08, 0.05],
+    "cloth": [0.16, 0.15, 0.14],
+    "cloak_color": [0.42, 0.08, 0.08],
+    "metal": [0.62, 0.63, 0.66],
+    "accent": [0.78, 0.62, 0.22]
+  },
+  "jimena": {
+    "kit": "lady",
+    "veil": true,
+    "skin": [0.78, 0.60, 0.48],
+    "hair": [0.22, 0.14, 0.09],
+    "cloth": [0.38, 0.16, 0.22],
+    "accent": [0.72, 0.58, 0.28]
+  },
+  "elvira": {
+    "kit": "lady",
+    "veil": true,
+    "skin": [0.80, 0.62, 0.50],
+    "hair": [0.32, 0.20, 0.10],
+    "cloth": [0.28, 0.30, 0.42],
+    "accent": [0.70, 0.62, 0.40]
+  },
+  "sol": {
+    "kit": "lady",
+    "veil": true,
+    "skin": [0.80, 0.63, 0.50],
+    "hair": [0.42, 0.28, 0.12],
+    "cloth": [0.48, 0.28, 0.18],
+    "accent": [0.74, 0.60, 0.30]
+  },
+  "alfonso": {
+    "kit": "king",
+    "beard": true,
+    "crown": true,
+    "robe": true,
+    "cloak": true,
+    "skin": [0.76, 0.58, 0.46],
+    "hair": [0.55, 0.42, 0.22],
+    "cloth": [0.42, 0.08, 0.10],
+    "cloak_color": [0.12, 0.10, 0.22],
+    "accent": [0.86, 0.70, 0.22]
+  },
+  "alvar_fanez": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "cloak": true,
+    "skin": [0.72, 0.54, 0.40],
+    "hair": [0.28, 0.16, 0.08],
+    "cloth": [0.28, 0.22, 0.16],
+    "cloak_color": [0.18, 0.32, 0.28],
+    "metal": [0.58, 0.56, 0.52],
+    "accent": [0.70, 0.55, 0.22]
+  },
+  "martin_antolinez": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "skin": [0.70, 0.52, 0.40],
+    "hair": [0.18, 0.12, 0.08],
+    "cloth": [0.22, 0.28, 0.18],
+    "metal": [0.55, 0.54, 0.50],
+    "accent": [0.62, 0.42, 0.18]
+  },
+  "pero_bermudez": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "cloak": true,
+    "skin": [0.68, 0.50, 0.38],
+    "hair": [0.14, 0.09, 0.06],
+    "cloth": [0.36, 0.12, 0.10],
+    "cloak_color": [0.50, 0.10, 0.08],
+    "metal": [0.60, 0.58, 0.54],
+    "accent": [0.72, 0.50, 0.16]
+  },
+  "muno_gustioz": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "skin": [0.73, 0.55, 0.42],
+    "hair": [0.36, 0.28, 0.16],
+    "cloth": [0.22, 0.24, 0.30],
+    "metal": [0.56, 0.56, 0.58],
+    "accent": [0.50, 0.48, 0.40]
+  },
+  "felez_munoz": {
+    "kit": "youth",
+    "mail": true,
+    "skin": [0.78, 0.60, 0.48],
+    "hair": [0.34, 0.22, 0.12],
+    "cloth": [0.30, 0.26, 0.20],
+    "metal": [0.60, 0.60, 0.58],
+    "accent": [0.68, 0.52, 0.22]
+  },
+  "ferran_gonzalez": {
+    "kit": "youth",
+    "skin": [0.80, 0.64, 0.50],
+    "hair": [0.62, 0.48, 0.22],
+    "cloth": [0.62, 0.48, 0.16],
+    "accent": [0.82, 0.68, 0.24]
+  },
+  "diego_gonzalez": {
+    "kit": "youth",
+    "skin": [0.80, 0.64, 0.50],
+    "hair": [0.58, 0.44, 0.18],
+    "cloth": [0.50, 0.40, 0.14],
+    "accent": [0.78, 0.64, 0.22]
+  },
+  "asur_gonzalez": {
+    "kit": "youth",
+    "skin": [0.76, 0.58, 0.46],
+    "hair": [0.50, 0.38, 0.16],
+    "cloth": [0.44, 0.34, 0.16],
+    "accent": [0.70, 0.56, 0.20]
+  },
+  "garcia_ordonez": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "cloak": true,
+    "skin": [0.72, 0.54, 0.42],
+    "hair": [0.40, 0.28, 0.12],
+    "cloth": [0.16, 0.28, 0.16],
+    "cloak_color": [0.10, 0.22, 0.12],
+    "metal": [0.68, 0.62, 0.36],
+    "accent": [0.80, 0.66, 0.20]
+  },
+  "raquel": {
+    "kit": "merchant",
+    "robe": true,
+    "cap": true,
+    "skin": [0.70, 0.52, 0.40],
+    "hair": [0.10, 0.08, 0.06],
+    "cloth": [0.28, 0.18, 0.32],
+    "accent": [0.72, 0.58, 0.22]
+  },
+  "vidas": {
+    "kit": "merchant",
+    "robe": true,
+    "beard": true,
+    "cap": true,
+    "skin": [0.68, 0.50, 0.38],
+    "hair": [0.16, 0.12, 0.08],
+    "cloth": [0.22, 0.20, 0.28],
+    "accent": [0.68, 0.54, 0.20]
+  },
+  "sisebuto": {
+    "kit": "clerk",
+    "robe": true,
+    "tonsure": true,
+    "skin": [0.74, 0.58, 0.48],
+    "hair": [0.42, 0.36, 0.28],
+    "cloth": [0.28, 0.22, 0.16],
+    "accent": [0.55, 0.42, 0.22]
+  },
+  "jeronimo": {
+    "kit": "bishop",
+    "robe": true,
+    "mitre": true,
+    "beard": true,
+    "skin": [0.74, 0.56, 0.44],
+    "hair": [0.30, 0.22, 0.14],
+    "cloth": [0.72, 0.70, 0.66],
+    "cloak_color": [0.48, 0.08, 0.10],
+    "accent": [0.82, 0.66, 0.18]
+  },
+  "yusuf": {
+    "kit": "taifa",
+    "robe": true,
+    "turban": true,
+    "beard": true,
+    "skin": [0.58, 0.40, 0.28],
+    "hair": [0.10, 0.07, 0.05],
+    "cloth": [0.82, 0.78, 0.62],
+    "cloak_color": [0.16, 0.28, 0.22],
+    "accent": [0.78, 0.62, 0.18]
+  },
+  "bucar": {
+    "kit": "taifa",
+    "robe": true,
+    "turban": true,
+    "beard": true,
+    "skin": [0.50, 0.34, 0.24],
+    "hair": [0.08, 0.06, 0.04],
+    "cloth": [0.18, 0.16, 0.14],
+    "cloak_color": [0.42, 0.10, 0.08],
+    "accent": [0.84, 0.68, 0.16]
+  },
+  "avengalvon": {
+    "kit": "taifa",
+    "robe": true,
+    "turban": true,
+    "beard": true,
+    "mail": true,
+    "skin": [0.60, 0.42, 0.30],
+    "hair": [0.12, 0.08, 0.06],
+    "cloth": [0.20, 0.32, 0.24],
+    "cloak_color": [0.72, 0.70, 0.58],
+    "metal": [0.55, 0.52, 0.46],
+    "accent": [0.70, 0.56, 0.20]
+  },
+  "ramon_berenguer": {
+    "kit": "knight",
+    "beard": true,
+    "mail": true,
+    "cloak": true,
+    "skin": [0.74, 0.56, 0.44],
+    "hair": [0.22, 0.14, 0.08],
+    "cloth": [0.40, 0.10, 0.10],
+    "cloak_color": [0.72, 0.58, 0.18],
+    "metal": [0.64, 0.64, 0.62],
+    "accent": [0.80, 0.64, 0.18]
+  },
+  "fariz": {
+    "kit": "taifa",
+    "robe": true,
+    "turban": true,
+    "beard": true,
+    "skin": [0.56, 0.38, 0.26],
+    "hair": [0.10, 0.07, 0.05],
+    "cloth": [0.28, 0.30, 0.22],
+    "accent": [0.70, 0.54, 0.18]
+  },
+  "galve": {
+    "kit": "taifa",
+    "robe": true,
+    "turban": true,
+    "beard": true,
+    "skin": [0.54, 0.36, 0.26],
+    "hair": [0.10, 0.07, 0.05],
+    "cloth": [0.32, 0.22, 0.16],
+    "accent": [0.74, 0.58, 0.16]
+  },
+  "gabriel": {
+    "kit": "clerk",
+    "robe": true,
+    "skin": [0.86, 0.78, 0.68],
+    "hair": [0.70, 0.68, 0.62],
+    "cloth": [0.88, 0.86, 0.80],
+    "accent": [0.82, 0.74, 0.40]
+  },
+  "burgos_child": {
+    "kit": "child",
+    "scale": 0.62,
+    "skin": [0.80, 0.64, 0.52],
+    "hair": [0.28, 0.18, 0.10],
+    "cloth": [0.40, 0.32, 0.22],
+    "accent": [0.50, 0.40, 0.24]
+  },
+  "diego_tellez": {
+    "kit": "youth",
+    "mail": true,
+    "skin": [0.76, 0.58, 0.46],
+    "hair": [0.30, 0.20, 0.10],
+    "cloth": [0.26, 0.24, 0.20],
+    "metal": [0.58, 0.58, 0.56],
+    "accent": [0.64, 0.48, 0.20]
+  },
+  "lanza": {
+    "kit": "lanza",
+    "mail": true,
+    "skin": [0.70, 0.54, 0.42],
+    "hair": [0.24, 0.16, 0.10],
+    "cloth": [0.40, 0.36, 0.30],
+    "metal": [0.50, 0.48, 0.44],
+    "accent": [0.45, 0.38, 0.28]
+  },
+  "host": {
+    "kit": "lanza",
+    "skin": [0.62, 0.44, 0.32],
+    "hair": [0.12, 0.08, 0.06],
+    "cloth": [0.36, 0.22, 0.16],
+    "accent": [0.40, 0.28, 0.16]
+  }
+}

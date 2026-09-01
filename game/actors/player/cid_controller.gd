@@ -19,6 +19,8 @@ extends CharacterBody3D
 
 const CidCombatScript := preload("res://game/actors/player/cid_combat.gd")
 const HorseCompanionScript := preload("res://game/actors/player/horse_companion.gd")
+const TouchHudScript := preload("res://game/ui/touch_hud.gd")
+const TOUCH_HUD_SCENE := "res://content/ui/touch_hud.tscn"
 
 @onready var visual: Node3D = $Visual
 @onready var camera_rig: Node3D = $CameraRig
@@ -61,6 +63,10 @@ func _ready() -> void:
 	add_to_group("player")
 	_lock_isometric_camera()
 	_horse = _find_horse()
+	_ensure_touch_hud()
+	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", self)
 
 
 func facing_dir() -> Vector3:
@@ -158,37 +164,46 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventMouseMotion or event is InputEventJoypadMotion:
 			return
 		_notify_chapter_sleep_input()
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 		return
 	if chapter_locked:
 		if event is InputEventMouseMotion or event is InputEventJoypadMotion:
 			return
-		get_viewport().set_input_as_handled()
+		_mark_handled()
+		return
+	# World taps emulate LMB (slam). HUD actions / keys / joy still pass.
+	if _pointer_event_blocked(event):
+		if _is_world_walk_tap(event):
+			_queued_click_pos = _event_screen_pos(event)
+		_mark_handled()
 		return
 	if event.is_action_pressed("dodge"):
 		_queued_dodge = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("slam"):
 		_queued_slam = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("leap"):
 		_queued_leap = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("shout"):
 		_queued_shout = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("weapon_swap"):
 		_queued_swap = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("interact"):
 		_queued_interact = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("rage_dump"):
 		_queued_dump = true
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 	elif event.is_action_pressed("click_move"):
+		if _touch_hud_blocks_pointer():
+			_mark_handled()
+			return
 		_queued_click_pos = get_viewport().get_mouse_position()
-		get_viewport().set_input_as_handled()
+		_mark_handled()
 
 
 func _physics_process(delta: float) -> void:
@@ -368,7 +383,7 @@ func _movement_wish() -> Vector3:
 	if stick.length() > 0.12:
 		_click_target = null
 		return _camera_aligned(stick)
-	if Input.is_action_pressed("click_move"):
+	if Input.is_action_pressed("click_move") and not _touch_hud_blocks_pointer():
 		_click_target = _ground_point_from_mouse()
 	if _click_target != null:
 		var to := (_click_target as Vector3) - global_position
@@ -391,6 +406,10 @@ func _update_facing(wish: Vector3) -> void:
 			_facing = aimed
 		return
 	if _click_target != null and _stick().length() <= 0.12:
+		if wish.length_squared() > 0.0:
+			_facing = wish
+		return
+	if _touch_hud_blocks_pointer():
 		if wish.length_squared() > 0.0:
 			_facing = wish
 		return
@@ -546,6 +565,69 @@ func _consume_mounted_queues() -> void:
 	_queued_shout = false
 	_queued_swap = false
 	_queued_dump = false
+
+
+func _mark_handled() -> void:
+	var vp := get_viewport()
+	if vp:
+		vp.set_input_as_handled()
+
+
+func _touch_hud_blocks_pointer() -> bool:
+	return bool(TouchHudScript.pointer_blocked)
+
+
+func _pointer_event_blocked(event: InputEvent) -> bool:
+	if not _touch_hud_blocks_pointer():
+		return false
+	if event is InputEventAction:
+		return false
+	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventJoypadMotion:
+		return false
+	if event is InputEventMouse or event is InputEventScreenTouch or event is InputEventScreenDrag:
+		return true
+	return event.device == InputEvent.DEVICE_ID_EMULATION
+
+
+func _is_world_walk_tap(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch:
+		return (event as InputEventScreenTouch).pressed
+	if event is InputEventMouseButton:
+		var mb := event as InputEventMouseButton
+		return mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT
+	return false
+
+
+func _event_screen_pos(event: InputEvent) -> Vector2:
+	if event is InputEventScreenTouch:
+		return (event as InputEventScreenTouch).position
+	if event is InputEventMouseButton:
+		return (event as InputEventMouseButton).position
+	var vp := get_viewport()
+	if vp:
+		return vp.get_mouse_position()
+	return Vector2.ZERO
+
+
+func _ensure_touch_hud() -> void:
+	if not is_inside_tree():
+		return
+	var tree := get_tree()
+	if tree == null or tree.root == null:
+		return
+	if tree.root.find_child("TouchHud", true, false) != null:
+		return
+	var packed := load(TOUCH_HUD_SCENE) as PackedScene
+	if packed == null:
+		return
+	var hud := packed.instantiate()
+	hud.name = "TouchHud"
+	var host: Node = tree.current_scene
+	if host == null or host == self:
+		host = get_parent()
+	if host == null or host == self:
+		host = tree.root
+	host.add_child.call_deferred(hud)
 
 
 func _find_horse() -> HorseCompanionScript:
