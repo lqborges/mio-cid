@@ -50,12 +50,17 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | `a2_yusuf` | Day 1 huerta field (not a wall climb); day 2 one charge + resolve |
 | `a2_embassy3` | Third gift; pardon whisper; exit toward Tagus or repay |
 | `a2_repay_raquel` | Cheat-path only; unreachable if you refused the sand chests |
+| `a2_tagus` | Three-day court; Alfonso's pardon; forced yes to the marriages |
+| `a2_bodas` | Infantes in Valencia; train/gift; cage still locked |
+| `a3_leon` | Lion joke; mesura or rage to return it; no kill |
+| `a3_bucar` | Shore battle; Infantes flee; Tizona in hand |
+| `a3_despedida` | Swords gifted; Elvira and Sol leave; Avengalvón lives |
 
 Spanish display strings. English loc keys. Greybox 3D (CSG / capsules).
 
 ## Not in this build
 
-Tagus pardon, lion escape, Búcar / Tizona, Corpes, Toledo, Pentecost. Embassy 3 exit whispers if Tagus is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
+Corpes aftermath, querella, Cortes de Toledo, Valencia wait, lists, Pentecost. Departure exit whispers if Corpes is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
 
 ## Controls (foot)
 
