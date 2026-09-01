@@ -6,6 +6,7 @@ func _initialize() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_check_cid())
 	failures.append_array(_check_named_hosts())
+	failures.append_array(_check_nameplate_fit())
 	_finish(failures)
 
 
@@ -65,6 +66,27 @@ func _expect_host(node_name: String, parts: PackedStringArray) -> PackedStringAr
 			if human.get_node_or_null(part) == null:
 				failures.append("%s portrait missing %s" % [node_name, part])
 	host.free()
+	return failures
+
+
+func _check_nameplate_fit() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var label := Label3D.new()
+	label.name = "Name"
+	label.pixel_size = 0.012
+	label.font_size = 42
+	label.fixed_size = false
+	get_root().add_child(label)
+	var looks: Node = get_root().get_node_or_null("HumanoidLooks")
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", label)
+	elif looks and looks.has_method("fit_nameplate"):
+		looks.call("fit_nameplate", label)
+	if not label.fixed_size:
+		failures.append("nameplate fit must set fixed_size")
+	if label.font_size > 22:
+		failures.append("nameplate font_size stayed huge: %s" % label.font_size)
+	label.free()
 	return failures
 
 

@@ -4,11 +4,18 @@ extends Control
 ## Three distinct meters. Shape + pattern carry identity; hue is secondary (colorblind).
 
 const METERS := [&"onores", &"honor", &"honra"]
-const LABELS := {
-	&"onores": "onores",
-	&"honor": "honor",
-	&"honra": "honra",
+const LABEL_KEYS := {
+	&"onores": "hud.onores",
+	&"honor": "hud.honor",
+	&"honra": "hud.honra",
 }
+const LABEL_FALLBACK := {
+	&"onores": "Honores",
+	&"honor": "Honor",
+	&"honra": "Honra",
+}
+const PANEL_SIZE := Vector2(232, 228)
+const COL_PAD := 10.0
 const COLORS := {
 	&"onores": Color(0.0, 0.45, 0.70),
 	&"honor": Color(0.90, 0.62, 0.0),
@@ -31,8 +38,9 @@ const TRACK := Color(0.32, 0.28, 0.22)
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	custom_minimum_size = Vector2(176, 228)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	custom_minimum_size = PANEL_SIZE
+	clip_contents = false
 	_bind_state()
 	if EventBus:
 		EventBus.honor_logged.connect(_on_honor_logged)
@@ -68,7 +76,8 @@ func _draw() -> void:
 		size = custom_minimum_size
 	draw_rect(Rect2(Vector2.ZERO, size), IRON)
 	var honor := _honor()
-	var col_w := size.x / 3.0
+	var inner := size.x - COL_PAD * 2.0
+	var col_w := inner / 3.0
 	for i in METERS.size():
 		var meter: StringName = METERS[i]
 		var value := 8.0 if meter == &"onores" else (15.0 if meter == &"honor" else 40.0)
@@ -78,7 +87,7 @@ func _draw() -> void:
 
 
 func _draw_column(index: int, col_w: float, height: float, value: float, meter: StringName) -> void:
-	var origin := Vector2(col_w * index, 0.0)
+	var origin := Vector2(COL_PAD + col_w * index, 0.0)
 	var color: Color = COLORS[meter]
 	var icon_c := origin + Vector2(col_w * 0.5, 22.0)
 	_draw_shape(SHAPES[meter], icon_c, color)
@@ -92,17 +101,41 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	draw_rect(bar, PARCHMENT, false, 1.5)
 	var font := ThemeDB.fallback_font
 	var font_size := 12
-	var label: String = str(LABELS[meter])
+	var label := _meter_label(meter)
 	var text_w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	if text_w > col_w - 2.0:
+		font_size = 11
+		text_w = font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var text_x := origin.x + (col_w - text_w) * 0.5
+	var min_x := origin.x + 1.0
+	var max_x := origin.x + col_w - text_w - 1.0
+	if max_x < min_x:
+		text_x = min_x
+	else:
+		text_x = clampf(text_x, min_x, max_x)
 	draw_string(
 		font,
-		Vector2(origin.x + (col_w - text_w) * 0.5, height - 10.0),
+		Vector2(text_x, height - 10.0),
 		label,
 		HORIZONTAL_ALIGNMENT_LEFT,
 		-1,
 		font_size,
 		PARCHMENT,
 	)
+
+
+func _meter_label(meter: StringName) -> String:
+	var key := str(LABEL_KEYS.get(meter, ""))
+	var fallback := str(LABEL_FALLBACK.get(meter, String(meter)))
+	if key.is_empty():
+		return fallback
+	var loc := get_node_or_null("/root/Loc")
+	if loc == null or not loc.has_method("text"):
+		return fallback
+	var t := str(loc.call("text", key))
+	if t.is_empty() or t == key:
+		return fallback
+	return t
 
 
 func _draw_shape(shape: StringName, center: Vector2, color: Color) -> void:

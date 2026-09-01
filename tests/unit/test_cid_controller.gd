@@ -10,6 +10,7 @@ var _leap_queued: bool = false
 func _initialize() -> void:
 	_failures.append_array(_check_cid_scene())
 	_failures.append_array(_check_arena_scene())
+	_failures.append_array(_check_desktop_lmb_walks())
 	call_deferred("_begin_leap_tick")
 
 
@@ -67,6 +68,33 @@ func _check_arena_scene() -> PackedStringArray:
 	if boxes.size() < 4:
 		failures.append("arena greybox missing floor/boxes")
 	arena.free()
+	return failures
+
+
+func _check_desktop_lmb_walks() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("desktop LMB: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	if cid == null:
+		failures.append("desktop LMB: Cid is not CharacterBody3D")
+		return failures
+	get_root().add_child(cid)
+	var hud_script: Script = load("res://game/ui/touch_hud.gd") as Script
+	if hud_script:
+		hud_script.set("pointer_blocked", false)
+	var lmb := InputEventMouseButton.new()
+	lmb.button_index = MOUSE_BUTTON_LEFT
+	lmb.pressed = true
+	lmb.position = Vector2(640, 360)
+	cid._unhandled_input(lmb)
+	if bool(cid.get("_queued_slam")):
+		failures.append("desktop LMB must not slam; it is click-to-move")
+	if cid.get("_queued_click_pos") == null:
+		failures.append("desktop LMB must queue click-to-move")
+	cid.free()
 	return failures
 
 

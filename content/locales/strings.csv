@@ -43,11 +43,19 @@ horse.mount,Montar,Mount
 horse.dismount,Desmontar,Dismount
 hud.mesura,Mesura,Mesura
 hud.ira,Ira,Ira
+hud.onores,Honores,Honores
+hud.honor,Honor,Honor
+hud.honra,Honra,Honra
 hud.slam,Golpe,Slam
 hud.leap,Salto,Leap
 hud.shout,Grito,Shout
 hud.dodge,Esquiva,Dodge
 hud.interact,Hablar,Talk
+hud.interact_hint,E — Hablar,E — Talk
+ui.pause.title,Pausa,Pause
+ui.pause.resume,Continuar,Resume
+ui.pause.menu,Menú principal,Main menu
+ui.pause.quit,Salir,Quit
 ui.keep_or_sell.title,¿Guardar o vender?,Keep or sell?
 ui.keep_or_sell.keep,Guardar,Keep
 ui.keep_or_sell.sell,Vender,Sell

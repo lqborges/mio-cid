@@ -25,6 +25,10 @@ func _run() -> void:
 	failures.append_array(_check_scene_loads())
 	if _world:
 		failures.append_array(_check_plazo_bar_present())
+		failures.append_array(_check_hud_labels_and_click_sink())
+		failures.append_array(_check_nameplates())
+		failures.append_array(_check_companions_interactable())
+		failures.append_array(_check_pause_menu())
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(await _check_first_names_set_seen())
 		failures.append_array(_check_advance_plazo_does_not_feed())
@@ -66,6 +70,92 @@ func _check_plazo_bar_present() -> PackedStringArray:
 		failures.append("plazo bar missing from a1_vivar HUD")
 	elif not (bar is Control):
 		failures.append("plazo bar is not a Control")
+	return failures
+
+
+func _check_hud_labels_and_click_sink() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var meters: Node = _world.find_child("HonorMeters", true, false)
+	if meters == null or not (meters is Control):
+		failures.append("HonorMeters missing")
+		return failures
+	var hud := meters as Control
+	if hud.mouse_filter != Control.MOUSE_FILTER_STOP:
+		failures.append("HonorMeters must STOP mouse so HUD is a click sink")
+	if hud.has_method("_meter_label"):
+		var onores := str(hud.call("_meter_label", &"onores"))
+		if onores != "Honores":
+			failures.append("onores label want Honores, got %s" % onores)
+		if onores == "onores" or onores.begins_with("onores"):
+			failures.append("onores label is still clipped/uncapitalized")
+	var bar: Node = _world.find_child("PlazoBar", true, false)
+	if bar is Control and (bar as Control).mouse_filter != Control.MOUSE_FILTER_STOP:
+		failures.append("PlazoBar must STOP mouse so HUD is a click sink")
+	return failures
+
+
+func _check_nameplates() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var looks: Node = get_root().get_node_or_null("HumanoidLooks")
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", _world)
+	for path in ["Alvar/Name", "Martin/Name"]:
+		var label: Label3D = _world.get_node_or_null(path) as Label3D
+		if label == null:
+			failures.append("missing nameplate %s" % path)
+			continue
+		if not label.fixed_size:
+			failures.append("%s nameplate must be fixed_size (screen-space)" % path)
+		if label.font_size > 22:
+			failures.append("%s nameplate font_size %s is too large" % [path, label.font_size])
+		if label.pixel_size > 0.006:
+			failures.append("%s nameplate pixel_size %s is too large" % [path, label.pixel_size])
+	return failures
+
+
+func _check_companions_interactable() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	for name in ["Alvar", "Martin"]:
+		var npc: Node = _world.get_node_or_null(name)
+		if npc == null:
+			failures.append("missing %s" % name)
+			continue
+		if not npc.has_method("interact"):
+			failures.append("%s missing interact()" % name)
+		if not npc.is_in_group("interactable"):
+			failures.append("%s must be in interactable group" % name)
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and cid.has_method("_nearest_interactable"):
+		var near: Variant = cid.call("_nearest_interactable")
+		if near == null:
+			failures.append("Cid should see a nearby interactable in the solar")
+	return failures
+
+
+func _check_pause_menu() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var pause: Node = get_root().get_node_or_null("PauseMenu")
+	if pause == null:
+		failures.append("PauseMenu autoload missing")
+		return failures
+	if not pause.has_method("open") or not pause.has_method("resume"):
+		failures.append("PauseMenu missing open/resume")
+		return failures
+	pause.call("open")
+	if not bool(pause.visible):
+		failures.append("Escape pause menu did not open")
+	if pause.get_node_or_null("Panel/Center/Resume") == null:
+		failures.append("pause menu missing Resume")
+	if pause.get_node_or_null("Panel/Center/Menu") == null:
+		failures.append("pause menu missing Menu")
+	if pause.get_node_or_null("Panel/Center/Quit") == null:
+		failures.append("pause menu missing Quit")
+	var tree := get_tree()
+	if tree and not tree.paused:
+		failures.append("pause menu must pause the tree")
+	pause.call("resume")
+	if tree and tree.paused:
+		failures.append("resume must unpause the tree")
 	return failures
 
 

@@ -15,7 +15,7 @@ const TICK_OFF := Color(0.28, 0.24, 0.20)
 
 
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(176, 88)
 	set_process(true)
 
