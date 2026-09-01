@@ -52,6 +52,7 @@ func _run() -> void:
 		_world = null
 	failures.append_array(_check_legal_files_querella())
 	failures.append_array(_check_mesura_files_querella())
+	failures.append_array(_check_ira_does_not_commit())
 	failures.append_array(_check_ride_host_blocks_toledo())
 	failures.append_array(_check_missing_toledo_no_scene_change())
 	failures.append_array(_check_graph_spine())
@@ -309,6 +310,49 @@ func _check_mesura_files_querella() -> PackedStringArray:
 	return failures
 
 
+func _check_ira_does_not_commit() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("ira: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	_logged.clear()
+	_sent = 0
+	_completed.clear()
+	world.run_ira()
+	if bool(world.call("querella_filed")):
+		failures.append("ira must not file the querella")
+	if bool(world.call("host_ridden")):
+		failures.append("ira must not ride a host")
+	if _logged.count("querella_filed") > 0:
+		failures.append("ira must not apply querella_filed")
+	if _logged.count("ride_host_to_carrion") > 0:
+		failures.append("ira must not apply ride_host_to_carrion")
+	if _sent > 0:
+		failures.append("ira must not emit querella_sent")
+	if _completed.count("a3_querella") > 0:
+		failures.append("ira retry must not complete the beat")
+	var node: Node = world.get_node_or_null("SpeechTrial")
+	if node is SpeechTrial:
+		var trial := node as SpeechTrial
+		if trial.current_index() != 0:
+			failures.append("ira retry must stay on ask 0, got %s" % trial.current_index())
+		if trial.legal_score != 0.0 or trial.mesura_score != 0.0 or trial.ira_score != 0.0:
+			failures.append("ira retry must not commit scores")
+	world.run_legal()
+	if not bool(world.call("querella_filed")):
+		failures.append("legal after ira retry must still file")
+	if _logged.count("querella_filed") < 1:
+		failures.append("legal after ira retry must apply querella_filed")
+	if _sent < 1:
+		failures.append("legal after ira retry must emit querella_sent")
+	world.free()
+	return failures
+
+
 func _check_ride_host_blocks_toledo() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_prep_campaign()
@@ -356,6 +400,16 @@ func _check_ride_host_blocks_toledo() -> PackedStringArray:
 		failures.append("ride_host must not change_scene")
 	if bool(world.call("try_travel_toledo")):
 		failures.append("ride_host try_travel_toledo must fail")
+	var whisper_text := _whisper_text(world)
+	if whisper_text.contains("ya va") or whisper_text.contains("already rides"):
+		failures.append("ride_host must not whisper WAIT_KEY, got %s" % whisper_text)
+	if not whisper_text.contains("hueste") and not whisper_text.contains("host"):
+		failures.append("ride_host whisper must stay on the illegal path, got %s" % whisper_text)
+	world.run_legal()
+	if bool(world.call("querella_filed")):
+		failures.append("legal after ride_host must not file")
+	if _sent > 0:
+		failures.append("legal after ride_host must not emit querella_sent")
 	world.free()
 	return failures
 
@@ -459,6 +513,16 @@ func _check_cid_standing(world: Node, label: String) -> PackedStringArray:
 	if "chapter_locked" in cid and bool(cid.chapter_locked):
 		failures.append("%s: Cid must not start chapter_locked" % label)
 	return failures
+
+
+func _whisper_text(world: Node) -> String:
+	var whisper: Node = world.find_child("HallWhisper", true, false)
+	if whisper == null:
+		return ""
+	var line: Label = whisper.get_node_or_null("Line") as Label
+	if line == null:
+		return ""
+	return line.text.to_lower()
 
 
 func _cid_mesura(world: Node) -> Node:

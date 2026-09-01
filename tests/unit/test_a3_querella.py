@@ -195,6 +195,9 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         self.assertIn("func run_legal", source)
         self.assertIn("func run_mesura", source)
         self.assertIn("func run_ride_host", source)
+        self.assertIn("func run_ira", source)
+        gd = _read("tests/unit/test_a3_querella.gd")
+        self.assertIn("func _check_ira_does_not_commit", gd)
         self.assertIn("querella_filed", source)
         self.assertIn("ride_host_to_carrion", source)
         self.assertIn("querella_sent", source)
@@ -213,6 +216,18 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         self.assertNotIn("func _enter_tree", source)
         leave = source.split("func _finish_beat", 1)[1].split("func _dest_ready", 1)[0]
         self.assertIn("not _dest_ready() or not _travel", leave)
+        self.assertIn("if _host_ridden:", leave)
+        host_block = leave.split("if _host_ridden:", 1)[1].split(
+            "if not _dest_ready()", 1
+        )[0]
+        self.assertIn("return", host_block)
+        self.assertNotIn("WAIT_KEY", host_block)
+        submit = source.split("func _submit", 1)[1].split("func _load_querella", 1)[0]
+        self.assertIn("if _filed or _host_ridden:", submit)
+        travel_try = source.split("func try_travel_toledo", 1)[1].split(
+            "func can_leave_to_toledo", 1
+        )[0]
+        self.assertIn("if not _filed or _host_ridden:", travel_try)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         runner = _read("game/autoload/chapter_runner.gd")
@@ -320,6 +335,8 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
         self.assertIn("~ dictate", text)
         self.assertIn("~ legal", text)
         self.assertIn("~ mesura", text)
+        self.assertIn("~ ira", text)
+        self.assertIn("a3_querella.line_ira", text)
         self.assertIn("~ ride_host", text)
         self.assertIn("MunoGustioz:", text)
         self.assertIn("Cid:", text)

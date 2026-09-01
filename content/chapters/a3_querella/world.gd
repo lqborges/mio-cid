@@ -85,7 +85,7 @@ func run_ride_host() -> void:
 
 
 func try_travel_toledo() -> bool:
-	if not _filed and not _host_ridden:
+	if not _filed or _host_ridden:
 		return false
 	if not _dest_ready():
 		_whisper(WAIT_KEY)
@@ -116,6 +116,8 @@ func place_name_text() -> String:
 
 
 func _submit(line_id: StringName) -> void:
+	if _filed or _host_ridden:
+		return
 	start_dictate()
 	var node := trial()
 	if node == null:
@@ -253,6 +255,11 @@ func _finish_beat() -> void:
 	_freeze_cid(false)
 	_hide_trial_ui()
 	if _left:
+		return
+	if _host_ridden:
+		if EventBus and EventBus.has_signal("beat_completed"):
+			EventBus.beat_completed.emit(BEAT_ID)
+		_checkpoint()
 		return
 	# ChapterRunner.travel emits beat_completed; only emit here if travel does not run.
 	if not _dest_ready() or not _travel(DEST):

@@ -18,6 +18,10 @@ Cid: a3_querella.line_mesura
 MunoGustioz: a3_querella.sent
 => END
 
+~ ira
+Cid: a3_querella.line_ira
+=> END
+
 ~ ride_host
 Cid: a3_querella.line_ride_host
 => END
