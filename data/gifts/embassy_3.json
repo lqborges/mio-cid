@@ -1,0 +1,14 @@
+{
+  "id": "embassy_3_valencia",
+  "beat": "a2_embassy3",
+  "bearer": "alvar_fanez",
+  "event_id": "embassy3_gift",
+  "spend_escrow_first": true,
+  "player_options": [
+    { "id": "thirty_horses", "horses": 30, "marks": 0, "honor_delta": 16, "blocked_if_horses_lt": 30 },
+    { "id": "thirty_horses_and_swords", "horses": 30, "marks": 200, "honor_delta": 18, "blocked_if_horses_lt": 30 },
+    { "id": "ten_horses", "horses": 10, "marks": 0, "honor_delta": 10, "blocked_if_horses_lt": 10 },
+    { "id": "empty_hands", "horses": 0, "marks": 0, "honor_delta": -4 }
+  ],
+  "alfonso_response": "pardon_possible"
+}

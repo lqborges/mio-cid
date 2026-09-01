@@ -153,6 +153,12 @@
       "ui_whisper_key": "a2_yusuf.day2_win"
     },
     {
+      "id": "embassy3_gift",
+      "deltas": { "honor": 10 },
+      "tags": ["gift_up"],
+      "beat": "a2_embassy3"
+    },
+    {
       "id": "pardon",
       "deltas": { "honor": 30 },
       "tags": ["king"],

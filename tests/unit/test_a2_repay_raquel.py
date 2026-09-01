@@ -117,7 +117,7 @@ class TestA2RepayRaquel(unittest.TestCase):
             "content/art/characters/horse/horse.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a2_tagus/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a2_bodas/world.tscn").is_file())
 

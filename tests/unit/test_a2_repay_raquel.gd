@@ -342,8 +342,8 @@ func _check_graph_and_join() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(EMBASSY3):
-		failures.append("a2_embassy3 must not ship in this PR")
+	if not ResourceLoader.exists(EMBASSY3):
+		failures.append("a2_embassy3 must ship in this slice")
 	if ResourceLoader.exists(TAGUS):
 		failures.append("a2_tagus must not ship in this PR")
 	if ResourceLoader.exists("res://content/chapters/a2_bodas/world.tscn"):

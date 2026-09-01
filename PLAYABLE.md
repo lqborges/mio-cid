@@ -1,8 +1,8 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean campaign as of Yusuf day 2. It is **not** merged to `main`. Later chapters (embassy 3, Tagus, lion, Corpes) are still in flight on other worktrees.
+This branch (`playable/0e9dbd46-ready`) is the review-clean campaign as of embassy 3. It is **not** merged to `main`. Later chapters (Tagus, lion, Corpes) are still in flight on other worktrees.
 
-**Tip:** Valencia hub + siege + embassy 2 + Yusuf day 1–2 + repay Raquel.
+**Tip:** Valencia hub + siege + embassy 2 + Yusuf + embassy 3 + repay Raquel.
 
 ## How to run
 
@@ -48,13 +48,14 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | `a2_jeronimo` | Valencia hub rooms, Jerónimo, horse named Babieca, locked lion cage |
 | `a2_embassy2` | Medinaceli road; recruit Avengalvón; second gift to Alfonso; family returns |
 | `a2_yusuf` | Day 1 huerta field (not a wall climb); day 2 one charge + resolve |
+| `a2_embassy3` | Third gift; pardon whisper; exit toward Tagus or repay |
 | `a2_repay_raquel` | Cheat-path only; unreachable if you refused the sand chests |
 
 Spanish display strings. English loc keys. Greybox 3D (CSG / capsules).
 
 ## Not in this build
 
-Embassy 3, Tagus pardon, lion escape, Búcar / Tizona, Corpes, Toledo, Pentecost. Day 2 does not hop into missing embassy 3. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
+Tagus pardon, lion escape, Búcar / Tizona, Corpes, Toledo, Pentecost. Embassy 3 exit whispers if Tagus is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
 
 ## Controls (foot)
 

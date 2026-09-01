@@ -156,6 +156,12 @@ a2_yusuf.day1_hold,"Anochece. Mañana, el segundo día.","Night falls. Tomorrow,
 a2_yusuf.day2_watch,Segundo día. Jimena mira otra vez desde el muro.,Second day. Jimena watches from the wall again.
 a2_yusuf.day2_charge,"Una carga. De frente, en la huerta.","One charge. Straight, in the huerta."
 a2_yusuf.day2_win,Yusuf se retira. Jimena ve el campo nuestro.,Yusuf withdraws. Jimena sees the field is ours.
+a2_embassy3.prompt,Álvar llevará el tercer presente a Alfonso. El perdón ya puede pedirse.,Álvar will take the third gift to Alfonso. Pardon may now be asked.
+a2_embassy3.alvar_leave,Álvar Fáñez parte de Valencia con el presente.,Álvar Fáñez leaves Valencia with the gift.
+a2_embassy3.alvar_return,Álvar vuelve. Alfonso recibirá al Cid.,Álvar returns. Alfonso will receive the Cid.
+a2_embassy3.pardon_possible,El perdón es posible. Alfonso os espera en el Tajo.,Pardon is possible. Alfonso waits for you at the Tagus.
+a2_embassy3.tagus_wait,El Tajo aún no abre el camino.,The Tagus road is not open yet.
+a2_embassy3.repay_wait,Antes hay que pagar a Raquel y Vidas.,Raquel and Vidas must be paid first.
 a2_repay_raquel.minaya,"Raquel y Vidas vienen a mí, mio Cid. Piden las arcas.","Raquel and Vidas come to me, my Cid. They ask for the chests."
 a2_repay_raquel.raquel,"Mio Cid, pagad lo que os prestamos. Valencia es vuestra.","My Cid, pay what we lent you. Valencia is yours."
 a2_repay_raquel.vidas,Las arcas eran de arena. Ahora cobramos en marcos.,The chests were sand. Now we collect in marks.

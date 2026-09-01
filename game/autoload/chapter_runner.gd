@@ -20,6 +20,7 @@ const SIEGE_SCENE := "res://content/chapters/a2_siege/world.tscn"
 const JERONIMO_SCENE := "res://content/chapters/a2_jeronimo/world.tscn"
 const EMBASSY2_SCENE := "res://content/chapters/a2_embassy2/world.tscn"
 const YUSUF_SCENE := "res://content/chapters/a2_yusuf/world.tscn"
+const EMBASSY3_SCENE := "res://content/chapters/a2_embassy3/world.tscn"
 const REPAY_SCENE := "res://content/chapters/a2_repay_raquel/world.tscn"
 
 var graph: Resource
@@ -155,6 +156,8 @@ func _scene_path(beat_id: StringName) -> String:
 		return EMBASSY2_SCENE
 	if beat_id == &"a2_yusuf":
 		return YUSUF_SCENE
+	if beat_id == &"a2_embassy3":
+		return EMBASSY3_SCENE
 	if beat_id == &"a2_repay_raquel":
 		return REPAY_SCENE
 	_ensure_loaded()

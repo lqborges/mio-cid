@@ -16,6 +16,8 @@ const STEP_TYPES := [
 	"speech_trial",
 	"fail_copy",
 	"siege_event",
+	"embassy_ledger",
+	"whisper",
 ]
 
 var beat_id: StringName = &""

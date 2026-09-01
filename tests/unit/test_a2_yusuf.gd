@@ -56,7 +56,7 @@ func _run() -> void:
 	failures.append_array(_check_thinner_refuse_wedge())
 	failures.append_array(_check_win_stays_on_yusuf())
 	failures.append_array(_check_graph_spine())
-	failures.append_array(_check_embassy3_not_shipped())
+	failures.append_array(_check_embassy3_dest())
 	failures.append_array(await _check_day2_scripted())
 	_finish(failures)
 
@@ -419,12 +419,12 @@ func _check_graph_spine() -> PackedStringArray:
 	return failures
 
 
-func _check_embassy3_not_shipped() -> PackedStringArray:
+func _check_embassy3_dest() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if not ResourceLoader.exists(DAY2):
 		failures.append("a2_yusuf/day2.tscn must exist")
-	if ResourceLoader.exists(EMBASSY3):
-		failures.append("a2_embassy3 must not ship in this PR")
+	if not ResourceLoader.exists(EMBASSY3):
+		failures.append("day2 dest a2_embassy3/world.tscn must exist")
 	return failures
 
 
@@ -638,8 +638,8 @@ func _check_day2_resolve() -> PackedStringArray:
 			failures.append("resolve must open embassy3 travel")
 		if String(_runner.current_id) != "a2_embassy3":
 			failures.append("day2 travel must complete toward embassy3, got %s" % _runner.current_id)
-		if ResourceLoader.exists(EMBASSY3):
-			failures.append("a2_embassy3 must not ship in this PR")
+		if not ResourceLoader.exists(EMBASSY3):
+			failures.append("day2 dest a2_embassy3/world.tscn must exist")
 	world.free()
 	return failures
 
