@@ -1,0 +1,22 @@
+# Spoken lines are CSV keys. Crime is off-stage. Félez reports. Fact cannot be skipped.
+
+~ start
+=> warning
+
+~ warning
+Cid: a3_corpes.warning
+=> END
+
+~ report
+Felez: a3_corpes.report
+DiegoTellez: a3_corpes.diego_escort
+Cid: a3_corpes.alive
+=> END
+
+~ mesura
+Cid: a3_corpes.mesura_done
+=> END
+
+~ rage
+Cid: a3_corpes.rage_done
+=> END

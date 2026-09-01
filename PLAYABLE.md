@@ -1,8 +1,8 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean campaign through departure. It is **not** merged to `main`. Corpes, querella, Toledo, and Pentecost are still in flight on other worktrees.
+This branch (`playable/0e9dbd46-ready`) is the review-clean campaign through Corpes. It is **not** merged to `main`. Querella, Toledo, and Pentecost are still in flight on other worktrees.
 
-**Tip:** Valencia hub through Tagus, marriages, lion, Búcar / Tizona, and the Infantes' departure.
+**Tip:** Valencia hub through Tagus, marriages, lion, Búcar / Tizona, departure, and Corpes aftermath.
 
 ## How to run
 
@@ -55,12 +55,13 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | `a3_leon` | Lion joke; mesura or rage to return it; no kill |
 | `a3_bucar` | Shore battle; Infantes flee; Tizona in hand |
 | `a3_despedida` | Swords gifted; Elvira and Sol leave; Avengalvón lives |
+| `a3_corpes` | Off-stage crime; Félez report; content warning; hear-only skips grove not fact |
 
 Spanish display strings. English loc keys. Greybox 3D (CSG / capsules).
 
 ## Not in this build
 
-Corpes aftermath, querella, Cortes de Toledo, Valencia wait, lists, Pentecost. Departure exit whispers if Corpes is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
+Querella, Cortes de Toledo, Valencia wait, lists, Pentecost. Corpes exit whispers if querella is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
 
 ## Controls (foot)
 

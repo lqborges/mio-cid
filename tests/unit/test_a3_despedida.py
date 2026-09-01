@@ -121,9 +121,10 @@ class TestA3DespedidaSwordsAndRoad(unittest.TestCase):
             "content/chapters/a3_bucar/world.tscn",
             "content/chapters/a3_leon/world.tscn",
             "content/chapters/a2_embassy2/world.tscn",
+            "content/chapters/a3_corpes/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_querella/world.tscn").is_file())
 
     def test_scene_is_cheap_greybox_hall_and_road(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -380,23 +381,32 @@ class TestA3DespedidaSwordsAndRoad(unittest.TestCase):
         self.assertIn("Run Python a3_leon tests", workflow)
         self.assertIn("Run Python a3_bucar tests", workflow)
         self.assertIn("Run Python a3_despedida tests", workflow)
+        self.assertIn("Run Python a3_corpes tests", workflow)
         self.assertIn("tests/unit/test_embassy2.py", workflow)
         self.assertIn("tests/unit/test_a3_leon.py", workflow)
         self.assertIn("tests/unit/test_a3_bucar.py", workflow)
         self.assertIn("tests/unit/test_a3_despedida.py", workflow)
+        self.assertIn("tests/unit/test_a3_corpes.py", workflow)
         self.assertIn("Run embassy2 Avengalvón escort headless test", workflow)
         self.assertIn("Run a3_leon lion scene headless test", workflow)
         self.assertIn("Run a3_bucar shore/Tizona headless test", workflow)
         self.assertIn("Run a3_despedida departure/Avengalvón headless test", workflow)
+        self.assertIn("Run a3_corpes aftermath headless test", workflow)
         self.assertIn("res://tests/unit/test_embassy2.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_leon.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_bucar.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_despedida.gd", workflow)
+        self.assertIn("res://tests/unit/test_a3_corpes.gd", workflow)
         imported = workflow.find("Import project")
         self.assertLess(imported, workflow.find("res://tests/unit/test_a3_despedida.gd"))
+        self.assertLess(imported, workflow.find("res://tests/unit/test_a3_corpes.gd"))
         self.assertLess(
             workflow.find("Run Python a3_bucar tests"),
             workflow.find("Run Python a3_despedida tests"),
+        )
+        self.assertLess(
+            workflow.find("Run Python a3_despedida tests"),
+            workflow.find("Run Python a3_corpes tests"),
         )
 
     def test_no_denylist_tokens(self) -> None:

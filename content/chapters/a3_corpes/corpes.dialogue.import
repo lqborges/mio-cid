@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://csj5y4asf5hsw"
+path="res://.godot/imported/corpes.dialogue-06b9655fd2579289daa8826b1864cd74.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_corpes/corpes.dialogue"
+dest_files=["res://.godot/imported/corpes.dialogue-06b9655fd2579289daa8826b1864cd74.tres"]
+
+[params]
+
+defaults=true
