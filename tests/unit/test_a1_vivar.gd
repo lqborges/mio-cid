@@ -86,6 +86,8 @@ func _check_hud_labels_and_click_sink() -> PackedStringArray:
 		failures.append("HonorMeters must STOP mouse so HUD is a click sink")
 	if not hud.is_in_group("hud_click_sink"):
 		failures.append("HonorMeters must join hud_click_sink")
+	if hud.get_rect().size.x < 200.0:
+		failures.append("HonorMeters hit rect is too small to sink clicks")
 	if hud.has_method("_meter_label"):
 		var onores := str(hud.call("_meter_label", &"onores"))
 		if onores != "Honores":

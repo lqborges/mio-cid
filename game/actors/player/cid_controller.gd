@@ -168,7 +168,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if not _is_click_move_press(event):
 		return
-	if not _world_click_blocked():
+	var pos := _event_screen_pos(event)
+	if not _world_click_blocked() and not _point_over_hud(pos):
 		return
 	_click_move_from_hud = true
 	_click_target = null
@@ -199,15 +200,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	# World taps walk / talk. Slam stays on the key / pad / touch button.
 	if _pointer_event_blocked(event):
-		if _is_world_walk_tap(event) and not _world_click_blocked():
-			_queued_click_pos = _event_screen_pos(event)
+		var tap_pos := _event_screen_pos(event)
+		if _is_world_walk_tap(event) and not _world_click_blocked() and not _point_over_hud(tap_pos):
+			_queued_click_pos = tap_pos
 		_mark_handled()
 		return
-	if _is_pointer_event(event) and _world_click_blocked():
+	if _is_pointer_event(event) and (_world_click_blocked() or _point_over_hud(_event_screen_pos(event))):
 		_mark_handled()
 		return
 	if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
-		if _world_click_blocked() or _click_move_from_hud:
+		var pos := _event_screen_pos(event)
+		if _world_click_blocked() or _click_move_from_hud or _point_over_hud(pos):
 			_click_move_from_hud = true
 			_click_target = null
 			_queued_click_pos = null
@@ -755,21 +758,39 @@ func _world_click_blocked() -> bool:
 
 
 func _mouse_over_hud() -> bool:
-	if not is_inside_tree():
-		return false
 	var vp := get_viewport()
 	if vp == null:
 		return false
-	var mouse := vp.get_mouse_position()
+	return _point_over_hud(vp.get_mouse_position())
+
+
+func _point_over_hud(screen_pos: Vector2) -> bool:
+	if not is_inside_tree():
+		return false
 	for node in get_tree().get_nodes_in_group("hud_click_sink"):
 		if not (node is Control):
 			continue
 		var ctl := node as Control
 		if not ctl.is_visible_in_tree():
 			continue
-		if ctl.get_global_rect().has_point(mouse):
+		if _hud_hit_rect(ctl).has_point(screen_pos):
 			return true
 	return false
+
+
+func _hud_hit_rect(ctl: Control) -> Rect2:
+	var r := ctl.get_global_rect()
+	var min_s := ctl.custom_minimum_size
+	if r.size.x < min_s.x:
+		r.size.x = min_s.x
+	if r.size.y < min_s.y:
+		r.size.y = min_s.y
+	# Drawn meters fallback to PANEL_SIZE when the Control has not laid out yet.
+	if r.size.x < 8.0:
+		r.size.x = 232.0
+	if r.size.y < 8.0:
+		r.size.y = 36.0
+	return r
 
 
 func _is_pointer_event(event: InputEvent) -> bool:

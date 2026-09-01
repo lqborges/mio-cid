@@ -40,6 +40,7 @@ const TRACK := Color(0.32, 0.28, 0.22)
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = PANEL_SIZE
+	size = PANEL_SIZE
 	clip_contents = false
 	add_to_group("hud_click_sink")
 	_bind_state()

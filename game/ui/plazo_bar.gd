@@ -15,6 +15,7 @@ var days_left: int = 9
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	custom_minimum_size = Vector2(232, 36)
+	size = custom_minimum_size
 	add_to_group("hud_click_sink")
 	_sync_from_clock()
 	# Clock is a stub until PR-05a; skip per-frame polling when the field is absent.
