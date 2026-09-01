@@ -23,6 +23,7 @@ const DIALOGUE_PATH := "res://content/chapters/a3_corpes/corpes.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 const DEST_SCENE := "res://content/chapters/a3_querella/world.tscn"
 const NEWS_FLAGS := ["corpes_happened", "corpes_news", "elvira_alive", "sol_alive", "felez_found_them"]
+const GROVE_HOLD_SEC := 2.4
 
 var last_dialogue_speakers: PackedStringArray = PackedStringArray()
 var last_dialogue_keys: PackedStringArray = PackedStringArray()
@@ -35,8 +36,7 @@ var _path: StringName = &""
 var _talking: bool = false
 var _left: bool = false
 var _skip_cinematic: bool = false
-var _cid_walk: float = 4.5
-var _cid_run: float = 7.0
+var _grove_camera_held: bool = false
 
 
 func _ready() -> void:
@@ -97,10 +97,12 @@ func choose_see() -> void:
 	_warned = true
 	_hear_only = false
 	_dismiss_warning()
-	_play_grove()
+	_arm_grove_camera()
 	if _skip_cinematic:
+		_cut_to_hall()
 		_finish_report()
 		return
+	await _hold_grove_then_cut()
 	start_report()
 
 
@@ -226,6 +228,10 @@ func grove_shown() -> bool:
 	return _grove_shown
 
 
+func grove_camera_held() -> bool:
+	return _grove_camera_held
+
+
 func daughters_present() -> bool:
 	var elvira: Node = get_node_or_null("Elvira")
 	var sol: Node = get_node_or_null("Sol")
@@ -249,7 +255,6 @@ func _present_warning() -> void:
 		ui.call("present")
 	else:
 		ui.visible = true
-	_prefer_hear_only()
 
 
 func _dismiss_warning() -> void:
@@ -262,7 +267,7 @@ func _dismiss_warning() -> void:
 		ui.visible = false
 
 
-func _play_grove() -> void:
+func _arm_grove_camera() -> void:
 	_grove_shown = true
 	var grove: Node3D = get_node_or_null("Grove") as Node3D
 	if grove:
@@ -274,10 +279,17 @@ func _play_grove() -> void:
 	var grove_cam: Camera3D = get_node_or_null("Grove/Camera3D") as Camera3D
 	if grove_cam:
 		grove_cam.current = true
+		_grove_camera_held = true
 	var grove_name: Label3D = get_node_or_null("Grove/PlaceName") as Label3D
 	if grove_name:
 		grove_name.text = _loc(GROVE_KEY)
 		grove_name.visible = true
+
+
+func _hold_grove_then_cut() -> void:
+	var tree := get_tree()
+	if tree:
+		await tree.create_timer(GROVE_HOLD_SEC).timeout
 	_cut_to_hall()
 
 
@@ -288,7 +300,9 @@ func _cut_to_hall() -> void:
 	var cid_cam: Camera3D = get_node_or_null("Cid/CameraRig/Camera3D") as Camera3D
 	if cid_cam:
 		cid_cam.current = true
-	# Grove stays as a shown place after the cut so the linen can be inspected.
+	var grove: Node3D = get_node_or_null("Grove") as Node3D
+	if grove:
+		grove.visible = false
 
 
 func _hide_grove() -> void:
@@ -380,6 +394,12 @@ func _seat_family() -> void:
 func _set_body_active(node: Node, active: bool) -> void:
 	if node == null:
 		return
+	_set_body_colliders(node, active)
+	if node is Node3D:
+		(node as Node3D).visible = active
+
+
+func _set_body_colliders(node: Node, active: bool) -> void:
 	node.process_mode = Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if node is CollisionObject3D:
 		var body := node as CollisionObject3D
@@ -388,10 +408,8 @@ func _set_body_active(node: Node, active: bool) -> void:
 		body.collision_layer = int(body.get_meta("host_layer")) if active else 0
 		if node is Area3D:
 			(node as Area3D).monitorable = active
-	if node is Node3D:
-		(node as Node3D).visible = active
 	for child in node.get_children():
-		_set_body_active(child, active)
+		_set_body_colliders(child, active)
 
 
 func _connect_zones() -> void:
@@ -417,22 +435,10 @@ func _freeze_cid(on: bool) -> void:
 	var cid: Node = get_node_or_null("Cid")
 	if cid == null:
 		return
-	if cid.has_method("set_chapter_asleep"):
-		cid.call("set_chapter_asleep", on)
-	elif "chapter_asleep" in cid:
-		cid.chapter_asleep = on
-	if on:
-		if "walk_speed" in cid:
-			_cid_walk = float(cid.walk_speed)
-			cid.walk_speed = 0.0
-		if "run_speed" in cid:
-			_cid_run = float(cid.run_speed)
-			cid.run_speed = 0.0
-	else:
-		if "walk_speed" in cid:
-			cid.walk_speed = _cid_walk
-		if "run_speed" in cid:
-			cid.run_speed = _cid_run
+	if cid.has_method("set_chapter_locked"):
+		cid.call("set_chapter_locked", on)
+	elif "chapter_locked" in cid:
+		cid.chapter_locked = on
 
 
 func _hold_cid_mesura(on: bool) -> void:
@@ -479,15 +485,6 @@ func _hide_choice() -> void:
 		ui.call("dismiss")
 	else:
 		ui.visible = false
-
-
-func _prefer_hear_only() -> bool:
-	var opts := _autoload("OptionsService")
-	if opts == null:
-		return false
-	if "corpes_hear_only" in opts:
-		return bool(opts.get("corpes_hear_only"))
-	return false
 
 
 func _checkpoint() -> void:

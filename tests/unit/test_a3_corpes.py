@@ -231,7 +231,13 @@ class TestA3CorpesAftermath(unittest.TestCase):
         self.assertIn("current_scene != self", source)
         self.assertIn("goto", source)
         self.assertIn("func _ready", source)
-        self.assertIn("OptionsService", source)
+        self.assertIn("set_chapter_locked", source)
+        self.assertIn("GROVE_HOLD_SEC", source)
+        self.assertIn("_arm_grove_camera", source)
+        self.assertIn("_hold_grove_then_cut", source)
+        self.assertIn("_set_body_colliders", source)
+        self.assertNotIn("set_chapter_asleep", source)
+        self.assertNotIn("OptionsService", source)
         self.assertNotIn("ride_host", source)
         self.assertNotIn("func skip_fact", source)
         self.assertNotIn("func _enter_tree", source)
@@ -315,6 +321,12 @@ class TestA3CorpesAftermath(unittest.TestCase):
         self.assertIn("dialogue", types)
         self.assertIn("honor_event", types)
         self.assertIn("travel_spawn", types)
+        honor_ids = [
+            step.get("id")
+            for step in payload["steps"]
+            if isinstance(step, dict) and step.get("type") == "honor_event"
+        ]
+        self.assertEqual(honor_ids, ["corpes_news"])
         flags = []
         for step in payload["steps"]:
             if isinstance(step, dict):

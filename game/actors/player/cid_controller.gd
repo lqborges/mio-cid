@@ -47,6 +47,8 @@ var _leap_airborne: bool = false
 var _horse: HorseCompanionScript = null
 ## Chapter sleep (lion hall). Walk_speed 0 is not enough: dodge uses dodge_speed.
 var chapter_asleep: bool = false
+## Pose-free halt. Do not reuse chapter_asleep — that lays Visual down.
+var chapter_locked: bool = false
 
 
 func _ready() -> void:
@@ -88,6 +90,14 @@ func set_chapter_asleep(on: bool) -> void:
 		_clear_sleep_pose()
 
 
+func set_chapter_locked(on: bool) -> void:
+	chapter_locked = on
+	if on:
+		_clear_action_queues()
+		velocity.x = 0.0
+		velocity.z = 0.0
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
@@ -95,6 +105,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventMouseMotion or event is InputEventJoypadMotion:
 			return
 		_notify_chapter_sleep_input()
+		get_viewport().set_input_as_handled()
+		return
+	if chapter_locked:
+		if event is InputEventMouseMotion or event is InputEventJoypadMotion:
+			return
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("dodge"):
@@ -134,6 +149,14 @@ func _physics_process(delta: float) -> void:
 		velocity.z = 0.0
 		_apply_gravity(delta)
 		_apply_sleep_pose()
+		move_and_slide()
+		_lock_isometric_camera()
+		return
+	if chapter_locked:
+		_clear_action_queues()
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_apply_gravity(delta)
 		move_and_slide()
 		_lock_isometric_camera()
 		return

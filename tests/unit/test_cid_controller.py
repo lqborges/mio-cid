@@ -52,6 +52,8 @@ class TestCidController(unittest.TestCase):
         self.assertIn("click_move", source)
         self.assertIn("dodge", source)
         self.assertIn("chapter_asleep", source)
+        self.assertIn("chapter_locked", source)
+        self.assertIn("set_chapter_locked", source)
         self.assertIn("_apply_sleep_pose", source)
         self.assertNotRegex(source, re.compile(r"^func roll\b", re.MULTILINE))
         self.assertNotIn("SpringArm3D", source)

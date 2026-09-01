@@ -218,6 +218,7 @@ func _check_spawn_does_not_auto_flow() -> PackedStringArray:
 	var felez: Node = _world.get_node_or_null("Felez")
 	if felez and bool(felez.visible):
 		failures.append("Félez must enter with the report, not at spawn")
+	failures.append_array(_check_cid_standing(_world, "spawn"))
 	return failures
 
 
@@ -259,6 +260,12 @@ func _check_hear_only_records_fact() -> PackedStringArray:
 	var felez: Node = world.get_node_or_null("Felez")
 	if felez == null or not bool(felez.visible):
 		failures.append("Félez must report in the hall on hear-only")
+	var lod: Node = world.get_node_or_null("Felez/Visual/MeshCapsule")
+	if lod and bool(lod.visible):
+		failures.append("Félez LOD MeshCapsule must stay hidden after the report")
+	if bool(world.call("grove_camera_held")):
+		failures.append("hear-only must skip the grove camera")
+	failures.append_array(_check_cid_standing(world, "hear-only"))
 	if _logged.count("corpes_news") < 1:
 		failures.append("hear-only must apply corpes_news, got %s" % str(_logged))
 	if _honor and _honor.state:
@@ -296,11 +303,14 @@ func _check_default_shows_grove_same_flags() -> PackedStringArray:
 		failures.append("default path must not be hear-only")
 	if not bool(world.call("grove_shown")):
 		failures.append("default path must show the empty grove")
-	var grove: Node = world.get_node_or_null("Grove")
-	if grove == null or not bool(grove.visible):
-		failures.append("default grove node must be visible")
+	if not bool(world.call("grove_camera_held")):
+		failures.append("default path must hold the grove camera before the hall cut")
 	if world.get_node_or_null("Grove/Linen") == null:
 		failures.append("default path must include the linen")
+	var grove: Node = world.get_node_or_null("Grove")
+	if grove and bool(grove.visible):
+		failures.append("grove must hide after the camera cut")
+	failures.append_array(_check_cid_standing(world, "default"))
 	if not bool(world.call("fact_recorded")):
 		failures.append("default path must record the same fact")
 	if _logged.count("corpes_news") < 1:
@@ -420,6 +430,19 @@ func _on_honor_logged(event: Variant) -> void:
 
 func _on_beat_completed(beat_id: StringName) -> void:
 	_completed.append(String(beat_id))
+
+
+func _check_cid_standing(world: Node, label: String) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var cid: Node = world.get_node_or_null("Cid")
+	if cid == null:
+		return failures
+	if "chapter_asleep" in cid and bool(cid.chapter_asleep):
+		failures.append("%s: Cid must not use chapter_asleep" % label)
+	var visual: Node3D = cid.get_node_or_null("Visual") as Node3D
+	if visual and not visual.rotation.is_zero_approx():
+		failures.append("%s: Cid Visual.rotation must stay identity, got %s" % [label, visual.rotation])
+	return failures
 
 
 func _prep_campaign() -> void:

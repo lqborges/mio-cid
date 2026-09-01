@@ -25,9 +25,8 @@
       ]
     },
     {
-      "id": "honor",
-      "type": "honor_event",
-      "event": "corpes_news"
+      "id": "corpes_news",
+      "type": "honor_event"
     },
     {
       "id": "mesura_or_rage",
