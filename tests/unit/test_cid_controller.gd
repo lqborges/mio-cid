@@ -11,9 +11,7 @@ func _initialize() -> void:
 	_failures.append_array(_check_cid_scene())
 	_failures.append_array(_check_arena_scene())
 	_failures.append_array(_check_desktop_lmb_walks())
-	_failures.append_array(_check_dialogue_does_not_queue_interact())
-	_failures.append_array(_check_false_interact_does_not_block_walk())
-	call_deferred("_begin_leap_tick")
+	call_deferred("_begin_input_routing_checks")
 
 
 func _check_cid_scene() -> PackedStringArray:
@@ -110,8 +108,11 @@ func _check_dialogue_does_not_queue_interact() -> PackedStringArray:
 	get_root().add_child(cid)
 	var layer := CanvasLayer.new()
 	layer.name = "FakeBalloon"
-	layer.add_to_group("talk_balloon")
+	layer.visible = true
 	get_root().add_child(layer)
+	layer.add_to_group("talk_balloon")
+	if cid.has_method("_dialogue_open") and not bool(cid.call("_dialogue_open")):
+		failures.append("talk_balloon group must count as dialogue open")
 	var key := InputEventAction.new()
 	key.action = &"interact"
 	key.pressed = true
@@ -143,6 +144,12 @@ func _check_false_interact_does_not_block_walk() -> PackedStringArray:
 	body.free()
 	cid.free()
 	return failures
+
+
+func _begin_input_routing_checks() -> void:
+	_failures.append_array(_check_dialogue_does_not_queue_interact())
+	_failures.append_array(_check_false_interact_does_not_block_walk())
+	_begin_leap_tick()
 
 
 func _begin_leap_tick() -> void:

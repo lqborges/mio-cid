@@ -17,7 +17,16 @@ func ensure(node: Node) -> void:
 
 
 func _on_node_added(node: Node) -> void:
-	_consider.call_deferred(node)
+	if node == null:
+		return
+	_consider_deferred.call_deferred(node.get_instance_id())
+
+
+func _consider_deferred(id: int) -> void:
+	var node := instance_from_id(id) as Node
+	if node == null or not is_instance_valid(node) or node.is_queued_for_deletion():
+		return
+	_consider(node)
 
 
 func _walk(node: Node) -> void:
