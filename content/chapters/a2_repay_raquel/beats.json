@@ -1,0 +1,25 @@
+{
+  "id": "a2_repay_raquel",
+  "repay_marks": 600,
+  "steps": [
+    {
+      "id": "arrive",
+      "type": "cinematic",
+      "camera": "place_name"
+    },
+    {
+      "id": "pay",
+      "type": "dialogue",
+      "file": "res://content/chapters/a2_repay_raquel/repay.dialogue",
+      "start": "pay"
+    },
+    {
+      "id": "repay_raquel",
+      "type": "honor_event"
+    },
+    {
+      "id": "hub",
+      "type": "blocking"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Spoken lines are CSV keys. Raquel and Vidas speak as separate people.
+
+~ start
+=> pay
+
+~ pay
+Álvar: a2_repay_raquel.minaya
+Raquel: a2_repay_raquel.raquel
+Vidas: a2_repay_raquel.vidas
+Cid: a2_repay_raquel.pay
+=> END
