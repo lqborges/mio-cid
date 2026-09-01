@@ -113,7 +113,7 @@ class TestEmbassy2EscortAndGift(unittest.TestCase):
             self.assertTrue((ROOT / rel).is_file(), rel)
         self.assertTrue((ROOT / "content/chapters/a2_yusuf/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())
-        self.assertFalse((ROOT / "data/gifts/embassy_3.json").is_file())
+        self.assertTrue((ROOT / "data/gifts/embassy_3.json").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_leon/world.tscn").is_file())
 
     def test_gift_json_same_shape_higher_honor(self) -> None:
@@ -164,8 +164,8 @@ class TestEmbassy2EscortAndGift(unittest.TestCase):
 
     def test_gift_classes_reuse_ledger_not_autoload(self) -> None:
         king = _read("game/systems/gifts/gift_to_king.gd")
-        self.assertIn("embassy2_gift", king)
-        self.assertIn("_spend_escrow_first", king)
+        self.assertIn("honor_event", king)
+        self.assertIn("func _spend(", king)
         self.assertIn("royal_escrow_horses", king)
         self.assertIn("func resolve(", king)
         option = _read("game/systems/gifts/gift_option.gd")
