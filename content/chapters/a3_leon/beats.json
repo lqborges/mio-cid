@@ -1,0 +1,38 @@
+{
+  "id": "a3_leon",
+  "steps": [
+    {
+      "id": "escape",
+      "type": "cinematic",
+      "set_flags": [
+        "lion_escaped",
+        "ferran_hid_leon",
+        "diego_hid_leon",
+        "infantes_hid_leon",
+        "infantes_cowardice_leon"
+      ]
+    },
+    {
+      "id": "joke",
+      "type": "dialogue",
+      "file": "res://content/chapters/a3_leon/leon.dialogue",
+      "start": "joke"
+    },
+    {
+      "id": "mesura_or_rage",
+      "type": "choice",
+      "white": "lion_mesura",
+      "red": "lion_rage"
+    },
+    {
+      "id": "return",
+      "type": "blocking",
+      "set_flags": ["lion_returned"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_bucar"
+    }
+  ]
+}

@@ -45,6 +45,8 @@ var _queued_interact: bool = false
 var _queued_dump: bool = false
 var _leap_airborne: bool = false
 var _horse: HorseCompanionScript = null
+## Chapter sleep (lion hall). Walk_speed 0 is not enough: dodge uses dodge_speed.
+var chapter_asleep: bool = false
 
 
 func _ready() -> void:
@@ -75,8 +77,25 @@ func is_mounted() -> bool:
 	return _horse != null and is_instance_valid(_horse) and _horse.is_mounted()
 
 
+func set_chapter_asleep(on: bool) -> void:
+	chapter_asleep = on
+	if on:
+		_clear_action_queues()
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_apply_sleep_pose()
+	else:
+		_clear_sleep_pose()
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
+		return
+	if chapter_asleep:
+		if event is InputEventMouseMotion or event is InputEventJoypadMotion:
+			return
+		_notify_chapter_sleep_input()
+		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("dodge"):
 		_queued_dodge = true
@@ -108,6 +127,16 @@ func _physics_process(delta: float) -> void:
 	# Yaw on the body would orbit the child camera — keep rotation on Visual only.
 	rotation = Vector3.ZERO
 	_tick_cooldowns(delta)
+	if chapter_asleep:
+		# _orient_visual look_at stands the capsule; dodge/leap ignore walk_speed.
+		_clear_action_queues()
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_apply_gravity(delta)
+		_apply_sleep_pose()
+		move_and_slide()
+		_lock_isometric_camera()
+		return
 	_update_mesura_hold()
 	if _horse == null or not is_instance_valid(_horse):
 		_horse = _find_horse()
@@ -296,12 +325,47 @@ func _update_facing(wish: Vector3) -> void:
 
 
 func _orient_visual() -> void:
-	if visual == null:
+	if visual == null or chapter_asleep:
 		return
 	var pt := global_position + Vector3(_facing.x, 0.0, _facing.z)
 	if pt.distance_squared_to(global_position) < 0.0001:
 		return
 	visual.look_at(pt, Vector3.UP)
+
+
+func _apply_sleep_pose() -> void:
+	if visual == null:
+		return
+	visual.rotation_degrees = Vector3(90.0, 0.0, 0.0)
+
+
+func _clear_sleep_pose() -> void:
+	if visual == null:
+		return
+	visual.rotation_degrees = Vector3.ZERO
+
+
+func _clear_action_queues() -> void:
+	_queued_dodge = false
+	_queued_slam = false
+	_queued_leap = false
+	_queued_shout = false
+	_queued_swap = false
+	_queued_dump = false
+	_queued_interact = false
+	_queued_click_pos = null
+	_click_target = null
+	_dodge_left = 0.0
+	_leap_airborne = false
+
+
+func _notify_chapter_sleep_input() -> void:
+	var node: Node = get_parent()
+	while node:
+		if node.has_method("on_sleep_input"):
+			node.call("on_sleep_input")
+			return
+		node = node.get_parent()
 
 
 func _stick() -> Vector2:

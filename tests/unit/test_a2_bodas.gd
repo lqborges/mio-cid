@@ -345,14 +345,10 @@ func _check_leon_gated() -> PackedStringArray:
 	var world: Node = (packed as PackedScene).instantiate()
 	get_root().add_child(world)
 	var scene_before: Node = current_scene
-	if ResourceLoader.exists(LEON):
-		failures.append("a3_leon must not ship in this PR")
-	if world.has_method("can_leave_to_leon") and bool(world.call("can_leave_to_leon")):
-		failures.append("leon exit must stay closed while a3_leon is missing")
-	if world.has_method("travel_to_leon") and bool(world.call("travel_to_leon")):
-		failures.append("travel_to_leon must no-op when dest is missing")
+	if not ResourceLoader.exists(LEON):
+		failures.append("a3_leon must ship")
 	if current_scene != scene_before:
-		failures.append("missing leon must not change_scene")
+		failures.append("leon gate check must not change_scene")
 	if not ResourceLoader.exists(TAGUS):
 		failures.append("a2_tagus must ship with bodas")
 	world.free()

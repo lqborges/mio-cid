@@ -289,7 +289,8 @@
     },
     {
       "from": "a3_leon",
-      "to": "a3_bucar"
+      "to": "a3_bucar",
+      "req_flags": ["lion_returned"]
     },
     {
       "from": "a3_bucar",

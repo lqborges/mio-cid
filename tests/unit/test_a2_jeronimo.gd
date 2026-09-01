@@ -7,6 +7,7 @@ const SIEGE := "res://content/chapters/a2_siege/world.tscn"
 const TEVAR := "res://content/chapters/a1_tevar/world.tscn"
 const EMBASSY2 := "res://content/chapters/a2_embassy2/world.tscn"
 const LEON := "res://content/chapters/a3_leon/world.tscn"
+const BUCAR := "res://content/chapters/a3_bucar/world.tscn"
 const CID := "res://content/art/characters/cid/cid.tscn"
 const HORSE := "res://content/art/characters/horse/horse.tscn"
 const APPOINT_KEY := "a2_jeronimo.appoint"
@@ -490,8 +491,10 @@ func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if not ResourceLoader.exists(EMBASSY2):
 		failures.append("a2_embassy2 must ship with the hub")
-	if ResourceLoader.exists(LEON):
-		failures.append("a3_leon must not ship in this PR")
+	if not ResourceLoader.exists(LEON):
+		failures.append("a3_leon must ship")
+	if ResourceLoader.exists(BUCAR):
+		failures.append("a3_bucar must not ship in this PR")
 	return failures
 
 

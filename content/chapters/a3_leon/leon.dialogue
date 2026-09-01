@@ -1,0 +1,22 @@
+# Spoken lines are CSV keys. Infantes hide; the Cid returns the lion.
+
+~ start
+=> joke
+
+~ joke
+Alvar: a3_leon.ring
+Cid: a3_leon.wake
+Alvar: a3_leon.joke
+Pero: a3_leon.ferran_hide
+Martin: a3_leon.diego_hide
+=> END
+
+~ mesura
+Cid: a3_leon.mesura_done
+Alvar: a3_leon.returned
+=> END
+
+~ rage
+Cid: a3_leon.rage_done
+Alvar: a3_leon.returned
+=> END

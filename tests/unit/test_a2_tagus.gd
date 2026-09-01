@@ -321,8 +321,8 @@ func _check_later_beats() -> PackedStringArray:
 		failures.append("a2_repay_raquel must remain shipped")
 	if not ResourceLoader.exists(BODAS):
 		failures.append("a2_bodas must ship")
-	if ResourceLoader.exists(LEON):
-		failures.append("a3_leon must not ship in this PR")
+	if not ResourceLoader.exists(LEON):
+		failures.append("a3_leon must ship")
 	return failures
 
 
