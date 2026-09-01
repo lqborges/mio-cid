@@ -27,6 +27,7 @@ AUTOLOAD_ORDER = [
     "MobileLook",
     "HumanoidLooks",
     "DialogueManager",
+    "PauseMenu",
 ]
 AUTOLOAD_SCRIPTS = {
     "EventBus": "game/autoload/event_bus.gd",
@@ -40,6 +41,7 @@ AUTOLOAD_SCRIPTS = {
     "MobileLook": "game/autoload/mobile_look.gd",
     "HumanoidLooks": "game/autoload/humanoid_looks.gd",
     "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
+    "PauseMenu": "game/ui/pause_menu.gd",
 }
 # ChapterRunner is implemented in PR-06. No remaining autoload stubs.
 STUBS = {}
@@ -126,9 +128,10 @@ class TestAutoloadsAndEventBus(unittest.TestCase):
             "func flags(",
         ):
             self.assertIn(getter, source)
-        # Facade only: no exported/cached game fields.
+        # Facade only: no exported fields. Plot swords are the documented cache
+        # (no inventory autoload); nothing else may live on GameState.
         self.assertIsNone(re.search(r"^@export", source, re.MULTILINE))
-        self.assertIsNone(re.search(r"^var ", source, re.MULTILINE))
+        self.assertEqual(re.findall(r"^var (\w+)", source, re.MULTILINE), ["_swords"])
 
     def test_poem_formulas_csv_has_montaner_v20(self) -> None:
         path = ROOT / "content/locales/poem_formulas.csv"

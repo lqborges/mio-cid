@@ -25,6 +25,7 @@ func _check_autoloads_are_nodes() -> PackedStringArray:
 		"MobileLook",
 		"HumanoidLooks",
 		"DialogueManager",
+		"PauseMenu",
 	])
 	for name in names:
 		var node: Node = get_root().get_node_or_null(NodePath(name))
