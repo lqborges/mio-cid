@@ -1,0 +1,38 @@
+{
+  "id": "a3_despedida",
+  "steps": [
+    {
+      "id": "depart",
+      "type": "dialogue",
+      "file": "res://content/chapters/a3_despedida/despedida.dialogue",
+      "start": "depart",
+      "set_flags": ["despedida_agreed"]
+    },
+    {
+      "id": "gift_swords",
+      "type": "cinematic",
+      "set_flags": ["swords_gifted"]
+    },
+    {
+      "id": "leave_daughters",
+      "type": "cinematic",
+      "set_flags": ["daughters_left"]
+    },
+    {
+      "id": "ambush",
+      "type": "blocking"
+    },
+    {
+      "id": "lets_go",
+      "type": "dialogue",
+      "file": "res://content/chapters/a3_despedida/despedida.dialogue",
+      "start": "lets_go",
+      "set_flags": ["avengalvon_alive_despedida"]
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_corpes"
+    }
+  ]
+}

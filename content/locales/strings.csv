@@ -172,6 +172,7 @@ a2_repay_raquel.not_owed,No hay deuda. Las arcas no se llenaron de arena.,There 
 a2_repay_raquel.pay_first,Primero pagad a Raquel y a Vidas.,Pay Raquel and Vidas first.
 a2_repay_raquel.to_tagus,Hacia el Tajo,Toward the Tagus
 char.alfonso,Alfonso,Alfonso
+
 char.ferran_gonzalez,Ferrán González,Ferrán González
 char.diego_gonzalez,Diego González,Diego González
 a2_tagus.arrive,Cortes de tres días junto al Tajo. Alfonso espera.,Three days of court by the Tagus. Alfonso waits.
@@ -219,3 +220,13 @@ a3_bucar.flee,Ferrán y Diego huyen. No esperan el encuentro.,Ferrán and Diego 
 a3_bucar.cover,Los capitanes cubren el hueco. La vergüenza queda escrita.,The captains cover the gap. The shame is written down.
 a3_bucar.win,Búcar cae en la orilla. Valencia queda.,Búcar falls on the shore. Valencia holds.
 a3_bucar.tizona_kept,Tizona queda en mi mano. No es botín.,Tizona stays in my hand. It is not booty.
+a3_despedida.prompt,Los infantes piden irse con Elvira y Sol. Las espadas irán con ellas.,The infantes ask to leave with Elvira and Sol. The swords will go with them.
+a3_despedida.agree,Id. Colada y Tizona os las doy. No es botín.,Go. I give you Colada and Tizona. It is not booty.
+a3_despedida.swords,Colada y Tizona van con los infantes. Quedan dadas.,Colada and Tizona go with the infantes. They are given.
+a3_despedida.daughters_leave,Elvira y Sol salen de Valencia con los infantes.,Elvira and Sol leave Valencia with the infantes.
+a3_despedida.jimena_stay,Jimena queda en Valencia.,Jimena stays in Valencia.
+a3_despedida.road,El camino. Avengalvón guarda a las hijas.,The road. Avengalvón keeps the daughters.
+a3_despedida.ambush,Los infantes quieren matar a Avengalvón en el camino.,The infantes want to kill Avengalvón on the road.
+a3_despedida.lets_go,Avengalvón los deja ir. Él vive.,Avengalvón lets them go. He lives.
+a3_despedida.need_agree,Hasta que no acordéis la despedida; las espadas no se dan.,Until you agree to the departure; the swords are not given.
+fail.avengalvon_dead,Avengalvón debía vivir. Recargad.,Avengalvón had to live. Reload.

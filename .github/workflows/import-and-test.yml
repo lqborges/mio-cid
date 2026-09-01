@@ -133,7 +133,6 @@ jobs:
 
       - name: Run Python embassy2 tests
         run: python3 tests/unit/test_embassy2.py
-
       - name: Run Python a2 Yusuf tests
         run: python3 tests/unit/test_a2_yusuf.py
 
@@ -154,6 +153,8 @@ jobs:
 
       - name: Run Python a3_bucar tests
         run: python3 tests/unit/test_a3_bucar.py
+      - name: Run Python a3_despedida tests
+        run: python3 tests/unit/test_a3_despedida.py
 
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
@@ -276,6 +277,7 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy2.gd
 
+<<<<<<< HEAD
       - name: Run a2 Yusuf headless test
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -314,6 +316,10 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_bucar.gd
+      - name: Run a3_despedida departure/Avengalvón headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_despedida.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

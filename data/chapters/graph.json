@@ -295,11 +295,13 @@
     {
       "from": "a3_bucar",
       "to": "a3_despedida",
+      "req_flags": ["tizona_acquired"],
       "set_flags": ["tizona_acquired"]
     },
     {
       "from": "a3_despedida",
-      "to": "a3_corpes"
+      "to": "a3_corpes",
+      "set_flags": ["swords_gifted", "avengalvon_alive_despedida"]
     },
     {
       "from": "a3_corpes",

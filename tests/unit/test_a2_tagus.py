@@ -123,7 +123,8 @@ class TestA2TagusPardon(unittest.TestCase):
             self.assertTrue((ROOT / rel).is_file(), rel)
         self.assertTrue((ROOT / "content/chapters/a3_leon/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_bucar/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
+        self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
 
     def test_greybox_three_day_court(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")

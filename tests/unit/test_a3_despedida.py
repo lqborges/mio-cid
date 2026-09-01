@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Structural tests for a3_bucar shore battle / Infantes flee / Tizona.
+"""Structural tests for a3_despedida departure / swords gifted / Avengalvón road.
 
-Run: python3 tests/unit/test_a3_bucar.py
+Run: python3 tests/unit/test_a3_despedida.py
 """
 
 from __future__ import annotations
@@ -34,8 +34,8 @@ DENY = (
     "holy_war",
 )
 
-CHAPTER = "content/chapters/a3_bucar"
-COWARDICE_FLAGS = ("infantes_fled_bucar", "captains_covered_bucar")
+CHAPTER = "content/chapters/a3_despedida"
+GIFT_FLAGS = ("despedida_agreed", "swords_gifted", "daughters_left", "avengalvon_alive_despedida")
 
 
 def _read(rel: str) -> str:
@@ -103,27 +103,29 @@ def _zone_aabb(
     )
 
 
-class TestA3BucarTizona(unittest.TestCase):
+class TestA3DespedidaSwordsAndRoad(unittest.TestCase):
     def test_required_files_exist(self) -> None:
         for rel in (
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/world.gd",
-            f"{CHAPTER}/bucar.dialogue",
+            f"{CHAPTER}/despedida.dialogue",
             f"{CHAPTER}/beats.json",
+            f"{CHAPTER}/depart_npc.gd",
             "game/systems/inventory/sword_item.gd",
+            "data/items/colada.json",
             "data/items/tizona.json",
-            "data/honor_events/bucar.json",
-            "data/characters/bucar.json",
+            "data/characters/avengalvon.json",
             "content/art/characters/cid/cid.tscn",
             "content/art/characters/horse/horse.tscn",
             "content/art/characters/dummy/dummy.tscn",
+            "content/chapters/a3_bucar/world.tscn",
+            "content/chapters/a3_leon/world.tscn",
+            "content/chapters/a2_embassy2/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertTrue((ROOT / "content/chapters/a3_leon/world.tscn").is_file())
-        self.assertTrue((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
         self.assertFalse((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
 
-    def test_scene_is_cheap_greybox_shore(self) -> None:
+    def test_scene_is_cheap_greybox_hall_and_road(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
         self.assertIn("cid.tscn", scene)
         self.assertIn("horse.tscn", scene)
@@ -140,42 +142,45 @@ class TestA3BucarTizona(unittest.TestCase):
         self.assertIn('type="CSGBox3D"', scene)
         self.assertIn('type="CSGCylinder3D"', scene)
         self.assertGreaterEqual(scene.count('type="CSGBox3D"'), 8)
-        self.assertGreaterEqual(scene.count('[node name="Palm'), 6)
         self.assertIn("cone = true", scene)
         for node in (
-            "Water",
-            "Shore",
-            "Wall",
-            "BattleZone",
-            "Host",
-            "Bucar",
+            "Hall",
+            "GiftTable",
+            "GiftZone",
+            "AmbushZone",
+            "Avengalvon",
             "Infantes",
             "Ferran",
             "Diego",
+            "Jimena",
+            "Elvira",
+            "Sol",
             "Mesnada",
             "Cid",
             "Horse",
             "PlaceName",
         ):
             self.assertIn(f'[node name="{node}"', scene, node)
-        self.assertIn('character_id = &"bucar"', scene)
+        self.assertIn('character_id = &"avengalvon"', scene)
         self.assertIn('character_id = &"ferran_gonzalez"', scene)
         self.assertIn('character_id = &"diego_gonzalez"', scene)
         ferran_block = scene[scene.find('[node name="Ferran"') : scene.find('[node name="Diego"')]
-        diego_block = scene[scene.find('[node name="Diego"') : scene.find('[node name="Host"')]
-        bucar_block = scene[scene.find('[node name="Bucar"') : scene.find('[node name="Dummy1"')]
+        diego_block = scene[scene.find('[node name="Diego"') : scene.find('[node name="Mesnada"')]
+        avengalvon_block = scene[
+            scene.find('[node name="Avengalvon"') : scene.find('[node name="Infantes"')
+        ]
         self.assertIn("spectator = true", ferran_block)
         self.assertIn("spectator = true", diego_block)
-        self.assertNotIn("spectator = true", bucar_block)
+        self.assertNotIn("spectator = true", avengalvon_block)
         self.assertIn("CavalryCharge", _read("content/art/characters/horse/horse.tscn"))
         self.assertIn("NavigationRegion3D", scene)
-        self.assertNotIn('[node name="RestZone"', scene)
-        self.assertNotIn('[node name="StormZone"', scene)
-        self.assertNotIn('[node name="ChargeZone"', scene)
         self.assertNotIn("GPUParticles3D", scene)
-        battle_at = scene.find('[node name="BattleZone"')
-        self.assertGreaterEqual(battle_at, 0)
-        self.assertIn("collision_mask = 130", scene[battle_at : battle_at + 280])
+        gift_at = scene.find('[node name="GiftZone"')
+        ambush_at = scene.find('[node name="AmbushZone"')
+        self.assertGreaterEqual(gift_at, 0)
+        self.assertGreaterEqual(ambush_at, 0)
+        self.assertIn("collision_mask = 130", scene[gift_at : gift_at + 280])
+        self.assertIn("collision_mask = 130", scene[ambush_at : ambush_at + 280])
 
     def test_zones_do_not_overlap_spawn(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")
@@ -187,100 +192,94 @@ class TestA3BucarTizona(unittest.TestCase):
         cid_max = (cid[0] + cid_radius, cid[1] + cid_height, cid[2] + cid_radius)
         horse_min = (horse[0] - 0.5, horse[1], horse[2] - 0.8)
         horse_max = (horse[0] + 0.5, horse[1] + 1.4, horse[2] + 0.8)
-        battle_min, battle_max = _zone_aabb(scene, "BattleZone", "Box_battle")
-        battle_size = _subresource_size(scene, "Box_battle")
-        battle = _origin(scene, "BattleZone")
-        self.assertFalse(
-            _aabb_overlap(cid_min, cid_max, battle_min, battle_max),
-            f"BattleZone {battle} size {battle_size} overlaps Cid spawn {cid}",
-        )
-        self.assertFalse(
-            _aabb_overlap(horse_min, horse_max, battle_min, battle_max),
-            f"BattleZone overlaps Horse spawn {horse}",
-        )
-        self.assertGreater(abs(cid[2] - battle[2]), battle_size[2] / 2.0 + cid_radius)
+        for node_name, shape_id in (
+            ("GiftZone", "Box_gift"),
+            ("AmbushZone", "Box_ambush"),
+        ):
+            zmin, zmax = _zone_aabb(scene, node_name, shape_id)
+            origin = _origin(scene, node_name)
+            size = _subresource_size(scene, shape_id)
+            self.assertFalse(
+                _aabb_overlap(cid_min, cid_max, zmin, zmax),
+                f"{node_name} {origin} size {size} overlaps Cid spawn {cid}",
+            )
+            self.assertFalse(
+                _aabb_overlap(horse_min, horse_max, zmin, zmax),
+                f"{node_name} overlaps Horse spawn {horse}",
+            )
+            self.assertGreater(abs(cid[2] - origin[2]), size[2] / 2.0 + cid_radius)
 
-    def test_world_script_battle_flee_cover_win(self) -> None:
+    def test_world_script_gift_and_road(self) -> None:
         source = _read(f"{CHAPTER}/world.gd")
-        self.assertIn("func start_battle", source)
-        self.assertIn("func run_battle", source)
-        self.assertIn("func start_flee", source)
-        self.assertIn("func start_cover", source)
-        self.assertIn("func run_win", source)
-        self.assertIn("func start_win", source)
-        self.assertIn('await _walk_lines(resource, "win")', source)
-        self.assertIn("last_dialogue_speakers", source)
-        self.assertIn("PROCESS_MODE_DISABLED", source)
-        self.assertIn('set_order(&"hold")', source)
-        self.assertIn("bucar_win", source)
+        self.assertIn("func start_departure", source)
+        self.assertIn("func run_departure", source)
+        self.assertIn("func start_ambush", source)
+        self.assertIn("func run_ambush", source)
+        self.assertIn("func start_let_go", source)
+        self.assertIn("GIFTED_TO_INFANTES", source)
         self.assertIn("SwordItem", source)
-        self.assertIn("Phase.IN_HAND", source)
-        self.assertIn("infantes_fled_bucar", source)
-        self.assertIn("captains_covered_bucar", source)
-        self.assertIn("a3_despedida", source)
+        self.assertIn("colada", source)
+        self.assertIn("tizona", source)
+        self.assertIn("avengalvon_dead", source)
+        self.assertIn("hard_fail", source)
+        self.assertIn("fail_copy.gd", source)
+        self.assertIn("avengalvon_alive_despedida", source)
+        self.assertIn("keep_avengalvon", source)
+        self.assertIn("a3_corpes", source)
+        self.assertIn("ResourceLoader.exists", source)
         self.assertIn("hub_lock_cardena", source)
         self.assertIn("horse_companion", source)
         self.assertIn("can_travel", source)
         self.assertIn("autosave", source)
         self.assertIn("current_scene != self", source)
+        self.assertIn("goto", source)
         self.assertIn("func _ready", source)
         self.assertIn("lanza_body_limit", source)
-        self.assertIn("bucar", source)
+        self.assertIn("_restore_avengalvon_if_ready", source)
         self.assertIn("MesnadaMember.from_id", source)
-        self.assertIn("goto", source)
-        self.assertIn("ResourceLoader.exists", source)
-        self.assertIn("_protect_infantes", source)
-        self.assertIn("spectator", source)
-        finish = source.split("func _finish_win", 1)[1].split("func try_travel", 1)[0]
-        self.assertLess(finish.find("start_flee"), finish.find("_won = true"))
-        self.assertNotIn("if _fled or _won", source)
-        self.assertNotIn("if _covered or _won", source)
-        leave = source.split("func _leave_for_despedida", 1)[1].split("func _dest_ready", 1)[0]
+        self.assertIn("must_survive_until", _read("data/characters/avengalvon.json"))
+        self.assertIn("PROCESS_MODE_DISABLED", source)
+        leave = source.split("func _leave_for_corpes", 1)[1].split("func _dest_ready", 1)[0]
         self.assertIn("not _dest_ready() or not _travel", leave)
         self.assertNotIn("func _enter_tree", source)
+        self.assertNotIn('apply_id(&"colada")', source)
         self.assertNotIn('apply_id(&"tizona")', source)
-        self.assertNotIn('apply_id("tizona")', source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))
         runner = _read("game/autoload/chapter_runner.gd")
-        self.assertIn("res://content/chapters/a3_bucar/world.tscn", runner)
-        self.assertIn('&"a3_bucar"', runner)
-        leon = _read("content/chapters/a3_leon/world.gd")
-        self.assertIn("BUCAR_SCENE", leon)
-        self.assertIn("goto", leon)
-        self.assertIn("current_scene != self", leon)
+        self.assertIn("res://content/chapters/a3_despedida/world.tscn", runner)
+        self.assertIn('&"a3_despedida"', runner)
+        bucar = _read("content/chapters/a3_bucar/world.gd")
+        self.assertIn("DEST_SCENE", bucar)
+        self.assertIn("goto", bucar)
+        self.assertIn("current_scene != self", bucar)
 
-    def test_sword_item_is_plot_not_loot(self) -> None:
+    def test_sword_item_gift_is_plot_not_loot(self) -> None:
         source = _read("game/systems/inventory/sword_item.gd")
-        self.assertRegex(source, re.compile(r"^class_name SwordItem$", re.MULTILINE))
-        tizona = json.loads(_read("data/items/tizona.json"))
-        self.assertEqual(tizona["id"], "tizona")
-        self.assertEqual(tizona["kind"], "plot_sword")
-        self.assertEqual(tizona["acquired_beat"], "a3_bucar")
-        self.assertFalse(tizona["lootable"])
-        self.assertFalse(tizona["sellable"])
-        self.assertEqual(tizona["wielded_in_lists_by"], "pero_bermudez")
+        self.assertIn("GIFTED_TO_INFANTES", source)
+        for stem in ("colada", "tizona"):
+            payload = json.loads(_read(f"data/items/{stem}.json"))
+            self.assertEqual(payload["kind"], "plot_sword")
+            self.assertEqual(payload["gifted_beat"], "a3_despedida")
+            self.assertFalse(payload["lootable"])
+            self.assertFalse(payload["sellable"])
         core = json.loads(_read("data/honor_events/core.json"))
         events = {row["id"]: row for row in core["events"]}
+        self.assertNotIn("colada", events)
         self.assertNotIn("tizona", events)
-        payload = json.loads(_read("data/honor_events/bucar.json"))
-        bucar_events = {row["id"]: row for row in payload["events"]}
-        self.assertNotIn("tizona", bucar_events)
-        win = bucar_events["bucar_win"]
-        self.assertEqual(win["deltas"]["honor"], 12)
-        self.assertIn("battle", win["tags"])
-        self.assertEqual(win["beat"], "a3_bucar")
-        self.assertFalse(win.get("hard_fail", False))
-        self.assertNotIn("tizona", json.dumps(win))
+        fail = _read("game/ui/fail_copy.gd")
+        self.assertIn('&"avengalvon_dead"', fail)
+        self.assertIn("_copy_for", fail)
+        self.assertIn("fail.%s", fail)
 
-    def test_bucar_json_taifa_king(self) -> None:
-        bucar = json.loads(_read("data/characters/bucar.json"))
-        self.assertEqual(bucar["id"], "bucar")
-        self.assertEqual(bucar["display_name_key"], "char.bucar")
-        self.assertEqual(bucar["role"], "taifa_king")
-        self.assertEqual(bucar["combat"], 68)
-        self.assertFalse(bucar["unkillable"])
-        self.assertEqual(bucar["recruitable_beat"], "a3_bucar")
+    def test_avengalvon_is_essential(self) -> None:
+        person = json.loads(_read("data/characters/avengalvon.json"))
+        self.assertEqual(person["id"], "avengalvon")
+        self.assertTrue(person["essential"])
+        self.assertEqual(person["must_survive_until"], "a3_despedida")
+        tres = _read("data/characters/avengalvon.tres")
+        self.assertIn('must_survive_until = &"a3_despedida"', tres)
+        self.assertIn("essential = true", tres)
 
     def test_strings_csv_spanish(self) -> None:
         with (ROOT / "content/locales/strings.csv").open(
@@ -288,128 +287,127 @@ class TestA3BucarTizona(unittest.TestCase):
         ) as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
-            "a3_bucar.battle",
-            "a3_bucar.flee",
-            "a3_bucar.cover",
-            "a3_bucar.win",
-            "a3_bucar.tizona_kept",
-            "char.bucar",
+            "a3_despedida.prompt",
+            "a3_despedida.agree",
+            "a3_despedida.swords",
+            "a3_despedida.daughters_leave",
+            "a3_despedida.ambush",
+            "a3_despedida.lets_go",
+            "fail.avengalvon_dead",
+            "char.avengalvon",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)
             self.assertTrue(rows[key]["en"].strip(), key)
-        self.assertIn("Búcar", rows["a3_bucar.battle"]["es"])
-        self.assertIn("playa", rows["a3_bucar.battle"]["es"].lower())
-        self.assertIn("huyen", rows["a3_bucar.flee"]["es"].lower())
-        self.assertIn("capitanes", rows["a3_bucar.cover"]["es"].lower())
-        self.assertIn("Tizona", rows["a3_bucar.tizona_kept"]["es"])
-        self.assertIn("botín", rows["a3_bucar.tizona_kept"]["es"].lower())
-        self.assertIn("Búcar", rows["char.bucar"]["es"])
+        self.assertIn("Colada", rows["a3_despedida.swords"]["es"])
+        self.assertIn("Tizona", rows["a3_despedida.swords"]["es"])
+        self.assertIn("botín", rows["a3_despedida.swords"]["es"].lower() + rows["a3_despedida.agree"]["es"].lower())
+        self.assertIn("Avengalvón", rows["a3_despedida.lets_go"]["es"])
+        self.assertIn("vive", rows["a3_despedida.lets_go"]["es"].lower())
+        self.assertIn("Avengalvón", rows["fail.avengalvon_dead"]["es"])
+        self.assertIn("Recargad", rows["fail.avengalvon_dead"]["es"])
+        self.assertNotEqual(rows["fail.avengalvon_dead"]["es"].lower(), "the name is empty")
         poem = _read("content/locales/poem_formulas.csv")
-        self.assertIn("a3_bucar.place_name,Playa de Valencia,", poem)
+        self.assertIn("a3_despedida.place_name,Valencia,", poem)
 
-    def test_dialogue_flee_cover_tizona(self) -> None:
-        text = _read(f"{CHAPTER}/bucar.dialogue")
-        self.assertIn("~ battle", text)
-        self.assertIn("~ flee", text)
-        self.assertIn("~ cover", text)
-        self.assertIn("~ win", text)
+    def test_dialogue_and_beats(self) -> None:
+        text = _read(f"{CHAPTER}/despedida.dialogue")
+        self.assertIn("~ depart", text)
+        self.assertIn("~ swords", text)
+        self.assertIn("~ ambush", text)
+        self.assertIn("~ lets_go", text)
         self.assertIn("Cid:", text)
-        self.assertIn("Alvar:", text)
-        self.assertIn("Pero:", text)
-        self.assertIn("a3_bucar.flee", text)
-        self.assertIn("a3_bucar.cover", text)
-        self.assertIn("a3_bucar.tizona_kept", text)
+        self.assertIn("Jimena:", text)
+        self.assertIn("Avengalvon:", text)
+        self.assertIn("a3_despedida.swords", text)
+        self.assertIn("a3_despedida.lets_go", text)
         self.assertNotIn("{{", text)
         lowered = text.lower()
         for banned in DENY:
             self.assertNotIn(banned, lowered, banned)
-        self.assertNotIn("honor_event=tizona", text)
-
-    def test_beats_then_despedida(self) -> None:
         payload = json.loads(_read(f"{CHAPTER}/beats.json"))
-        self.assertEqual(payload["id"], "a3_bucar")
+        self.assertEqual(payload["id"], "a3_despedida")
         nexts = [step.get("next") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("a3_despedida", nexts)
-        self.assertNotIn("a3_corpes", nexts)
+        self.assertIn("a3_corpes", nexts)
         types = [step.get("type") for step in payload["steps"] if isinstance(step, dict)]
         self.assertIn("cinematic", types)
-        self.assertIn("honor_event", types)
+        self.assertIn("dialogue", types)
         self.assertIn("travel_spawn", types)
-        ids = [step.get("id") for step in payload["steps"] if isinstance(step, dict)]
-        self.assertIn("bucar_win", ids)
-        self.assertNotIn("tizona", ids)
         flags = []
         for step in payload["steps"]:
             if isinstance(step, dict):
                 flags.extend(step.get("set_flags", []))
-        for flag in COWARDICE_FLAGS:
+        for flag in GIFT_FLAGS:
             self.assertIn(flag, flags, flag)
 
-    def test_graph_cannot_skip_bucar_or_leon(self) -> None:
+    def test_graph_cannot_skip_bucar(self) -> None:
         self.assertEqual(validate_main([]), 0)
         graph = load_graph(ROOT / "data" / "chapters" / "graph.json")
         pairs = {(edge["from"], edge["to"]) for edge in graph["edges"]}
-        self.assertIn(("a3_leon", "a3_bucar"), pairs)
         self.assertIn(("a3_bucar", "a3_despedida"), pairs)
+        self.assertIn(("a3_despedida", "a3_corpes"), pairs)
         self.assertNotIn(("a3_leon", "a3_despedida"), pairs)
+        self.assertNotIn(("a3_bucar", "a3_corpes"), pairs)
         locked = ["hub_lock_cardena"]
-        self.assertFalse(can_travel(graph, "a3_leon", "a3_bucar", locked))
-        self.assertTrue(
-            can_travel(graph, "a3_leon", "a3_bucar", locked + ["lion_returned"])
-        )
         self.assertFalse(can_travel(graph, "a3_bucar", "a3_despedida", locked))
         self.assertTrue(
             can_travel(graph, "a3_bucar", "a3_despedida", locked + ["tizona_acquired"])
         )
-        self.assertFalse(can_travel(graph, "a3_leon", "a3_despedida", locked + ["lion_returned"]))
-        self.assertFalse(can_travel(graph, "a2_bodas", "a3_bucar", locked))
-        bucar_out = next(
+        self.assertTrue(
+            can_travel(
+                graph,
+                "a3_despedida",
+                "a3_corpes",
+                locked + ["tizona_acquired", "swords_gifted"],
+            )
+        )
+        self.assertFalse(
+            can_travel(graph, "a3_leon", "a3_despedida", locked + ["lion_returned"])
+        )
+        dest_out = next(
             edge
             for edge in graph["edges"]
-            if edge["from"] == "a3_bucar" and edge["to"] == "a3_despedida"
+            if edge["from"] == "a3_despedida" and edge["to"] == "a3_corpes"
         )
-        self.assertEqual(bucar_out.get("set_flags"), ["tizona_acquired"])
-        self.assertEqual(bucar_out.get("req_flags"), ["tizona_acquired"])
-        node = next(n for n in graph["nodes"] if n["id"] == "a3_bucar")
-        self.assertEqual(node["scene"], "res://content/chapters/a3_bucar/world.tscn")
+        self.assertIn("swords_gifted", dest_out.get("set_flags", []))
+        self.assertIn("avengalvon_alive_despedida", dest_out.get("set_flags", []))
+        node = next(n for n in graph["nodes"] if n["id"] == "a3_despedida")
+        self.assertEqual(node["scene"], "res://content/chapters/a3_despedida/world.tscn")
 
-    def test_ci_keeps_leon_and_runs_bucar_after_import(self) -> None:
+    def test_ci_keeps_siblings_and_runs_despedida_after_import(self) -> None:
         workflow = _read(".github/workflows/import-and-test.yml")
+        self.assertIn("Run Python embassy2 tests", workflow)
         self.assertIn("Run Python a3_leon tests", workflow)
         self.assertIn("Run Python a3_bucar tests", workflow)
         self.assertIn("Run Python a3_despedida tests", workflow)
+        self.assertIn("tests/unit/test_embassy2.py", workflow)
         self.assertIn("tests/unit/test_a3_leon.py", workflow)
         self.assertIn("tests/unit/test_a3_bucar.py", workflow)
         self.assertIn("tests/unit/test_a3_despedida.py", workflow)
+        self.assertIn("Run embassy2 Avengalvón escort headless test", workflow)
         self.assertIn("Run a3_leon lion scene headless test", workflow)
         self.assertIn("Run a3_bucar shore/Tizona headless test", workflow)
         self.assertIn("Run a3_despedida departure/Avengalvón headless test", workflow)
+        self.assertIn("res://tests/unit/test_embassy2.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_leon.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_bucar.gd", workflow)
         self.assertIn("res://tests/unit/test_a3_despedida.gd", workflow)
-        leon_py = workflow.find("Run Python a3_leon tests")
-        bucar_py = workflow.find("Run Python a3_bucar tests")
-        despedida_py = workflow.find("Run Python a3_despedida tests")
         imported = workflow.find("Import project")
-        leon_gd = workflow.find("res://tests/unit/test_a3_leon.gd")
-        bucar_gd = workflow.find("res://tests/unit/test_a3_bucar.gd")
-        despedida_gd = workflow.find("res://tests/unit/test_a3_despedida.gd")
-        self.assertLess(leon_py, bucar_py)
-        self.assertLess(bucar_py, despedida_py)
-        self.assertLess(imported, leon_gd)
-        self.assertLess(imported, bucar_gd)
-        self.assertLess(imported, despedida_gd)
+        self.assertLess(imported, workflow.find("res://tests/unit/test_a3_despedida.gd"))
+        self.assertLess(
+            workflow.find("Run Python a3_bucar tests"),
+            workflow.find("Run Python a3_despedida tests"),
+        )
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/world.tscn",
-            f"{CHAPTER}/bucar.dialogue",
+            f"{CHAPTER}/despedida.dialogue",
             f"{CHAPTER}/beats.json",
+            f"{CHAPTER}/depart_npc.gd",
             "game/systems/inventory/sword_item.gd",
-            "data/items/tizona.json",
-            "data/honor_events/bucar.json",
+            "game/ui/fail_copy.gd",
             "game/autoload/chapter_runner.gd",
         ):
             lowered = _read(rel).lower()
@@ -450,7 +448,7 @@ class TestA3BucarTizona(unittest.TestCase):
                 "--audio-driver",
                 "Dummy",
                 "-s",
-                "res://tests/unit/test_a3_bucar.gd",
+                "res://tests/unit/test_a3_despedida.gd",
             ],
             check=False,
             capture_output=True,

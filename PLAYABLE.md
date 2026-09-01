@@ -1,8 +1,8 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean campaign as of embassy 3. It is **not** merged to `main`. Later chapters (Tagus, lion, Corpes) are still in flight on other worktrees.
+This branch (`playable/0e9dbd46-ready`) is the review-clean campaign through departure. It is **not** merged to `main`. Corpes, querella, Toledo, and Pentecost are still in flight on other worktrees.
 
-**Tip:** Valencia hub + siege + embassy 2 + Yusuf + embassy 3 + repay Raquel.
+**Tip:** Valencia hub through Tagus, marriages, lion, Búcar / Tizona, and the Infantes' departure.
 
 ## How to run
 

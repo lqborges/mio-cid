@@ -104,8 +104,8 @@ func _check_scene_loads() -> PackedStringArray:
 	var plazo: Node = _world.find_child("PlazoBar", true, false)
 	if plazo and bool(plazo.visible):
 		failures.append("plazo bar must stay hidden in Valencia")
-	if ResourceLoader.exists(DESPEDIDA):
-		failures.append("a3_despedida must not ship in this PR")
+	if not ResourceLoader.exists(DESPEDIDA):
+		failures.append("a3_despedida world must ship")
 	return failures
 
 
@@ -507,16 +507,16 @@ func _check_win_keeps_tizona_in_hand() -> PackedStringArray:
 	if _completed.count("a3_bucar") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _runner:
-		if String(_runner.current_id) != "a3_bucar":
-			failures.append("win must stay on a3_bucar until despedida ships, got %s" % _runner.current_id)
+		if String(_runner.current_id) != "a3_despedida":
+			failures.append("win must travel to a3_despedida, got %s" % _runner.current_id)
 		var flags: PackedStringArray = _runner.flags if "flags" in _runner else PackedStringArray()
 		if "tizona_acquired" not in flags:
 			failures.append("win must set tizona_acquired")
 		for flag in COWARDICE_FLAGS:
 			if flag not in flags:
 				failures.append("cowardice flag dropped after win: %s" % flag)
-		if bool(world.get("_left")):
-			failures.append("must not _left into missing a3_despedida")
+		if not bool(world.get("_left")):
+			failures.append("win must _left when a3_despedida exists")
 		if _runner.has_method("can_travel") and not bool(_runner.can_travel(&"a3_bucar", &"a3_despedida", flags)):
 			failures.append("bucar -> despedida must stay open")
 	var bucar: Node = world.get_node_or_null("Host/Bucar")
@@ -584,6 +584,9 @@ func _check_graph_spine() -> PackedStringArray:
 	var flags := PackedStringArray(["hub_lock_cardena", "horse_companion", "colada_acquired", "lion_returned"])
 	if not bool(_runner.can_travel(&"a3_leon", &"a3_bucar", flags)):
 		failures.append("leon -> bucar must stay open after lion_returned")
+	if bool(_runner.can_travel(&"a3_bucar", &"a3_despedida", flags)):
+		failures.append("bucar -> despedida must wait for tizona_acquired")
+	flags.append("tizona_acquired")
 	if not bool(_runner.can_travel(&"a3_bucar", &"a3_despedida", flags)):
 		failures.append("bucar -> despedida must stay open")
 	if bool(_runner.can_travel(&"a3_leon", &"a3_despedida", flags)):
@@ -597,8 +600,8 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(DESPEDIDA):
-		failures.append("a3_despedida must not ship in this PR")
+	if not ResourceLoader.exists(DESPEDIDA):
+		failures.append("a3_despedida world must ship")
 	if ResourceLoader.exists(CORPES):
 		failures.append("a3_corpes must not ship in this PR")
 	if not ResourceLoader.exists(LEON):
