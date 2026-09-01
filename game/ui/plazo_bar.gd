@@ -17,15 +17,15 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(232, 36)
 	add_to_group("hud_click_sink")
 	_sync_from_clock()
+	# Clock is a stub until PR-05a; skip per-frame polling when the field is absent.
+	set_process(CampaignClock != null and "plazo_days_left" in CampaignClock)
+	if EventBus and not EventBus.beat_completed.is_connected(_on_beat_completed):
+		EventBus.beat_completed.connect(_on_beat_completed)
 
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton or event is InputEventScreenTouch:
 		accept_event()
-	# Clock is a stub until PR-05a; skip per-frame polling when the field is absent.
-	set_process(CampaignClock != null and "plazo_days_left" in CampaignClock)
-	if EventBus:
-		EventBus.beat_completed.connect(_on_beat_completed)
 
 
 func _process(_delta: float) -> void:

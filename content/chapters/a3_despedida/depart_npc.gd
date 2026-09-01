@@ -5,6 +5,10 @@ extends StaticBody3D
 @export var cue: String = "depart"
 
 
+func _ready() -> void:
+	add_to_group("interactable")
+
+
 func interact() -> void:
 	var host := _chapter()
 	if host == null:

@@ -69,6 +69,13 @@ class TestA1BurgosGreybox(unittest.TestCase):
         self.assertIn("Child", scene)
         self.assertIn("Innkeeper", scene)
         self.assertIn("BurgalesA", scene)
+        camp = scene.split('[node name="Camp"', 1)[1].split("[node name=", 1)[0]
+        self.assertNotIn("townsfolk.gd", camp)
+        self.assertNotIn("role = \"camp\"", camp)
+        folk = _read(f"{CHAPTER}/townsfolk.gd")
+        self.assertIn("add_to_group(\"interactable\")", folk)
+        self.assertIn("func _is_talk_role", folk)
+        self.assertIn("return false", folk)
         self.assertNotIn("type=\"OmniLight3D\"", scene)
         self.assertNotIn("type=\"SpotLight3D\"", scene)
 

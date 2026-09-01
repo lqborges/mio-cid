@@ -29,6 +29,8 @@ func _run() -> void:
 		failures.append_array(_check_nameplates())
 		failures.append_array(_check_companions_interactable())
 		failures.append_array(_check_pause_menu())
+		failures.append_array(_check_plazo_clock_bound_on_ready())
+		failures.append_array(_check_talk_balloon_advances_on_click())
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(await _check_first_names_set_seen())
 		failures.append_array(_check_advance_plazo_does_not_feed())
@@ -160,6 +162,49 @@ func _check_pause_menu() -> PackedStringArray:
 	pause.call("resume")
 	if paused:
 		failures.append("resume must unpause the tree")
+	return failures
+
+
+func _check_plazo_clock_bound_on_ready() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var bar: Node = _world.find_child("PlazoBar", true, false)
+	if bar == null:
+		failures.append("PlazoBar missing for ready bind")
+		return failures
+	if bar is CanvasItem and not (bar as CanvasItem).is_processing():
+		failures.append("PlazoBar must start processing from _ready, not the first HUD click")
+	var bus: Node = get_root().get_node_or_null("EventBus")
+	if bus and bus.has_signal("beat_completed") and bar.has_method("_on_beat_completed"):
+		if not bus.beat_completed.is_connected(bar._on_beat_completed):
+			failures.append("PlazoBar must connect beat_completed in _ready")
+	return failures
+
+
+func _check_talk_balloon_advances_on_click() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://game/ui/talk_balloon.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("talk_balloon.tscn failed to load")
+		return failures
+	var balloon: Node = (packed as PackedScene).instantiate()
+	if balloon == null:
+		failures.append("talk_balloon did not instantiate")
+		return failures
+	get_root().add_child(balloon)
+	if not balloon.has_method("_try_advance") or not balloon.has_method("_input"):
+		failures.append("talk balloon must advance from _input so HUD/Cid cannot eat the click")
+		balloon.free()
+		return failures
+	balloon.set("_waiting", true)
+	balloon.set("_line", {"next_id": "end"})
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(640, 640)
+	balloon.call("_input", click)
+	if bool(balloon.get("_waiting")):
+		failures.append("talk balloon click must leave _waiting so the next line can show")
+	balloon.free()
 	return failures
 
 

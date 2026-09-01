@@ -28,6 +28,7 @@ func _run() -> void:
 		failures.append_array(await _check_child_speaks_v20())
 		failures.append_array(_check_shutters_seen())
 		failures.append_array(_check_steel_on_burgaleses_gated())
+		failures.append_array(_check_talk_npcs_not_camp_click())
 		_world.free()
 		_world = null
 	_finish(failures)
@@ -175,6 +176,33 @@ func _check_steel_on_burgaleses_gated() -> PackedStringArray:
 		failures.append("drawing steel must not kill burgaleses")
 	if _world.has_method("inn_is_closed") and not bool(_world.inn_is_closed()):
 		failures.append("inn must stay closed (no lodging)")
+	return failures
+
+
+func _check_talk_npcs_not_camp_click() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var camp: Node = _world.get_node_or_null("Camp")
+	if camp and camp.has_method("interact"):
+		failures.append("Camp must not implement interact(); RiverCamp Area3D owns travel")
+	if camp and camp.is_in_group("interactable"):
+		failures.append("Camp must not be interactable or E/click skips Burgos")
+	var child: Node = _world.get_node_or_null("Child")
+	if child == null or not child.is_in_group("interactable"):
+		failures.append("Child must join interactable")
+	if child and child.has_method("interact") and child.has_method("_is_talk_role"):
+		if not bool(child.call("_is_talk_role")):
+			failures.append("Child should be a talk role")
+	var inn: Node = _world.get_node_or_null("Innkeeper")
+	if inn == null or not inn.is_in_group("interactable"):
+		failures.append("Innkeeper must join interactable")
+	var burgales: Node = _world.get_node_or_null("BurgalesA")
+	if burgales and burgales.is_in_group("interactable"):
+		failures.append("Burgales must not steal E / click-to-move")
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and cid.has_method("_nearest_interactable"):
+		var near: Variant = cid.call("_nearest_interactable")
+		if near != null and String((near as Node).name) == "Camp":
+			failures.append("Cid must not treat Camp as the nearest talk target at spawn")
 	return failures
 
 

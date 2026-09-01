@@ -55,6 +55,8 @@ class TestCidController(unittest.TestCase):
         self.assertIn("_mouse_over_hud", source)
         self.assertIn("_click_move_from_hud", source)
         self.assertIn("_try_interact_node", source)
+        self.assertIn("_dialogue_open", source)
+        self.assertIn("_is_talk_target", source)
         self.assertIn("dodge", source)
         self.assertIn("chapter_asleep", source)
         self.assertIn("chapter_locked", source)

@@ -378,9 +378,6 @@ font_size = 32
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0, 11.4)
 collision_layer = 1
 collision_mask = 0
-script = ExtResource("7_folk")
-cue = "camp_river"
-role = "camp"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Camp"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)

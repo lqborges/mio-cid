@@ -190,6 +190,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		_mark_handled()
 		return
+	if _dialogue_open():
+		# Balloon owns click / E / accept. Do not walk, talk-again, or dodge-on-Space.
+		if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
+			_click_target = null
+			_queued_click_pos = null
+		_queued_interact = false
+		return
 	# World taps walk / talk. Slam stays on the key / pad / touch button.
 	if _pointer_event_blocked(event):
 		if _is_world_walk_tap(event) and not _world_click_blocked():
@@ -608,10 +615,14 @@ func _try_interact_node(node: Node) -> bool:
 	if owner == null:
 		return false
 	if owner.has_method("interact"):
-		owner.call("interact")
+		var result: Variant = owner.call("interact")
+		if result is bool and result == false:
+			return false
 		return true
 	if owner.has_method("action"):
-		owner.call("action")
+		var result: Variant = owner.call("action")
+		if result is bool and result == false:
+			return false
 		return true
 	return false
 
@@ -630,13 +641,17 @@ func _interact_owner(node: Node) -> Node:
 	return null
 
 
+func _is_talk_target(node: Node) -> bool:
+	return node != null and node.is_in_group("interactable")
+
+
 func _nearest_interactable() -> Node:
 	var best: Node = null
 	var best_d := interact_range
 	if not is_inside_tree():
 		return null
 	for node in get_tree().get_nodes_in_group("interactable"):
-		if not (node is Node3D):
+		if not (node is Node3D) or not _is_talk_target(node):
 			continue
 		var d := (node as Node3D).global_position.distance_to(global_position)
 		if d <= best_d:
@@ -654,7 +669,7 @@ func _nearest_interactable() -> Node:
 	query.exclude = [get_rid()]
 	for hit in space.intersect_shape(query, 24):
 		var owner := _interact_owner(hit.get("collider") as Node)
-		if owner == null or not (owner is Node3D):
+		if owner == null or not (owner is Node3D) or not _is_talk_target(owner):
 			continue
 		var d := (owner as Node3D).global_position.distance_to(global_position)
 		if d <= best_d:

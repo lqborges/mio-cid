@@ -5,23 +5,36 @@ extends StaticBody3D
 @export var role: String = "burgales"
 
 
-func interact() -> void:
+func _ready() -> void:
+	if _is_talk_role():
+		add_to_group("interactable")
+
+
+func interact() -> bool:
 	var host := _chapter()
 	if host == null:
-		return
+		return false
 	match role:
 		"child":
 			if host.has_method("start_child_v20"):
 				host.start_child_v20()
+				return true
 		"innkeeper":
 			if host.has_method("start_inn_refusal"):
 				host.start_inn_refusal()
+				return true
 		"camp":
-			if host.has_method("camp_on_river"):
-				host.camp_on_river()
+			# RiverCamp Area3D owns travel. A click/E here must not skip Burgos.
+			return false
 		_:
 			if not cue.is_empty() and host.has_method("start_cue"):
 				host.start_cue(cue)
+				return true
+	return false
+
+
+func _is_talk_role() -> bool:
+	return role == "child" or role == "innkeeper" or (not cue.is_empty() and role != "camp")
 
 
 func _chapter() -> Node:
