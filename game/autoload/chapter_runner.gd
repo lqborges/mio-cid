@@ -29,6 +29,10 @@ const BUCAR_SCENE := "res://content/chapters/a3_bucar/world.tscn"
 const DESPEDIDA_SCENE := "res://content/chapters/a3_despedida/world.tscn"
 const CORPES_SCENE := "res://content/chapters/a3_corpes/world.tscn"
 const QUERELLA_SCENE := "res://content/chapters/a3_querella/world.tscn"
+const TOLEDO_SCENE := "res://content/chapters/a3_toledo/world.tscn"
+const WAIT_SCENE := "res://content/chapters/a3_valencia_wait/world.tscn"
+const CARRION_SCENE := "res://content/chapters/a3_carrion/world.tscn"
+const PENTECOST_SCENE := "res://content/chapters/a3_pentecost/world.tscn"
 
 var graph: Resource
 var current_id: StringName = &"a1_vivar"
@@ -181,6 +185,14 @@ func _scene_path(beat_id: StringName) -> String:
 		return CORPES_SCENE
 	if beat_id == &"a3_querella":
 		return QUERELLA_SCENE
+	if beat_id == &"a3_toledo":
+		return TOLEDO_SCENE
+	if beat_id == &"a3_valencia_wait":
+		return WAIT_SCENE
+	if beat_id == &"a3_carrion":
+		return CARRION_SCENE
+	if beat_id == &"a3_pentecost":
+		return PENTECOST_SCENE
 	_ensure_loaded()
 	if graph != null and graph.has_method("get_chapter"):
 		var node: Resource = graph.get_chapter(beat_id)

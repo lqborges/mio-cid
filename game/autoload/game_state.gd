@@ -71,6 +71,23 @@ func apply_swords(raw: Variant) -> void:
 func reset_swords() -> void:
 	_swords.clear()
 	_ensure_swords()
+	var node := clock()
+	if node != null and "lists_seed" in node:
+		node.lists_seed = 0
+
+
+func ensure_lists_seed() -> int:
+	var node := clock()
+	if node == null:
+		return 1
+	if "lists_seed" in node and int(node.lists_seed) != 0:
+		return int(node.lists_seed)
+	var seed := randi()
+	if seed == 0:
+		seed = 1
+	if "lists_seed" in node:
+		node.lists_seed = seed
+	return seed
 
 
 func flags() -> PackedStringArray:

@@ -1,0 +1,163 @@
+{
+  "id": "toledo",
+  "win_threshold": 18,
+  "asks": [
+    {
+      "id": "swords",
+      "prompt_key": "a3_toledo.ask1_prompt",
+      "counts_toward_win": true,
+      "lines": [
+        {
+          "id": "legal",
+          "text_key": "a3_toledo.ask1_legal",
+          "legal": 8,
+          "mesura": 2,
+          "ira": 0,
+          "tags": ["legal", "joke"]
+        },
+        {
+          "id": "mesura",
+          "text_key": "a3_toledo.ask1_mesura",
+          "legal": 6,
+          "mesura": 4,
+          "ira": 0,
+          "tags": ["mesura"]
+        },
+        {
+          "id": "ira",
+          "text_key": "a3_toledo.ask1_ira",
+          "legal": 1,
+          "mesura": 0,
+          "ira": 4,
+          "tags": ["ira"]
+        },
+        {
+          "id": "infantes",
+          "text_key": "a3_toledo.ask1_infantes",
+          "legal": 2,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["infantes"]
+        },
+        {
+          "id": "skip_to_riepto",
+          "text_key": "a3_toledo.line_skip",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["skip_to_riepto"]
+        },
+        {
+          "id": "draw_steel",
+          "text_key": "a3_toledo.line_steel",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["draw_steel"]
+        }
+      ]
+    },
+    {
+      "id": "dowry",
+      "prompt_key": "a3_toledo.ask2_prompt",
+      "counts_toward_win": true,
+      "lines": [
+        {
+          "id": "legal",
+          "text_key": "a3_toledo.ask2_legal",
+          "legal": 8,
+          "mesura": 2,
+          "ira": 0,
+          "tags": ["legal", "humiliation_them"]
+        },
+        {
+          "id": "mesura",
+          "text_key": "a3_toledo.ask2_mesura",
+          "legal": 6,
+          "mesura": 4,
+          "ira": 0,
+          "tags": ["mesura"]
+        },
+        {
+          "id": "ira",
+          "text_key": "a3_toledo.ask2_ira",
+          "legal": 1,
+          "mesura": 0,
+          "ira": 4,
+          "tags": ["ira"]
+        },
+        {
+          "id": "infantes",
+          "text_key": "a3_toledo.ask2_infantes",
+          "legal": 2,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["infantes"]
+        },
+        {
+          "id": "skip_to_riepto",
+          "text_key": "a3_toledo.line_skip",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["skip_to_riepto"]
+        },
+        {
+          "id": "draw_steel",
+          "text_key": "a3_toledo.line_steel",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["draw_steel"]
+        }
+      ]
+    },
+    {
+      "id": "riepto",
+      "prompt_key": "a3_toledo.ask3_prompt",
+      "counts_toward_win": true,
+      "lines": [
+        {
+          "id": "legal",
+          "text_key": "a3_toledo.ask3_legal",
+          "legal": 8,
+          "mesura": 2,
+          "ira": 0,
+          "tags": ["legal"]
+        },
+        {
+          "id": "mesura",
+          "text_key": "a3_toledo.ask3_mesura",
+          "legal": 6,
+          "mesura": 4,
+          "ira": 0,
+          "tags": ["mesura"]
+        },
+        {
+          "id": "ira",
+          "text_key": "a3_toledo.ask3_ira",
+          "legal": 1,
+          "mesura": 0,
+          "ira": 4,
+          "tags": ["ira"]
+        },
+        {
+          "id": "infantes",
+          "text_key": "a3_toledo.ask3_infantes",
+          "legal": 2,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["infantes"]
+        },
+        {
+          "id": "draw_steel",
+          "text_key": "a3_toledo.line_steel",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["draw_steel"]
+        }
+      ]
+    }
+  ]
+}

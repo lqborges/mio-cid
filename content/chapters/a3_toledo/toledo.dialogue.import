@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://bsiv7ky0un7pl"
+path="res://.godot/imported/toledo.dialogue-110ccbbefe6b89a878de8950cf4b3496.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_toledo/toledo.dialogue"
+dest_files=["res://.godot/imported/toledo.dialogue-110ccbbefe6b89a878de8950cf4b3496.tres"]
+
+[params]
+
+defaults=true

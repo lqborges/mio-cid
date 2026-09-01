@@ -499,8 +499,8 @@ func _check_later_beats_not_shipped() -> PackedStringArray:
 		failures.append("a3_corpes must ship in this slice")
 	if not ResourceLoader.exists("res://content/chapters/a3_querella/world.tscn"):
 		failures.append("a3_querella must ship in this slice")
-	if ResourceLoader.exists("res://content/chapters/a3_toledo/world.tscn"):
-		failures.append("a3_toledo must not ship in this PR")
+	if not ResourceLoader.exists("res://content/chapters/a3_toledo/world.tscn"):
+		failures.append("a3_toledo must keep shipping")
 	return failures
 
 

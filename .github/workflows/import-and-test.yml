@@ -162,6 +162,18 @@ jobs:
       - name: Run Python a3_querella tests
         run: python3 tests/unit/test_a3_querella.py
 
+      - name: Run Python a3_toledo tests
+        run: python3 tests/unit/test_a3_toledo.py
+
+      - name: Run Python Valencia wait tests
+        run: python3 tests/unit/test_a3_valencia_wait.py
+
+      - name: Run Python DuelResolver tests
+        run: python3 tests/unit/test_duel_resolver.py
+
+      - name: Run Python Pentecost tests
+        run: python3 tests/unit/test_a3_pentecost.py
+
       - name: Run Python combat tests
         run: python3 tests/unit/test_combat.py
 
@@ -283,7 +295,6 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_embassy2.gd
 
-<<<<<<< HEAD
       - name: Run a2 Yusuf headless test
         if: steps.godot.outputs.found == 'true'
         run: |
@@ -341,6 +352,31 @@ jobs:
         if: steps.godot.outputs.found == 'true'
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_querella.gd
+
+      - name: Run a3_toledo Cortes headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_toledo.gd
+
+      - name: Run Valencia wait headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_valencia_wait.gd
+
+      - name: Run DuelResolver headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_duel_resolver.gd
+
+      - name: Run spectator lists headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_carrion.gd
+
+      - name: Run Pentecost headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a3_pentecost.gd
 
       - name: Run gdUnit4
         if: steps.godot.outputs.found == 'true'

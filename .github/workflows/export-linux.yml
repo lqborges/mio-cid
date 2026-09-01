@@ -1,0 +1,75 @@
+name: Export Linux
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "export_presets.cfg"
+      - "project.godot"
+      - ".github/workflows/export-linux.yml"
+
+jobs:
+  export-linux:
+    name: Headless Linux export
+    runs-on: ubuntu-24.04
+    env:
+      GODOT_VERSION: "4.7.2"
+      GODOT_CACHE_DIR: ${{ github.workspace }}/.godot-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore Godot cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.GODOT_CACHE_DIR }}
+          key: godot-${{ env.GODOT_VERSION }}-linux.x86_64
+
+      - name: Resolve Godot 4.7.2
+        id: godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${GODOT_CACHE_DIR}"
+          if [ -x "${GODOT_CACHE_DIR}/godot" ]; then
+            echo "godot_bin=${GODOT_CACHE_DIR}/godot" >> "${GITHUB_OUTPUT}"
+            echo "found=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if command -v godot >/dev/null 2>&1; then
+            echo "godot_bin=$(command -v godot)" >> "${GITHUB_OUTPUT}"
+            echo "found=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          archive="${GODOT_CACHE_DIR}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          if curl -fsSL -o "${archive}" "${url}"; then
+            unzip -qo "${archive}" -d "${GODOT_CACHE_DIR}"
+            bin="$(find "${GODOT_CACHE_DIR}" -maxdepth 2 -type f -name 'Godot_v*-linux.x86_64' | head -n 1)"
+            if [ -n "${bin}" ]; then
+              chmod +x "${bin}"
+              ln -sfn "${bin}" "${GODOT_CACHE_DIR}/godot"
+              echo "godot_bin=${GODOT_CACHE_DIR}/godot" >> "${GITHUB_OUTPUT}"
+              echo "found=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+          fi
+          echo "found=false" >> "${GITHUB_OUTPUT}"
+
+      - name: Export Linux
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          mkdir -p build/linux
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --import
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --export-release "Linux" build/linux/mio-cid.x86_64
+
+      - name: Upload Linux build
+        if: steps.godot.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mio-cid-linux
+          path: build/linux/
+
+      - name: Skip notice
+        if: steps.godot.outputs.found != 'true'
+        run: echo "Godot missing; Linux export skipped. Steam partner status is not claimed by this repo."

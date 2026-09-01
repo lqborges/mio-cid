@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dsfhfkms5kqkj"
+path="res://.godot/imported/carrion.dialogue-a60c2355f010bc2970bddce5a9b832f9.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_carrion/carrion.dialogue"
+dest_files=["res://.godot/imported/carrion.dialogue-a60c2355f010bc2970bddce5a9b832f9.tres"]
+
+[params]
+
+defaults=true

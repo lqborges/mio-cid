@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://cmusqlj4pk73g"
+path="res://.godot/imported/pentecost.dialogue-a074588f2eab659f1f3ddf4e00eecb86.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_pentecost/pentecost.dialogue"
+dest_files=["res://.godot/imported/pentecost.dialogue-a074588f2eab659f1f3ddf4e00eecb86.tres"]
+
+[params]
+
+defaults=true

@@ -1,0 +1,21 @@
+{
+  "id": "a3_valencia_wait",
+  "steps": [
+    {
+      "id": "lists_wait",
+      "type": "clock_segment",
+      "segment": "lists_wait",
+      "days": 21
+    },
+    {
+      "id": "jimena_rest",
+      "type": "dialogue",
+      "file": "res://content/chapters/a3_valencia_wait/wait.dialogue"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_carrion"
+    }
+  ]
+}

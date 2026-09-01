@@ -1,0 +1,9 @@
+# Three weeks in Valencia. Jimena rest. Champions ride.
+
+~ start
+=> rest
+
+~ rest
+Jimena: a3_valencia_wait.table
+Cid: a3_valencia_wait.rested
+=> END

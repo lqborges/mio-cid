@@ -9,6 +9,7 @@ signal night_ticked(day: int)
 @export var days_elapsed: int = 0
 @export var unfed_streak: int = 0
 @export var plazo_days_left: int = 9
+@export var lists_seed: int = 0
 
 
 func reset() -> void:
@@ -16,6 +17,7 @@ func reset() -> void:
 	days_elapsed = 0
 	unfed_streak = 0
 	plazo_days_left = 9
+	lists_seed = 0
 
 
 func feeds_tonight() -> bool:
@@ -87,6 +89,7 @@ func to_save() -> Dictionary:
 		"days_elapsed": days_elapsed,
 		"unfed_streak": unfed_streak,
 		"plazo_days_left": plazo_days_left,
+		"lists_seed": lists_seed,
 	}
 
 
@@ -95,6 +98,7 @@ func from_save(data: Dictionary) -> void:
 	days_elapsed = maxi(0, int(data.get("days_elapsed", 0)))
 	unfed_streak = maxi(0, int(data.get("unfed_streak", 0)))
 	plazo_days_left = maxi(0, int(data.get("plazo_days_left", 9)))
+	lists_seed = int(data.get("lists_seed", 0))
 
 
 func _parse_segment(name: String) -> Segment:

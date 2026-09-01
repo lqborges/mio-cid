@@ -130,7 +130,7 @@ class TestA2JeronimoValenciaHub(unittest.TestCase):
         self.assertTrue((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_querella/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
 
     def test_hub_rooms_and_greybox(self) -> None:
         scene = _read(f"{CHAPTER}/world.tscn")

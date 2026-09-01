@@ -1,0 +1,16 @@
+[remap]
+
+importer="dialogue_manager"
+importer_version=18
+type="Resource"
+uid="uid://dclcqnf38lavm"
+path="res://.godot/imported/wait.dialogue-5253b231934a90f187fc3ad7fe2115a8.tres"
+
+[deps]
+
+source_file="res://content/chapters/a3_valencia_wait/wait.dialogue"
+dest_files=["res://.godot/imported/wait.dialogue-5253b231934a90f187fc3ad7fe2115a8.tres"]
+
+[params]
+
+defaults=true

@@ -51,6 +51,8 @@ SEED_IDS = [
     "garcia_ordonez",
     "diego_tellez",
     "burgos_child",
+    "sisebuto",
+    "gabriel",
 ]
 DESERTION_CAPABLE = {
     "martin_antolinez",

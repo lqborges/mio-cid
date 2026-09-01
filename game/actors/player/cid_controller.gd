@@ -49,6 +49,9 @@ var _horse: HorseCompanionScript = null
 var chapter_asleep: bool = false
 ## Pose-free halt. Do not reuse chapter_asleep — that lays Visual down.
 var chapter_locked: bool = false
+const LAYER_PLAYER := 2
+const LAYER_SPECTATOR := 64
+var spectator_mode: bool = false
 
 
 func _ready() -> void:
@@ -96,6 +99,56 @@ func set_chapter_locked(on: bool) -> void:
 		_clear_action_queues()
 		velocity.x = 0.0
 		velocity.z = 0.0
+
+
+func set_spectator_mode(on: bool) -> void:
+	spectator_mode = on
+	if on:
+		collision_layer = LAYER_SPECTATOR
+	else:
+		collision_layer = LAYER_PLAYER
+	var hurt: Node = get_node_or_null("HurtBox")
+	if hurt == null:
+		return
+	if on:
+		if "spectator" in hurt:
+			hurt.set("spectator", true)
+		if hurt.has_method("_apply_collision"):
+			hurt.call("_apply_collision")
+		hurt.monitorable = false
+		hurt.monitoring = false
+		# DESIGN: Cid has no HurtBox at the lists.
+		remove_child(hurt)
+		hurt.free()
+	else:
+		if "spectator" in hurt:
+			hurt.set("spectator", false)
+		if hurt.has_method("_apply_collision"):
+			hurt.call("_apply_collision")
+
+
+func possess_pawn(target: Node) -> bool:
+	# Debug-only. Compiled-out of ship builds; always denylists Cid at lists.
+	if not OS.is_debug_build():
+		return false
+	if target == null:
+		return false
+	if spectator_mode:
+		return false
+	if target == self or target.is_in_group("player"):
+		if _chapter_is_carrion():
+			return false
+	return false
+
+
+func _chapter_is_carrion() -> bool:
+	var loop := Engine.get_main_loop()
+	if not (loop is SceneTree):
+		return false
+	var runner: Node = (loop as SceneTree).root.get_node_or_null(NodePath("ChapterRunner"))
+	if runner == null or not ("current_id" in runner):
+		return false
+	return String(runner.current_id) == "a3_carrion"
 
 
 func _unhandled_input(event: InputEvent) -> void:

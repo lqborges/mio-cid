@@ -123,7 +123,9 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             "content/chapters/a2_embassy2/world.tscn",
         ):
             self.assertTrue((ROOT / rel).is_file(), rel)
-        self.assertFalse((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_valencia_wait/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_carrion/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a1_vivar/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a2_jeronimo/world.tscn").is_file())
 

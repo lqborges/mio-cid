@@ -499,8 +499,12 @@ func _check_later_beats_not_shipped() -> PackedStringArray:
 		failures.append("a3_corpes world must ship")
 	if not ResourceLoader.exists("res://content/chapters/a3_querella/world.tscn"):
 		failures.append("a3_querella world must keep shipping")
-	if ResourceLoader.exists("res://content/chapters/a3_toledo/world.tscn"):
-		failures.append("a3_toledo must not ship in this beat")
+	if not ResourceLoader.exists("res://content/chapters/a3_toledo/world.tscn"):
+		failures.append("a3_toledo world must keep shipping")
+	if not ResourceLoader.exists("res://content/chapters/a3_valencia_wait/world.tscn"):
+		failures.append("a3_valencia_wait must keep shipping")
+	if not ResourceLoader.exists("res://content/chapters/a3_carrion/world.tscn"):
+		failures.append("a3_carrion must keep shipping")
 	if not ResourceLoader.exists(WORLD):
 		failures.append("a3_despedida world must exist")
 	if not ResourceLoader.exists(BUCAR):

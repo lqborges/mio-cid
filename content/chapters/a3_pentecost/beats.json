@@ -1,0 +1,14 @@
+{
+  "id": "a3_pentecost",
+  "steps": [
+    {
+      "id": "ending",
+      "type": "cinematic",
+      "note": "poem ends; no corpse on Babieca"
+    },
+    {
+      "id": "credits",
+      "type": "cinematic"
+    }
+  ]
+}

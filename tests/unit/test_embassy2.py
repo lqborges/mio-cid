@@ -119,7 +119,7 @@ class TestEmbassy2EscortAndGift(unittest.TestCase):
         self.assertTrue((ROOT / "content/chapters/a3_despedida/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_corpes/world.tscn").is_file())
         self.assertTrue((ROOT / "content/chapters/a3_querella/world.tscn").is_file())
-        self.assertFalse((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
+        self.assertTrue((ROOT / "content/chapters/a3_toledo/world.tscn").is_file())
 
     def test_gift_json_same_shape_higher_honor(self) -> None:
         first = json.loads(_read("data/gifts/embassy_1.json"))

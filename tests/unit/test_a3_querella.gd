@@ -107,8 +107,8 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("plazo bar must stay hidden in Valencia")
 	if not ResourceLoader.exists(CORPES):
 		failures.append("a3_corpes world must keep shipping")
-	if ResourceLoader.exists(TOLEDO):
-		failures.append("a3_toledo must not ship in this beat")
+	if not ResourceLoader.exists(TOLEDO):
+		failures.append("a3_toledo must keep shipping")
 	return failures
 
 
@@ -267,12 +267,12 @@ func _check_legal_files_querella() -> PackedStringArray:
 			failures.append("legal line must not set ride_host")
 		if not bool(_runner.can_travel(&"a3_querella", &"a3_toledo", flags)):
 			failures.append("legal win must can_travel to Toledo")
-	if ResourceLoader.exists(TOLEDO):
-		failures.append("a3_toledo must not ship")
-	if bool(world.get("_left")):
-		failures.append("legal must not _left into missing a3_toledo")
-	if _runner and String(_runner.current_id) == "a3_toledo":
-		failures.append("legal must not travel into missing a3_toledo")
+	if not ResourceLoader.exists(TOLEDO):
+		failures.append("a3_toledo must ship")
+	if not bool(world.get("_left")):
+		failures.append("legal must _left when a3_toledo exists")
+	if _runner and String(_runner.current_id) != "a3_toledo":
+		failures.append("must travel() to a3_toledo, got %s" % _runner.current_id)
 	if current_scene != scene_before:
 		failures.append("legal must not change_scene when current_scene != world")
 	var mesura: Node = _cid_mesura(world)
@@ -426,22 +426,22 @@ func _check_missing_toledo_no_scene_change() -> PackedStringArray:
 	_completed.clear()
 	var scene_before: Node = current_scene
 	world.run_legal()
-	if ResourceLoader.exists(TOLEDO):
-		failures.append("a3_toledo must not ship")
-	if bool(world.get("_left")):
-		failures.append("must not _left into missing a3_toledo")
-	if _runner and String(_runner.current_id) == "a3_toledo":
-		failures.append("must not travel into missing a3_toledo")
+	if not ResourceLoader.exists(TOLEDO):
+		failures.append("a3_toledo must ship")
+	if not bool(world.get("_left")):
+		failures.append("legal must _left when a3_toledo exists")
+	if _runner and String(_runner.current_id) != "a3_toledo":
+		failures.append("must travel() to a3_toledo, got %s" % _runner.current_id)
 	if current_scene != scene_before:
 		failures.append("legal must not change_scene when current_scene != world")
 	if bool(world.call("try_travel_toledo")):
-		failures.append("try_travel_toledo must no-op when dest is missing")
+		failures.append("try_travel_toledo must no-op after already leaving")
 	if current_scene != scene_before:
 		failures.append("try_travel_toledo must not change_scene")
 	if _completed.count("a3_querella") > 1:
 		failures.append("beat_completed must not double-fire, got %s" % str(_completed))
 	if _completed.count("a3_querella") < 1:
-		failures.append("missing dest must still complete a3_querella once")
+		failures.append("travel must complete a3_querella once")
 	world.free()
 	return failures
 
@@ -469,8 +469,12 @@ func _check_graph_spine() -> PackedStringArray:
 
 func _check_later_beats_not_shipped() -> PackedStringArray:
 	var failures: PackedStringArray = []
-	if ResourceLoader.exists(TOLEDO):
-		failures.append("a3_toledo must not ship in this beat")
+	if not ResourceLoader.exists(TOLEDO):
+		failures.append("a3_toledo world must keep shipping")
+	if not ResourceLoader.exists("res://content/chapters/a3_valencia_wait/world.tscn"):
+		failures.append("a3_valencia_wait must keep shipping")
+	if not ResourceLoader.exists("res://content/chapters/a3_carrion/world.tscn"):
+		failures.append("a3_carrion must keep shipping")
 	if not ResourceLoader.exists(WORLD):
 		failures.append("a3_querella world must exist")
 	if not ResourceLoader.exists(CORPES):

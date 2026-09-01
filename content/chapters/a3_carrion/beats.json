@@ -1,0 +1,15 @@
+{
+  "id": "a3_carrion",
+  "steps": [
+    {
+      "id": "lists",
+      "type": "cinematic",
+      "note": "spectator lists; Cid is not a hurtbox"
+    },
+    {
+      "id": "leave",
+      "type": "travel_spawn",
+      "next": "a3_pentecost"
+    }
+  ]
+}

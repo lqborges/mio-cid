@@ -1,8 +1,8 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean campaign through querella. It is **not** merged to `main`. Toledo, the lists, and Pentecost are still in flight on other worktrees.
+This branch (`playable/0e9dbd46-ready`) is the review-clean three-cantar campaign through Pentecost. It is **not** merged to `main`.
 
-**Tip:** Valencia hub through Tagus, marriages, lion, Búcar / Tizona, departure, Corpes aftermath, and querella.
+**Tip:** Vivar through Tagus, marriages, lion, Búcar / Tizona, Corpes, querella, Cortes de Toledo, three-week wait, spectator lists, Pentecost credits.
 
 ## How to run
 
@@ -57,17 +57,17 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | `a3_despedida` | Swords gifted; Elvira and Sol leave; Avengalvón lives |
 | `a3_corpes` | Off-stage crime; Félez report; content warning; hear-only skips grove not fact |
 | `a3_querella` | One-ask SpeechTrial; legal/mesura files the complaint; ride_host does not unlock Toledo |
+| `a3_toledo` | García first, then swords / dowry / riepto. Tizona to Pero, Colada to Martín |
+| `a3_valencia_wait` | Three weeks on `lists_wait`. Jimena rest. No mouth-cost |
+| `a3_carrion` | Spectator lists. Cid is not a hurtbox and not possessable. One shout per duel |
+| `a3_pentecost` | Poem ending and credits. He dies. **No corpse on Babieca** |
 
 Spanish display strings. English loc keys. Greybox 3D (CSG / capsules).
 
-## Not in this build
-
-Cortes de Toledo, Valencia wait, lists, Pentecost. Querella exit whispers if Toledo is missing. Linux / Windows / Android debug APK of this slice ship in the delivery folder.
-
 ## Controls (foot)
 
-WASD or click-to-move. Run, slam, leap, dodge, shout, interact. Hold mesura / rage dump where that component is present. Horse companion: mount and couch lance on open ground.
+WASD or click-to-move. Run, slam, leap, dodge, shout, interact. Hold mesura / rage dump where that component is present. Horse companion: mount and couch lance on open ground. At Carrión you watch; you do not enter the lists.
 
 ## Saves
 
-Local HMAC saves via the menu. New Game resets honor, roster, treasury, clock, chapter flags, and plot swords.
+Local HMAC saves via the menu. New Game resets honor, roster, treasury, clock, chapter flags, plot swords, and the lists seed.

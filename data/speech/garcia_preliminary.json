@@ -1,0 +1,45 @@
+{
+  "id": "garcia_preliminary",
+  "win_threshold": 0,
+  "asks": [
+    {
+      "id": "garcia_preliminary",
+      "prompt_key": "a3_toledo.garcia_prompt",
+      "counts_toward_win": false,
+      "lines": [
+        {
+          "id": "legal",
+          "text_key": "a3_toledo.garcia_legal",
+          "legal": 4,
+          "mesura": 2,
+          "ira": 0,
+          "tags": ["legal"]
+        },
+        {
+          "id": "mesura",
+          "text_key": "a3_toledo.garcia_mesura",
+          "legal": 3,
+          "mesura": 4,
+          "ira": 0,
+          "tags": ["mesura"]
+        },
+        {
+          "id": "ira",
+          "text_key": "a3_toledo.garcia_ira",
+          "legal": 1,
+          "mesura": 0,
+          "ira": 4,
+          "tags": ["ira"]
+        },
+        {
+          "id": "draw_steel",
+          "text_key": "a3_toledo.line_steel",
+          "legal": 0,
+          "mesura": 0,
+          "ira": 0,
+          "tags": ["draw_steel"]
+        }
+      ]
+    }
+  ]
+}
