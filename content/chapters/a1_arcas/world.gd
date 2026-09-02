@@ -28,6 +28,8 @@ func _ready() -> void:
 func start_offer(_cue: String = "offer") -> void:
 	if _resolved or _talking:
 		return
+	if _choice_visible():
+		return
 	_talking = true
 	_hide_choice()
 	var resource := _load_dialogue()
@@ -111,6 +113,11 @@ func _refresh_ticker() -> void:
 	var ticker: Node = find_child("DesertionTicker", true, false)
 	if ticker and ticker.has_method("refresh"):
 		ticker.call("refresh")
+
+
+func _choice_visible() -> bool:
+	var ui: Node = find_child("ChoiceUI", true, false)
+	return ui != null and bool(ui.visible)
 
 
 func _show_choice() -> void:

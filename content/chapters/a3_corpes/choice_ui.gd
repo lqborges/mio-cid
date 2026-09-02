@@ -4,6 +4,8 @@ extends Control
 func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	add_to_group("modal_choice")
+	add_to_group("hud_click_sink")
 	_apply_copy()
 	var mesura: Button = get_node_or_null("Panel/Mesura") as Button
 	var rage: Button = get_node_or_null("Panel/Rage") as Button

@@ -128,10 +128,15 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertIn("arcas_cheated", source)
         self.assertIn("_confirm_choice", source)
         self.assertIn("_free_balloon", source)
+        self.assertIn("_choice_visible", source)
+        choice = _read(f"{CHAPTER}/choice_ui.gd")
+        self.assertIn("modal_choice", choice)
+        self.assertIn("hud_click_sink", choice)
         self.assertIn("a1_arcas.cheat_done", source)
         self.assertIn("a1_arcas.refuse_done", source)
         start = source.split("func start_offer", 1)[1].split("func run_offer", 1)[0]
         self.assertIn("_hide_choice()", start)
+        self.assertIn("_choice_visible", start)
         self.assertIn("_try_balloon", start)
         cheat = source.split("func choose_cheat", 1)[1].split("func choose_refuse", 1)[0]
         self.assertIn("_confirm_choice", cheat)

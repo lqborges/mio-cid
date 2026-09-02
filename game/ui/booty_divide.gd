@@ -16,6 +16,8 @@ var _applied: bool = false
 
 
 func _ready() -> void:
+	add_to_group("modal_choice")
+	add_to_group("hud_click_sink")
 	var gift_btn := _gift_button()
 	if gift_btn and not gift_btn.toggled.is_connected(_on_gift_toggled):
 		gift_btn.toggled.connect(_on_gift_toggled)

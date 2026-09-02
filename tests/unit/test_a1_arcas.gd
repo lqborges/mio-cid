@@ -32,6 +32,7 @@ func _run() -> void:
 		failures.append_array(_check_nameplates())
 		failures.append_array(_check_spanish_choice_copy())
 		failures.append_array(await _check_choice_after_offer())
+		failures.append_array(_check_choice_ui_is_modal())
 		failures.append_array(_check_offer_end_does_not_travel())
 		failures.append_array(_check_confirm_end_travels())
 		failures.append_array(_check_cheat_stain_and_marks())
@@ -224,6 +225,36 @@ func _check_choice_after_offer() -> PackedStringArray:
 	await _world.run_offer()
 	if ui == null or not bool(ui.visible):
 		failures.append("choice UI should present after the offer cue")
+	if _world.has_method("start_offer"):
+		_world.start_offer()
+		if ui and not bool(ui.visible):
+			failures.append("start_offer must not hide ChoiceUI once the branch is up")
+	return failures
+
+
+func _check_choice_ui_is_modal() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var ui: Node = _world.find_child("ChoiceUI", true, false)
+	if ui == null:
+		failures.append("ChoiceUI missing for modal check")
+		return failures
+	if not ui.is_in_group("modal_choice"):
+		failures.append("ChoiceUI must join modal_choice so E/LMB cannot walk or re-talk")
+	if not ui.is_in_group("hud_click_sink"):
+		failures.append("ChoiceUI must join hud_click_sink")
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and cid.has_method("_modal_ui_open") and ui.visible:
+		if not bool(cid.call("_modal_ui_open")):
+			failures.append("Cid must treat visible ChoiceUI as modal")
+		if cid.has_method("_input"):
+			var click := InputEventMouseButton.new()
+			click.button_index = MOUSE_BUTTON_LEFT
+			click.pressed = true
+			click.position = Vector2(640, 360)
+			cid.call("_input", click)
+			var vp := cid.get_viewport()
+			if vp and vp.is_input_handled():
+				failures.append("Cid _input must not eat the Arcas choice buttons")
 	return failures
 
 

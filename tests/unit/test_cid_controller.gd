@@ -98,6 +98,40 @@ func _check_desktop_lmb_walks() -> PackedStringArray:
 	return failures
 
 
+func _check_hud_input_does_not_eat_buttons() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("hud input: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	if cid == null:
+		failures.append("hud input: Cid is not CharacterBody3D")
+		return failures
+	get_root().add_child(cid)
+	var sink := Control.new()
+	sink.name = "FakeChoice"
+	sink.visible = true
+	sink.set_anchors_preset(Control.PRESET_FULL_RECT)
+	sink.mouse_filter = Control.MOUSE_FILTER_STOP
+	sink.add_to_group("modal_choice")
+	sink.add_to_group("hud_click_sink")
+	get_root().add_child(sink)
+	var lmb := InputEventMouseButton.new()
+	lmb.button_index = MOUSE_BUTTON_LEFT
+	lmb.pressed = true
+	lmb.position = Vector2(640, 360)
+	cid._input(lmb)
+	var vp := cid.get_viewport()
+	if vp and vp.is_input_handled():
+		failures.append("Cid _input must not eat modal ChoiceUI / KeepOrSell button clicks")
+	if cid.has_method("_modal_ui_open") and not bool(cid.call("_modal_ui_open")):
+		failures.append("visible modal_choice must count as modal UI")
+	sink.free()
+	cid.free()
+	return failures
+
+
 func _check_dialogue_does_not_queue_interact() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
@@ -147,6 +181,7 @@ func _check_false_interact_does_not_block_walk() -> PackedStringArray:
 
 
 func _begin_input_routing_checks() -> void:
+	_failures.append_array(_check_hud_input_does_not_eat_buttons())
 	_failures.append_array(_check_dialogue_does_not_queue_interact())
 	_failures.append_array(_check_false_interact_does_not_block_walk())
 	_begin_leap_tick()
