@@ -135,18 +135,9 @@ func _travel_to_arcas() -> void:
 		return
 	if ChapterRunner == null:
 		return
-	if not ChapterRunner.has_flag(SEEN_FLAG):
-		_set_flag(SEEN_FLAG)
-	var dest := &"a1_arcas"
-	if ChapterRunner.has_method("can_travel"):
-		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
-		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
-			return
-		if ChapterRunner.has_method("goto"):
-			ChapterRunner.goto(dest)
-		return
+	_set_flag(SEEN_FLAG)
 	if ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(dest)
+		ChapterRunner.goto(&"a1_arcas")
 
 
 func draw_steel_on_burgaleses() -> void:

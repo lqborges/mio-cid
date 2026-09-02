@@ -383,6 +383,16 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
 shape = SubResource("Box_camp")
 
+[node name="Name" type="Label3D" parent="Camp"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+pixel_size = 0.005
+billboard = 1
+text = "Río"
+modulate = Color(0.91, 0.85, 0.72, 1)
+outline_modulate = Color(0.18, 0.16, 0.13, 1)
+font_size = 28
+outline_size = 6
+
 [node name="BurgalesZone" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -1)
 collision_layer = 0
