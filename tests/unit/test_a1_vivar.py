@@ -241,6 +241,44 @@ class TestA1VivarPrologue(unittest.TestCase):
             result.stdout + "\n" + result.stderr,
         )
 
+    def test_godot_early_game_travel_if_available(self) -> None:
+        godot = None
+        for candidate in ("godot", "godot4"):
+            found = subprocess.run(
+                ["bash", "-lc", f"command -v {candidate}"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if found.returncode == 0 and found.stdout.strip():
+                godot = found.stdout.strip()
+                break
+        if godot is None:
+            local = Path("/home/lqborges/.local/bin/godot")
+            if local.is_file():
+                godot = str(local)
+        if godot is None:
+            self.skipTest("Godot binary not on PATH")
+        if not (ROOT / ".godot").is_dir():
+            self.skipTest("Godot import cache missing")
+        self.assertTrue((ROOT / "tests/unit/test_early_game_travel.gd").is_file())
+        result = subprocess.run(
+            [
+                godot,
+                "--headless",
+                "--path",
+                str(ROOT),
+                "-s",
+                "res://tests/unit/test_early_game_travel.gd",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        combined = result.stdout + "\n" + result.stderr
+        self.assertEqual(result.returncode, 0, combined)
+        self.assertNotIn("Cannot convert argument", combined)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -240,6 +240,11 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_a1_arcas.gd
 
+      - name: Run early-game travel headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_early_game_travel.gd
+
       - name: Run HumanoidLooks headless test
         if: steps.godot.outputs.found == 'true'
         run: |
