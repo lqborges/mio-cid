@@ -6,7 +6,7 @@ const LookScript := preload("res://game/actors/look/humanoid_look.gd")
 
 func _ready() -> void:
 	var tree := get_tree()
-	if tree:
+	if tree and not tree.node_added.is_connected(_on_node_added):
 		tree.node_added.connect(_on_node_added)
 	_walk(tree.root if tree else self)
 
@@ -16,20 +16,34 @@ func ensure(node: Node) -> void:
 		_walk(node)
 
 
+func _exit_tree() -> void:
+	var tree := get_tree()
+	if tree and tree.node_added.is_connected(_on_node_added):
+		tree.node_added.disconnect(_on_node_added)
+
+
 func _on_node_added(node: Node) -> void:
-	if node == null:
+	# Never call_deferred a Node. Freeing a1_vivar left ~118 typed-arg convert errors.
+	if node == null or not is_instance_valid(node) or node.is_queued_for_deletion():
 		return
 	_consider_deferred.call_deferred(node.get_instance_id())
 
 
 func _consider_deferred(id: int) -> void:
-	var node := instance_from_id(id) as Node
-	if node == null or not is_instance_valid(node) or node.is_queued_for_deletion():
+	if id == 0 or not is_instance_id_valid(id):
+		return
+	var obj: Object = instance_from_id(id)
+	if obj == null or not is_instance_valid(obj) or not (obj is Node):
+		return
+	var node: Node = obj
+	if node.is_queued_for_deletion() or not node.is_inside_tree():
 		return
 	_consider(node)
 
 
 func _walk(node: Node) -> void:
+	if node == null or not is_instance_valid(node):
+		return
 	_consider(node)
 	for child in node.get_children():
 		_walk(child)
@@ -90,6 +104,8 @@ func _should_attach(host: Node) -> bool:
 
 
 func _attach(host: Node) -> void:
+	if host == null or not is_instance_valid(host):
+		return
 	if host.get_node_or_null("Humanoid") != null:
 		return
 	var look: Node = LookScript.new()

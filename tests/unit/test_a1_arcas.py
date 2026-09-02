@@ -196,10 +196,9 @@ class TestA1ArcasSandChest(unittest.TestCase):
         burgos = _read("content/chapters/a1_burgos/world.gd")
         self.assertIn("a1_arcas", burgos)
         self.assertIn("_travel_to_arcas", burgos)
-        self.assertIn("can_travel", burgos)
         travel = burgos.split("func _travel_to_arcas", 1)[1].split("func draw_steel", 1)[0]
-        self.assertIn("can_travel", travel)
-        self.assertIn("goto", travel)
+        self.assertIn("_set_flag", travel)
+        self.assertIn('ChapterRunner.goto(&"a1_arcas")', travel)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

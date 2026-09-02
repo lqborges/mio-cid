@@ -37,6 +37,8 @@ func _run() -> void:
 		failures.append_array(_check_south_gate_leave())
 		_world.free()
 		_world = null
+		await process_frame
+		await process_frame
 	_finish(failures)
 
 

@@ -28,6 +28,12 @@ class TestPortraits(unittest.TestCase):
         self.assertIn(
             'HumanoidLooks="*res://game/autoload/humanoid_looks.gd"', autoload
         )
+        looks = (ROOT / "game/autoload/humanoid_looks.gd").read_text(encoding="utf-8")
+        self.assertIn("get_instance_id", looks)
+        self.assertIn("is_instance_id_valid", looks)
+        self.assertIn("func _consider_deferred", looks)
+        self.assertNotIn("_consider.call_deferred", looks)
+        self.assertNotIn('call_deferred("_consider"', looks)
 
 
 if __name__ == "__main__":
