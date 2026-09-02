@@ -2,6 +2,10 @@ extends StaticBody3D
 ## Closed cage. Interact refuses; the lion scene is later.
 
 
+func _ready() -> void:
+	add_to_group("interactable")
+
+
 func interact() -> void:
 	var host := _chapter()
 	if host and host.has_method("try_open_cage"):

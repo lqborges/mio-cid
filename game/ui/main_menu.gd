@@ -4,7 +4,6 @@ const VIVAR_SCENE := "res://content/chapters/a1_vivar/world.tscn"
 
 @onready var _status: Label = $Center/Status
 @onready var _slots: HBoxContainer = $Center/Slots
-var _overwrite_armed: bool = false
 
 
 func _ready() -> void:
@@ -18,15 +17,11 @@ func _ready() -> void:
 
 
 func _on_new_game() -> void:
+	# Always start. A two-click overwrite confirm looked like a dead menu
+	# once all five slots existed from prior play.
 	var slot := _first_empty_slot()
 	if slot == 0:
-		if not _overwrite_armed:
-			_overwrite_armed = true
-			if _status:
-				_status.text = "¿Sobrescribir hueco 1?"
-			return
 		slot = 1
-	_overwrite_armed = false
 	_reset_campaign()
 	if SaveService:
 		SaveService.save(slot)
@@ -36,7 +31,6 @@ func _on_new_game() -> void:
 
 
 func _on_load_pressed() -> void:
-	_overwrite_armed = false
 	_rebuild_slots()
 	_slots.visible = not _slots.visible
 

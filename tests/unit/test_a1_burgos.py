@@ -69,6 +69,19 @@ class TestA1BurgosGreybox(unittest.TestCase):
         self.assertIn("Child", scene)
         self.assertIn("Innkeeper", scene)
         self.assertIn("BurgalesA", scene)
+        camp = scene.split('[node name="Camp"', 1)[1].split("[node name=", 1)[0]
+        self.assertNotIn("townsfolk.gd", camp)
+        self.assertNotIn("role = \"camp\"", camp)
+        self.assertIn("collision_layer = 0", camp)
+        world = _read(f"{CHAPTER}/world.gd")
+        self.assertIn("func _physics_process", world)
+        self.assertIn("camp_on_river", world)
+        self.assertIn('ChapterRunner.goto(&"a1_arcas")', world)
+        self.assertIn("Río", scene)
+        folk = _read(f"{CHAPTER}/townsfolk.gd")
+        self.assertIn("add_to_group(\"interactable\")", folk)
+        self.assertIn("func _is_talk_role", folk)
+        self.assertIn("return false", folk)
         self.assertNotIn("type=\"OmniLight3D\"", scene)
         self.assertNotIn("type=\"SpotLight3D\"", scene)
 
@@ -144,9 +157,10 @@ class TestA1BurgosGreybox(unittest.TestCase):
         self.assertIn("res://content/chapters/a1_burgos/world.tscn", source)
         self.assertIn("&\"a1_burgos\"", source)
         vivar = _read("content/chapters/a1_vivar/world.gd")
-        self.assertIn("can_travel", vivar)
+        self.assertIn("_set_seen", vivar)
         self.assertIn("a1_burgos", vivar)
         self.assertIn("_travel_to_burgos", vivar)
+        self.assertIn('ChapterRunner.goto(&"a1_burgos")', vivar)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

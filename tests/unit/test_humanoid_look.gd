@@ -3,10 +3,15 @@ extends SceneTree
 
 
 func _initialize() -> void:
+	call_deferred("_run")
+
+
+func _run() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_check_cid())
 	failures.append_array(_check_named_hosts())
 	failures.append_array(_check_nameplate_fit())
+	failures.append_array(await _check_deferred_free_is_safe())
 	_finish(failures)
 
 
@@ -89,6 +94,36 @@ func _check_nameplate_fit() -> PackedStringArray:
 	if float(label.font_size) * float(label.pixel_size) > 0.18:
 		failures.append("nameplate world height stayed huge")
 	label.free()
+	return failures
+
+
+func _check_deferred_free_is_safe() -> PackedStringArray:
+	# Main@ff8b097 deferred the Node itself. Freeing a1_vivar printed
+	# ~118× "Cannot convert argument 1 from Object to Object".
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/chapters/a1_vivar/world.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("a1_vivar missing for deferred-free check")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	world.free()
+	await process_frame
+	await process_frame
+	var looks: Node = get_root().get_node_or_null("HumanoidLooks")
+	if looks == null:
+		failures.append("HumanoidLooks autoload missing")
+		return failures
+	if not looks.has_method("_consider_deferred"):
+		failures.append("HumanoidLooks must defer instance ids, not Nodes")
+	var dummy := Node3D.new()
+	dummy.name = "LooksProbe"
+	get_root().add_child(dummy)
+	var probe_id := dummy.get_instance_id()
+	dummy.free()
+	if looks.has_method("_consider_deferred"):
+		looks.call("_consider_deferred", probe_id)
+		looks.call("_consider_deferred", 0)
 	return failures
 
 

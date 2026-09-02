@@ -168,7 +168,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if not _is_click_move_press(event):
 		return
-	if not _world_click_blocked():
+	var pos := _event_screen_pos(event)
+	if not _world_click_blocked() and not _point_over_hud(pos):
 		return
 	_click_move_from_hud = true
 	_click_target = null
@@ -190,17 +191,26 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		_mark_handled()
 		return
+	if _dialogue_open():
+		# Balloon owns click / E / accept. Do not walk, talk-again, or dodge-on-Space.
+		if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
+			_click_target = null
+			_queued_click_pos = null
+		_queued_interact = false
+		return
 	# World taps walk / talk. Slam stays on the key / pad / touch button.
 	if _pointer_event_blocked(event):
-		if _is_world_walk_tap(event) and not _world_click_blocked():
-			_queued_click_pos = _event_screen_pos(event)
+		var tap_pos := _event_screen_pos(event)
+		if _is_world_walk_tap(event) and not _world_click_blocked() and not _point_over_hud(tap_pos):
+			_queued_click_pos = tap_pos
 		_mark_handled()
 		return
-	if _is_pointer_event(event) and _world_click_blocked():
+	if _is_pointer_event(event) and (_world_click_blocked() or _point_over_hud(_event_screen_pos(event))):
 		_mark_handled()
 		return
 	if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
-		if _world_click_blocked() or _click_move_from_hud:
+		var pos := _event_screen_pos(event)
+		if _world_click_blocked() or _click_move_from_hud or _point_over_hud(pos):
 			_click_move_from_hud = true
 			_click_target = null
 			_queued_click_pos = null
@@ -608,10 +618,14 @@ func _try_interact_node(node: Node) -> bool:
 	if owner == null:
 		return false
 	if owner.has_method("interact"):
-		owner.call("interact")
+		var result: Variant = owner.call("interact")
+		if result is bool and result == false:
+			return false
 		return true
 	if owner.has_method("action"):
-		owner.call("action")
+		var result: Variant = owner.call("action")
+		if result is bool and result == false:
+			return false
 		return true
 	return false
 
@@ -630,13 +644,17 @@ func _interact_owner(node: Node) -> Node:
 	return null
 
 
+func _is_talk_target(node: Node) -> bool:
+	return node != null and node.is_in_group("interactable")
+
+
 func _nearest_interactable() -> Node:
 	var best: Node = null
 	var best_d := interact_range
 	if not is_inside_tree():
 		return null
 	for node in get_tree().get_nodes_in_group("interactable"):
-		if not (node is Node3D):
+		if not (node is Node3D) or not _is_talk_target(node):
 			continue
 		var d := (node as Node3D).global_position.distance_to(global_position)
 		if d <= best_d:
@@ -654,7 +672,7 @@ func _nearest_interactable() -> Node:
 	query.exclude = [get_rid()]
 	for hit in space.intersect_shape(query, 24):
 		var owner := _interact_owner(hit.get("collider") as Node)
-		if owner == null or not (owner is Node3D):
+		if owner == null or not (owner is Node3D) or not _is_talk_target(owner):
 			continue
 		var d := (owner as Node3D).global_position.distance_to(global_position)
 		if d <= best_d:
@@ -679,7 +697,12 @@ func _update_interact_prompt() -> void:
 	var target := _focus_interactable()
 	_prompt_label.visible = target != null
 	if target:
-		_prompt_label.text = _loc_text("hud.interact_hint", "E — Hablar")
+		var key := "hud.interact_hint"
+		if target.has_method("interact_prompt_key"):
+			var custom := str(target.call("interact_prompt_key"))
+			if not custom.is_empty():
+				key = custom
+		_prompt_label.text = _loc_text(key, "E — Hablar")
 
 
 func _ensure_interact_prompt() -> void:
@@ -740,21 +763,39 @@ func _world_click_blocked() -> bool:
 
 
 func _mouse_over_hud() -> bool:
-	if not is_inside_tree():
-		return false
 	var vp := get_viewport()
 	if vp == null:
 		return false
-	var mouse := vp.get_mouse_position()
+	return _point_over_hud(vp.get_mouse_position())
+
+
+func _point_over_hud(screen_pos: Vector2) -> bool:
+	if not is_inside_tree():
+		return false
 	for node in get_tree().get_nodes_in_group("hud_click_sink"):
 		if not (node is Control):
 			continue
 		var ctl := node as Control
 		if not ctl.is_visible_in_tree():
 			continue
-		if ctl.get_global_rect().has_point(mouse):
+		if _hud_hit_rect(ctl).has_point(screen_pos):
 			return true
 	return false
+
+
+func _hud_hit_rect(ctl: Control) -> Rect2:
+	var r := ctl.get_global_rect()
+	var min_s := ctl.custom_minimum_size
+	if r.size.x < min_s.x:
+		r.size.x = min_s.x
+	if r.size.y < min_s.y:
+		r.size.y = min_s.y
+	# Drawn meters fallback to PANEL_SIZE when the Control has not laid out yet.
+	if r.size.x < 8.0:
+		r.size.x = 232.0
+	if r.size.y < 8.0:
+		r.size.y = 36.0
+	return r
 
 
 func _is_pointer_event(event: InputEvent) -> bool:

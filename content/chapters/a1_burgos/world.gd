@@ -117,24 +117,27 @@ func camp_on_river() -> void:
 	_travel_to_arcas()
 
 
+func _physics_process(_delta: float) -> void:
+	if _camped:
+		_travel_to_arcas()
+		return
+	var cid: Node3D = get_node_or_null("Cid") as Node3D
+	if cid == null:
+		return
+	# Spawn is z=6.5. The old Camp box (layer 1) blocked before RiverCamp (z~8.5).
+	if cid.global_position.z >= 9.4:
+		camp_on_river()
+
+
 func _travel_to_arcas() -> void:
 	var tree := get_tree()
 	if tree == null or tree.current_scene != self:
 		return
 	if ChapterRunner == null:
 		return
-	if not ChapterRunner.has_flag(SEEN_FLAG):
-		_set_flag(SEEN_FLAG)
-	var dest := &"a1_arcas"
-	if ChapterRunner.has_method("can_travel"):
-		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
-		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
-			return
-		if ChapterRunner.has_method("goto"):
-			ChapterRunner.goto(dest)
-		return
+	_set_flag(SEEN_FLAG)
 	if ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(dest)
+		ChapterRunner.goto(&"a1_arcas")
 
 
 func draw_steel_on_burgaleses() -> void:

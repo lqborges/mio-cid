@@ -29,11 +29,16 @@ func _run() -> void:
 		failures.append_array(_check_nameplates())
 		failures.append_array(_check_companions_interactable())
 		failures.append_array(_check_pause_menu())
+		failures.append_array(_check_plazo_clock_bound_on_ready())
+		failures.append_array(_check_talk_balloon_advances_on_click())
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(await _check_first_names_set_seen())
 		failures.append_array(_check_advance_plazo_does_not_feed())
+		failures.append_array(_check_south_gate_leave())
 		_world.free()
 		_world = null
+		await process_frame
+		await process_frame
 	_finish(failures)
 
 
@@ -58,6 +63,13 @@ func _check_scene_loads() -> PackedStringArray:
 		failures.append("world missing Álvar companion")
 	if _world.get_node_or_null("Martin") == null:
 		failures.append("world missing Martín companion")
+	var gate: Node = _world.get_node_or_null("Gate")
+	if gate == null or not gate.has_method("interact"):
+		failures.append("world missing Gate leave interact")
+	if gate and not gate.is_in_group("interactable"):
+		failures.append("Gate must be interactable")
+	if gate is CollisionObject3D and (gate as CollisionObject3D).collision_layer == 1:
+		failures.append("Gate layer 1 blocks Cid (mask 5) and traps the solar")
 	if _world.find_child("Chest", true, false) != null:
 		failures.append("empty solar still has a Chest")
 	return failures
@@ -84,6 +96,8 @@ func _check_hud_labels_and_click_sink() -> PackedStringArray:
 		failures.append("HonorMeters must STOP mouse so HUD is a click sink")
 	if not hud.is_in_group("hud_click_sink"):
 		failures.append("HonorMeters must join hud_click_sink")
+	if hud.get_rect().size.x < 200.0:
+		failures.append("HonorMeters hit rect is too small to sink clicks")
 	if hud.has_method("_meter_label"):
 		var onores := str(hud.call("_meter_label", &"onores"))
 		if onores != "Honores":
@@ -163,6 +177,49 @@ func _check_pause_menu() -> PackedStringArray:
 	return failures
 
 
+func _check_plazo_clock_bound_on_ready() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var bar: Node = _world.find_child("PlazoBar", true, false)
+	if bar == null:
+		failures.append("PlazoBar missing for ready bind")
+		return failures
+	if bar is CanvasItem and not (bar as CanvasItem).is_processing():
+		failures.append("PlazoBar must start processing from _ready, not the first HUD click")
+	var bus: Node = get_root().get_node_or_null("EventBus")
+	if bus and bus.has_signal("beat_completed") and bar.has_method("_on_beat_completed"):
+		if not bus.beat_completed.is_connected(bar._on_beat_completed):
+			failures.append("PlazoBar must connect beat_completed in _ready")
+	return failures
+
+
+func _check_talk_balloon_advances_on_click() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://game/ui/talk_balloon.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("talk_balloon.tscn failed to load")
+		return failures
+	var balloon: Node = (packed as PackedScene).instantiate()
+	if balloon == null:
+		failures.append("talk_balloon did not instantiate")
+		return failures
+	get_root().add_child(balloon)
+	if not balloon.has_method("_try_advance") or not balloon.has_method("_input"):
+		failures.append("talk balloon must advance from _input so HUD/Cid cannot eat the click")
+		balloon.free()
+		return failures
+	balloon.set("_waiting", true)
+	balloon.set("_line", {"next_id": "end"})
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = Vector2(640, 640)
+	balloon.call("_input", click)
+	if bool(balloon.get("_waiting")):
+		failures.append("talk balloon click must leave _waiting so the next line can show")
+	balloon.free()
+	return failures
+
+
 func _check_greybox_lights() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	var lights := _world.find_children("*", "DirectionalLight3D", true, false)
@@ -230,6 +287,27 @@ func _check_advance_plazo_does_not_feed() -> PackedStringArray:
 		failures.append("advance_plazo must not touch unfed_streak")
 	if int(_clock.days_elapsed) != 3:
 		failures.append("advance_plazo must not advance days_elapsed")
+	return failures
+
+
+func _check_south_gate_leave() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_world.set("_left", false)
+	var cid: Node3D = _world.get_node_or_null("Cid") as Node3D
+	if cid == null:
+		failures.append("Cid missing for south-gate leave")
+		return failures
+	cid.global_position = Vector3(0.0, 0.05, 8.4)
+	if _world.has_method("_physics_process"):
+		_world._physics_process(0.016)
+	if not bool(_world.get("_left")):
+		failures.append("Cid at the south opening must leave_solar (physics poll)")
+	_world.set("_left", false)
+	var gate: Node = _world.get_node_or_null("Gate")
+	if gate and gate.has_method("interact"):
+		gate.call("interact")
+		if not bool(_world.get("_left")):
+			failures.append("Gate.interact must call leave_solar")
 	return failures
 
 

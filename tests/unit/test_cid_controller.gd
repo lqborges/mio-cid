@@ -11,7 +11,7 @@ func _initialize() -> void:
 	_failures.append_array(_check_cid_scene())
 	_failures.append_array(_check_arena_scene())
 	_failures.append_array(_check_desktop_lmb_walks())
-	call_deferred("_begin_leap_tick")
+	call_deferred("_begin_input_routing_checks")
 
 
 func _check_cid_scene() -> PackedStringArray:
@@ -96,6 +96,60 @@ func _check_desktop_lmb_walks() -> PackedStringArray:
 		failures.append("desktop LMB must queue click-to-move")
 	cid.free()
 	return failures
+
+
+func _check_dialogue_does_not_queue_interact() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("dialogue interact: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	get_root().add_child(cid)
+	var layer := CanvasLayer.new()
+	layer.name = "FakeBalloon"
+	layer.visible = true
+	get_root().add_child(layer)
+	layer.add_to_group("talk_balloon")
+	if cid.has_method("_dialogue_open") and not bool(cid.call("_dialogue_open")):
+		failures.append("talk_balloon group must count as dialogue open")
+	var key := InputEventAction.new()
+	key.action = &"interact"
+	key.pressed = true
+	cid._unhandled_input(key)
+	if bool(cid.get("_queued_interact")):
+		failures.append("E during talk balloon must not queue another interact")
+	layer.free()
+	cid.free()
+	return failures
+
+
+func _check_false_interact_does_not_block_walk() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("false interact: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	get_root().add_child(cid)
+	var body := StaticBody3D.new()
+	body.name = "NoTalk"
+	var script := GDScript.new()
+	script.source_code = "extends StaticBody3D\nfunc interact() -> bool:\n\treturn false\n"
+	script.reload()
+	body.set_script(script)
+	get_root().add_child(body)
+	if cid.has_method("_try_interact_node") and bool(cid.call("_try_interact_node", body)):
+		failures.append("interact() false must not count as a talk hit")
+	body.free()
+	cid.free()
+	return failures
+
+
+func _begin_input_routing_checks() -> void:
+	_failures.append_array(_check_dialogue_does_not_queue_interact())
+	_failures.append_array(_check_false_interact_does_not_block_walk())
+	_begin_leap_tick()
 
 
 func _begin_leap_tick() -> void:

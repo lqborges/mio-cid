@@ -39,6 +39,7 @@ class TestA1VivarPrologue(unittest.TestCase):
             f"{CHAPTER}/world.gd",
             f"{CHAPTER}/vivar.dialogue",
             f"{CHAPTER}/companion.gd",
+            f"{CHAPTER}/gate.gd",
             "game/ui/plazo_bar.tscn",
             "game/ui/talk_balloon.tscn",
             "game/ui/pause_menu.gd",
@@ -75,8 +76,14 @@ class TestA1VivarPrologue(unittest.TestCase):
         source = _read(f"{CHAPTER}/world.gd")
         self.assertIn("advance_plazo", source)
         self.assertIn("func leave_solar", source)
+        self.assertIn("func _physics_process", source)
         self.assertIn("func run_first_names", source)
         self.assertIn("vivar_seen", source)
+        scene = _read(f"{CHAPTER}/world.tscn")
+        gate = scene.split('[node name="Gate"', 1)[1].split("[node name=", 1)[0]
+        self.assertIn("collision_layer = 8", gate)
+        self.assertIn('path="res://content/chapters/a1_vivar/gate.gd"', scene)
+        self.assertIn("collision_layer = 8", _read(f"{CHAPTER}/gate.gd"))
         self.assertNotIn("camp_night(", source)
         self.assertNotIn("rest_camp(", source)
         self.assertNotIn("tick_night(", source)
@@ -119,6 +126,7 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertEqual(rows["hud.honor"]["es"], "Honor")
         self.assertEqual(rows["hud.honra"]["es"], "Honra")
         self.assertEqual(rows["hud.interact_hint"]["es"], "E — Hablar")
+        self.assertEqual(rows["hud.leave_hint"]["es"], "E — Salir")
         self.assertEqual(rows["ui.pause.resume"]["es"], "Continuar")
         self.assertEqual(rows["ui.pause.menu"]["es"], "Menú principal")
         self.assertEqual(rows["ui.pause.quit"]["es"], "Salir")
@@ -130,6 +138,15 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("func _gui_input", meters)
         self.assertIn("MOUSE_FILTER_STOP", _read("game/ui/plazo_bar.gd"))
         self.assertIn("hud_click_sink", _read("game/ui/plazo_bar.gd"))
+        plazo = _read("game/ui/plazo_bar.gd")
+        ready, gui = plazo.split("func _gui_input", 1)
+        self.assertIn("set_process", ready)
+        self.assertIn("beat_completed", ready)
+        self.assertNotIn("beat_completed.connect", gui.split("func _process", 1)[0])
+        balloon = _read("game/ui/talk_balloon.gd")
+        self.assertIn("func _input", balloon)
+        self.assertIn("func _try_advance", balloon)
+        self.assertIn("func _on_panel_gui_input", balloon)
         self.assertIn("PauseMenu", _read("project.godot"))
         self.assertIn("func open", _read("game/ui/pause_menu.gd"))
         self.assertIn("ui_cancel", _read("game/ui/pause_menu.gd"))
@@ -140,6 +157,9 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("res://content/chapters/a1_vivar/world.tscn", menu)
         self.assertIn("Nueva partida", _read("game/ui/main_menu.tscn"))
         self.assertIn("ChapterRunner.goto", menu)
+        self.assertNotIn("_overwrite_armed", menu)
+        self.assertIn("_first_empty_slot", menu)
+        self.assertIn("_enter_game", menu)
         project = _read("project.godot")
         self.assertIn('run/main_scene="res://game/ui/main_menu.tscn"', project)
         self.assertIn("viewport_width=1280", project)
@@ -162,6 +182,7 @@ class TestA1VivarPrologue(unittest.TestCase):
             f"{CHAPTER}/world.tscn",
             f"{CHAPTER}/vivar.dialogue",
             f"{CHAPTER}/companion.gd",
+            f"{CHAPTER}/gate.gd",
             "game/ui/talk_balloon.gd",
             "game/autoload/chapter_runner.gd",
         ):
