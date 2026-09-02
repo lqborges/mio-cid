@@ -119,7 +119,7 @@ func camp_on_river() -> void:
 
 func _physics_process(_delta: float) -> void:
 	if _camped:
-		_travel_to_arcas()
+		# camp_on_river already queued one deferred goto. Do not restack it.
 		return
 	var cid: Node3D = get_node_or_null("Cid") as Node3D
 	if cid == null:

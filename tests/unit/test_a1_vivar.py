@@ -177,7 +177,16 @@ class TestA1VivarPrologue(unittest.TestCase):
         goto = source.split("func goto(beat_id: StringName)", 1)[1].split("func _scene_path", 1)[0]
         self.assertIn("call_deferred", goto)
         self.assertIn("change_scene_to_file", goto)
+        self.assertIn("_pending_scene", goto)
+        self.assertIn("queued_scene_changes", goto)
+        self.assertIn("_clear_pending_scene", goto)
         self.assertNotIn("camp_night(", source)
+        phys = _read(f"{CHAPTER}/world.gd").split("func _physics_process", 1)[1].split(
+            "func _travel_to_burgos", 1
+        )[0]
+        self.assertIn("if _left:", phys)
+        self.assertNotIn("_travel_to_burgos()", phys)
+        self.assertNotIn("ChapterRunner.goto", phys)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (
@@ -231,6 +240,44 @@ class TestA1VivarPrologue(unittest.TestCase):
             0,
             result.stdout + "\n" + result.stderr,
         )
+
+    def test_godot_early_game_travel_if_available(self) -> None:
+        godot = None
+        for candidate in ("godot", "godot4"):
+            found = subprocess.run(
+                ["bash", "-lc", f"command -v {candidate}"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if found.returncode == 0 and found.stdout.strip():
+                godot = found.stdout.strip()
+                break
+        if godot is None:
+            local = Path("/home/lqborges/.local/bin/godot")
+            if local.is_file():
+                godot = str(local)
+        if godot is None:
+            self.skipTest("Godot binary not on PATH")
+        if not (ROOT / ".godot").is_dir():
+            self.skipTest("Godot import cache missing")
+        self.assertTrue((ROOT / "tests/unit/test_early_game_travel.gd").is_file())
+        result = subprocess.run(
+            [
+                godot,
+                "--headless",
+                "--path",
+                str(ROOT),
+                "-s",
+                "res://tests/unit/test_early_game_travel.gd",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        combined = result.stdout + "\n" + result.stderr
+        self.assertEqual(result.returncode, 0, combined)
+        self.assertNotIn("Cannot convert argument", combined)
 
 
 if __name__ == "__main__":

@@ -38,6 +38,8 @@ var graph: Resource
 var current_id: StringName = &"a1_vivar"
 var flags: PackedStringArray = PackedStringArray()
 var director: Node
+var queued_scene_changes: int = 0
+var _pending_scene: String = ""
 
 
 func _ready() -> void:
@@ -56,10 +58,12 @@ func _ensure_loaded() -> void:
 
 
 func reset() -> void:
+	_pending_scene = ""
 	restore(&"a1_vivar", PackedStringArray())
 
 
 func restore(chapter_id: StringName, new_flags: PackedStringArray) -> void:
+	_pending_scene = ""
 	_ensure_loaded()
 	var text := String(chapter_id)
 	current_id = chapter_id if not text.is_empty() else &"a1_vivar"
@@ -131,11 +135,24 @@ func goto(beat_id: StringName) -> void:
 	var path := _scene_path(beat_id)
 	if path.is_empty() or not ResourceLoader.exists(path):
 		return
+	# Vivar / Burgos poll travel every physics frame until the scene dies.
+	# A second deferred change_scene_to_file reloads the destination and
+	# frees the new CollisionObjects while HumanoidLooks still has callbacks.
+	if path == _pending_scene:
+		return
 	var loop := Engine.get_main_loop()
 	if loop is SceneTree:
+		_pending_scene = path
+		queued_scene_changes += 1
 		# Area3D / _physics_process leave (Vivar gate, Burgos river) cannot
 		# free CollisionObjects in the same physics callback.
 		(loop as SceneTree).change_scene_to_file.call_deferred(path)
+		_clear_pending_scene.call_deferred(path)
+
+
+func _clear_pending_scene(path: String) -> void:
+	if _pending_scene == path:
+		_pending_scene = ""
 
 
 func _scene_path(beat_id: StringName) -> String:

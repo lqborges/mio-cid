@@ -35,10 +35,12 @@ func _run() -> void:
 		failures.append_array(await _check_first_names_set_seen())
 		failures.append_array(_check_advance_plazo_does_not_feed())
 		failures.append_array(_check_south_gate_leave())
+		failures.append_array(_check_leave_does_not_restack_goto())
 		_world.free()
 		_world = null
 		await process_frame
 		await process_frame
+	failures.append_array(_check_goto_is_idempotent())
 	_finish(failures)
 
 
@@ -308,6 +310,44 @@ func _check_south_gate_leave() -> PackedStringArray:
 		gate.call("interact")
 		if not bool(_world.get("_left")):
 			failures.append("Gate.interact must call leave_solar")
+	return failures
+
+
+func _check_leave_does_not_restack_goto() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null:
+		failures.append("ChapterRunner missing for stacked-goto check")
+		return failures
+	_runner.set("_pending_scene", "")
+	_runner.set("queued_scene_changes", 0)
+	_world.set("_left", true)
+	if _world.has_method("_physics_process"):
+		for _i in 8:
+			_world._physics_process(0.016)
+	if int(_runner.get("queued_scene_changes")) != 0:
+		failures.append("Vivar physics must not restack goto after leave_solar")
+	return failures
+
+
+func _check_goto_is_idempotent() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null or not _runner.has_method("goto"):
+		failures.append("ChapterRunner missing goto")
+		return failures
+	_runner.set("_pending_scene", "")
+	_runner.set("queued_scene_changes", 0)
+	_runner.goto(&"a1_burgos")
+	_runner.goto(&"a1_burgos")
+	_runner.goto(&"a1_burgos")
+	if int(_runner.get("queued_scene_changes")) != 1:
+		failures.append(
+			"goto must queue one deferred scene change, got %s"
+			% _runner.get("queued_scene_changes")
+		)
+	if String(_runner.get("_pending_scene")).find("a1_burgos") < 0:
+		failures.append("goto must remember the pending Burgos scene")
+	if _runner.has_method("_clear_pending_scene"):
+		_runner.call("_clear_pending_scene", String(_runner.get("_pending_scene")))
 	return failures
 
 

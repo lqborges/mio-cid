@@ -33,10 +33,11 @@ func _consider_deferred(id: int) -> void:
 	if id == 0 or not is_instance_id_valid(id):
 		return
 	var obj: Object = instance_from_id(id)
-	if obj == null or not is_instance_valid(obj) or not (obj is Node):
+	if obj == null or not is_instance_valid(obj):
 		return
-	var node: Node = obj
-	if node.is_queued_for_deletion() or not node.is_inside_tree():
+	# Never assign Object → Node. Scene-change frees left convert errors.
+	var node := obj as Node
+	if node == null or node.is_queued_for_deletion() or not node.is_inside_tree():
 		return
 	_consider(node)
 

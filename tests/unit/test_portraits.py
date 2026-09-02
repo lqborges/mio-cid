@@ -32,6 +32,8 @@ class TestPortraits(unittest.TestCase):
         self.assertIn("get_instance_id", looks)
         self.assertIn("is_instance_id_valid", looks)
         self.assertIn("func _consider_deferred", looks)
+        self.assertIn("obj as Node", looks)
+        self.assertNotIn("var node: Node = obj", looks)
         self.assertNotIn("_consider.call_deferred", looks)
         self.assertNotIn('call_deferred("_consider"', looks)
 

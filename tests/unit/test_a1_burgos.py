@@ -77,6 +77,10 @@ class TestA1BurgosGreybox(unittest.TestCase):
         self.assertIn("func _physics_process", world)
         self.assertIn("camp_on_river", world)
         self.assertIn('ChapterRunner.goto(&"a1_arcas")', world)
+        phys = world.split("func _physics_process", 1)[1].split("func _travel_to_arcas", 1)[0]
+        self.assertIn("if _camped:", phys)
+        self.assertNotIn("_travel_to_arcas()", phys)
+        self.assertNotIn("ChapterRunner.goto", phys)
         self.assertIn("Río", scene)
         folk = _read(f"{CHAPTER}/townsfolk.gd")
         self.assertIn("add_to_group(\"interactable\")", folk)
