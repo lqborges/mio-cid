@@ -56,6 +56,8 @@ class TestCidController(unittest.TestCase):
         self.assertIn("_click_move_from_hud", source)
         self.assertIn("_try_interact_node", source)
         self.assertIn("_dialogue_open", source)
+        self.assertIn("_modal_ui_open", source)
+        self.assertIn("modal_choice", source)
         self.assertIn("_is_talk_target", source)
         self.assertIn("_point_over_hud", source)
         self.assertIn("_hud_hit_rect", source)
@@ -83,6 +85,9 @@ class TestCidController(unittest.TestCase):
         self.assertIn("_queued_click_pos", unhandled)
         self.assertNotIn("_ground_point_from_mouse", unhandled)
         self.assertIn("func _resolve_queued_click", source)
+        inp = source.split("func _input(", 1)[1].split("func _unhandled_input", 1)[0]
+        self.assertIn("_click_move_from_hud", inp)
+        self.assertNotIn("_mark_handled", inp)
 
     def test_combat_stub_has_kit_slots(self) -> None:
         source = _read("game/actors/player/cid_combat.gd")

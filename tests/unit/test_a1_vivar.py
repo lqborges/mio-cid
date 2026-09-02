@@ -174,6 +174,9 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("var flags: PackedStringArray", source)
         self.assertIn("func set_flag(flag_id: StringName)", source)
         self.assertIn("func goto(beat_id: StringName)", source)
+        goto = source.split("func goto(beat_id: StringName)", 1)[1].split("func _scene_path", 1)[0]
+        self.assertIn("call_deferred", goto)
+        self.assertIn("change_scene_to_file", goto)
         self.assertNotIn("camp_night(", source)
 
     def test_no_denylist_tokens(self) -> None:

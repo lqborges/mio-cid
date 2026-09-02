@@ -19,6 +19,8 @@ var holding: Resource
 
 
 func _ready() -> void:
+	add_to_group("modal_choice")
+	add_to_group("hud_click_sink")
 	if _keep:
 		_keep.pressed.connect(_on_keep)
 	if _sell:

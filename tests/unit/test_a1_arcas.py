@@ -128,13 +128,31 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertIn("arcas_cheated", source)
         self.assertIn("_confirm_choice", source)
         self.assertIn("_free_balloon", source)
+        self.assertIn("_choice_visible", source)
+        choice = _read(f"{CHAPTER}/choice_ui.gd")
+        self.assertIn("modal_choice", choice)
+        self.assertIn("hud_click_sink", choice)
         self.assertIn("a1_arcas.cheat_done", source)
         self.assertIn("a1_arcas.refuse_done", source)
         start = source.split("func start_offer", 1)[1].split("func run_offer", 1)[0]
         self.assertIn("_hide_choice()", start)
+        self.assertIn("_choice_visible", start)
         self.assertIn("_try_balloon", start)
+        cheat = source.split("func choose_cheat", 1)[1].split("func choose_refuse", 1)[0]
+        self.assertIn("_confirm_choice", cheat)
+        self.assertNotIn("_finish_beat()", cheat)
+        self.assertNotIn("_travel_to_cardena()", cheat)
+        refuse = source.split("func choose_refuse", 1)[1].split("func cheated", 1)[0]
+        self.assertIn("_confirm_choice", refuse)
+        self.assertNotIn("_finish_beat()", refuse)
+        self.assertNotIn("_travel_to_cardena()", refuse)
+        confirm = source.split("func _confirm_choice", 1)[1].split("func _whisper", 1)[0]
+        self.assertIn("_try_balloon", confirm)
+        self.assertIn("_travel_to_cardena", confirm)
         ended = source.split("func _on_dialogue_ended", 1)[1].split("func _try_balloon", 1)[0]
         self.assertIn("_show_choice()", ended)
+        self.assertIn("_travel_to_cardena", ended)
+        self.assertIn("_resolved", ended)
         self.assertNotIn("camp_night(", source)
         self.assertRegex(source, re.compile(r"^extends Node3D", re.MULTILINE))
         self.assertIsNone(re.search(r"^class_name\s", source, re.MULTILINE))

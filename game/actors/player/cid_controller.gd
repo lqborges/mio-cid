@@ -174,7 +174,7 @@ func _input(event: InputEvent) -> void:
 	_click_move_from_hud = true
 	_click_target = null
 	_queued_click_pos = null
-	_mark_handled()
+	# Leave the event for GUI buttons (ChoiceUI / KeepOrSell). Walk is already blocked.
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -191,8 +191,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		_mark_handled()
 		return
-	if _dialogue_open():
-		# Balloon owns click / E / accept. Do not walk, talk-again, or dodge-on-Space.
+	if _modal_ui_open():
+		# Balloon / chapter choice owns click / E / accept. Do not walk, talk-again, or dodge-on-Space.
 		if _is_world_walk_tap(event) or event.is_action_pressed("click_move"):
 			_click_target = null
 			_queued_click_pos = null
@@ -691,7 +691,7 @@ func _focus_interactable() -> Node:
 func _update_interact_prompt() -> void:
 	if _prompt_label == null:
 		return
-	if _dialogue_open() or chapter_asleep or chapter_locked:
+	if _modal_ui_open() or chapter_asleep or chapter_locked:
 		_prompt_label.visible = false
 		return
 	var target := _focus_interactable()
@@ -748,6 +748,17 @@ func _dialogue_open() -> bool:
 	return false
 
 
+func _modal_ui_open() -> bool:
+	if _dialogue_open():
+		return true
+	if not is_inside_tree():
+		return false
+	for node in get_tree().get_nodes_in_group("modal_choice"):
+		if node is Control and bool((node as Control).visible):
+			return true
+	return false
+
+
 func _gui_blocks_pointer() -> bool:
 	var vp := get_viewport()
 	if vp == null:
@@ -759,7 +770,7 @@ func _gui_blocks_pointer() -> bool:
 
 
 func _world_click_blocked() -> bool:
-	return _gui_blocks_pointer() or _mouse_over_hud() or _dialogue_open()
+	return _gui_blocks_pointer() or _mouse_over_hud() or _modal_ui_open()
 
 
 func _mouse_over_hud() -> bool:

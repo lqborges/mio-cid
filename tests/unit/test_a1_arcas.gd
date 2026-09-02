@@ -28,8 +28,13 @@ func _run() -> void:
 	if _world:
 		failures.append_array(_check_greybox_lights())
 		failures.append_array(_check_separate_lenders())
+		failures.append_array(_check_lenders_interactable())
+		failures.append_array(_check_nameplates())
 		failures.append_array(_check_spanish_choice_copy())
 		failures.append_array(await _check_choice_after_offer())
+		failures.append_array(_check_choice_ui_is_modal())
+		failures.append_array(_check_offer_end_does_not_travel())
+		failures.append_array(_check_confirm_end_travels())
 		failures.append_array(_check_cheat_stain_and_marks())
 		_world.free()
 		_world = null
@@ -115,6 +120,82 @@ func _check_separate_lenders() -> PackedStringArray:
 	return failures
 
 
+func _check_lenders_interactable() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	for name in ["Martin", "Raquel", "Vidas"]:
+		var npc: Node = _world.get_node_or_null(name)
+		if npc == null:
+			failures.append("missing %s" % name)
+			continue
+		if not npc.has_method("interact"):
+			failures.append("%s missing interact()" % name)
+		if not npc.is_in_group("interactable"):
+			failures.append("%s must be in interactable group" % name)
+	return failures
+
+
+func _check_nameplates() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var looks: Node = get_root().get_node_or_null("HumanoidLooks")
+	if looks and looks.has_method("ensure"):
+		looks.call("ensure", _world)
+	for path in ["Martin/Name", "Raquel/Name", "Vidas/Name"]:
+		var label: Label3D = _world.get_node_or_null(path) as Label3D
+		if label == null:
+			failures.append("missing nameplate %s" % path)
+			continue
+		if label.fixed_size:
+			failures.append("%s nameplate must not use fixed_size" % path)
+		if label.font_size > 32:
+			failures.append("%s nameplate font_size %s is too large" % [path, label.font_size])
+		if label.pixel_size > 0.006:
+			failures.append("%s nameplate pixel_size %s is too large" % [path, label.pixel_size])
+		var world_h := float(label.font_size) * float(label.pixel_size)
+		if world_h > 0.18:
+			failures.append("%s nameplate world height %s is too tall" % [path, world_h])
+	return failures
+
+
+func _check_offer_end_does_not_travel() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null:
+		failures.append("ChapterRunner missing for offer-end travel check")
+		return failures
+	if "current_id" in _runner:
+		_runner.current_id = &"a1_arcas"
+	if "flags" in _runner:
+		_runner.flags = PackedStringArray()
+	_world.set("_resolved", false)
+	_world.set("_left", false)
+	if _world.has_method("_on_dialogue_ended"):
+		_world.call("_on_dialogue_ended")
+	if String(_runner.current_id) == "a1_cardena":
+		failures.append("offer dialogue end must present the choice, not travel")
+	var ui: Node = _world.find_child("ChoiceUI", true, false)
+	if ui == null or not bool(ui.visible):
+		failures.append("offer dialogue end must show ChoiceUI")
+	return failures
+
+
+func _check_confirm_end_travels() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null:
+		failures.append("ChapterRunner missing for confirm-end travel check")
+		return failures
+	if "current_id" in _runner:
+		_runner.current_id = &"a1_arcas"
+	if "flags" in _runner:
+		_runner.flags = PackedStringArray()
+	_world.set("_resolved", true)
+	_world.set("_left", false)
+	if _world.has_method("_on_dialogue_ended"):
+		_world.call("_on_dialogue_ended")
+	if String(_runner.current_id) != "a1_cardena":
+		failures.append("confirm dialogue end must travel to a1_cardena, got %s" % _runner.current_id)
+	_world.set("_left", false)
+	return failures
+
+
 func _check_spanish_choice_copy() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	if _loc == null or not _loc.has_method("text"):
@@ -144,6 +225,36 @@ func _check_choice_after_offer() -> PackedStringArray:
 	await _world.run_offer()
 	if ui == null or not bool(ui.visible):
 		failures.append("choice UI should present after the offer cue")
+	if _world.has_method("start_offer"):
+		_world.start_offer()
+		if ui and not bool(ui.visible):
+			failures.append("start_offer must not hide ChoiceUI once the branch is up")
+	return failures
+
+
+func _check_choice_ui_is_modal() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var ui: Node = _world.find_child("ChoiceUI", true, false)
+	if ui == null:
+		failures.append("ChoiceUI missing for modal check")
+		return failures
+	if not ui.is_in_group("modal_choice"):
+		failures.append("ChoiceUI must join modal_choice so E/LMB cannot walk or re-talk")
+	if not ui.is_in_group("hud_click_sink"):
+		failures.append("ChoiceUI must join hud_click_sink")
+	var cid: Node = _world.get_node_or_null("Cid")
+	if cid and cid.has_method("_modal_ui_open") and ui.visible:
+		if not bool(cid.call("_modal_ui_open")):
+			failures.append("Cid must treat visible ChoiceUI as modal")
+		if cid.has_method("_input"):
+			var click := InputEventMouseButton.new()
+			click.button_index = MOUSE_BUTTON_LEFT
+			click.pressed = true
+			click.position = Vector2(640, 360)
+			cid.call("_input", click)
+			var vp := cid.get_viewport()
+			if vp and vp.is_input_handled():
+				failures.append("Cid _input must not eat the Arcas choice buttons")
 	return failures
 
 
@@ -156,6 +267,9 @@ func _check_cheat_stain_and_marks() -> PackedStringArray:
 		failures.append("world missing choose_cheat")
 		return failures
 	_prep_campaign()
+	_world.set("_resolved", false)
+	_world.set("_left", false)
+	_world.set("_talking", false)
 	var roster: MesnadaRoster = _honor.roster
 	var martin: MesnadaMember = roster.member(&"martin_antolinez") if roster else null
 	var loyalty_before := 0.55

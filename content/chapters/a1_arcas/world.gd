@@ -11,6 +11,7 @@ const REFUSE_EVENT := &"arcas_refuse"
 
 var _talking: bool = false
 var _resolved: bool = false
+var _left: bool = false
 var _data: Dictionary = {}
 
 
@@ -26,6 +27,8 @@ func _ready() -> void:
 
 func start_offer(_cue: String = "offer") -> void:
 	if _resolved or _talking:
+		return
+	if _choice_visible():
 		return
 	_talking = true
 	_hide_choice()
@@ -64,7 +67,6 @@ func choose_cheat() -> void:
 	if TreasuryService and TreasuryService.state:
 		TreasuryService.state.marks += _tunable_int("cheat_marks")
 	_tick_martin_loyalty()
-	_finish_beat()
 	_confirm_choice("cheat", "a1_arcas.cheat_done")
 
 
@@ -79,7 +81,6 @@ func choose_refuse() -> void:
 	if CampaignClock and CampaignClock.has_method("run_refuse_48h"):
 		CampaignClock.run_refuse_48h()
 	_refresh_ticker()
-	_finish_beat()
 	_confirm_choice("refuse", "a1_arcas.refuse_done")
 
 
@@ -114,6 +115,11 @@ func _refresh_ticker() -> void:
 		ticker.call("refresh")
 
 
+func _choice_visible() -> bool:
+	var ui: Node = find_child("ChoiceUI", true, false)
+	return ui != null and bool(ui.visible)
+
+
 func _show_choice() -> void:
 	var ui: Node = find_child("ChoiceUI", true, false)
 	if ui == null:
@@ -135,15 +141,18 @@ func _hide_choice() -> void:
 
 
 func _confirm_choice(cue: String, whisper_key: String) -> void:
+	# Stay on the sandbar for the confirm line. Immediate goto skipped it.
 	_whisper(whisper_key)
 	_free_balloon()
 	var resource := _load_dialogue()
 	if resource == null:
+		_travel_to_cardena()
 		return
 	_talking = true
 	if _try_balloon(resource, cue):
 		return
 	_talking = false
+	_travel_to_cardena()
 
 
 func _whisper(key: String) -> void:
@@ -172,18 +181,15 @@ func _free_balloon() -> void:
 				node.queue_free()
 
 
-func _finish_beat() -> void:
-	_travel_to_cardena()
-
-
 func _travel_to_cardena() -> void:
-	if not _resolved:
+	if not _resolved or _left:
 		return
 	var dest := &"a1_cardena"
 	if ChapterRunner and ChapterRunner.has_method("can_travel"):
 		var flags: PackedStringArray = ChapterRunner.flags if "flags" in ChapterRunner else PackedStringArray()
 		if not bool(ChapterRunner.call("can_travel", BEAT_ID, dest, flags)):
 			return
+	_left = true
 	var travelled := false
 	if ChapterRunner and ChapterRunner.has_method("travel"):
 		travelled = bool(ChapterRunner.travel(dest))
@@ -265,6 +271,8 @@ func _on_dialogue_ended(_resource: Variant = null) -> void:
 	_talking = false
 	if not _resolved:
 		_show_choice()
+		return
+	_travel_to_cardena()
 
 
 func _try_balloon(resource: Resource, cue: String) -> bool:
