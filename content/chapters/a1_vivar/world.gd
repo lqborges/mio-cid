@@ -62,7 +62,8 @@ func leave_solar() -> void:
 
 func _physics_process(_delta: float) -> void:
 	if _left:
-		_travel_to_burgos()
+		# leave_solar already queued one deferred goto. Re-calling it every
+		# tick stacked change_scene_to_file and tore down Burgos on arrival.
 		return
 	var cid: Node3D = get_node_or_null("Cid") as Node3D
 	if cid == null:

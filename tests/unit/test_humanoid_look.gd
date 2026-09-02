@@ -124,6 +124,11 @@ func _check_deferred_free_is_safe() -> PackedStringArray:
 	if looks.has_method("_consider_deferred"):
 		looks.call("_consider_deferred", probe_id)
 		looks.call("_consider_deferred", 0)
+	var source := FileAccess.get_file_as_string("res://game/autoload/humanoid_looks.gd")
+	if source.find("obj as Node") < 0:
+		failures.append("HumanoidLooks must cast instance_from_id with as Node")
+	if source.find("var node: Node = obj") >= 0:
+		failures.append("HumanoidLooks must not assign Object to a Node typed var")
 	return failures
 
 

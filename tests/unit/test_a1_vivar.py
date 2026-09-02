@@ -177,7 +177,16 @@ class TestA1VivarPrologue(unittest.TestCase):
         goto = source.split("func goto(beat_id: StringName)", 1)[1].split("func _scene_path", 1)[0]
         self.assertIn("call_deferred", goto)
         self.assertIn("change_scene_to_file", goto)
+        self.assertIn("_pending_scene", goto)
+        self.assertIn("queued_scene_changes", goto)
+        self.assertIn("_clear_pending_scene", goto)
         self.assertNotIn("camp_night(", source)
+        phys = _read(f"{CHAPTER}/world.gd").split("func _physics_process", 1)[1].split(
+            "func _travel_to_burgos", 1
+        )[0]
+        self.assertIn("if _left:", phys)
+        self.assertNotIn("_travel_to_burgos()", phys)
+        self.assertNotIn("ChapterRunner.goto", phys)
 
     def test_no_denylist_tokens(self) -> None:
         for rel in (

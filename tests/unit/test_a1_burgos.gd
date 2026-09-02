@@ -30,6 +30,7 @@ func _run() -> void:
 		failures.append_array(_check_steel_on_burgaleses_gated())
 		failures.append_array(_check_talk_npcs_not_camp_click())
 		failures.append_array(_check_river_camp_reachable())
+		failures.append_array(_check_camp_does_not_restack_goto())
 		_world.free()
 		_world = null
 	_finish(failures)
@@ -224,6 +225,22 @@ func _check_river_camp_reachable() -> PackedStringArray:
 		_world._physics_process(0.016)
 	if not bool(_world.get("_camped")):
 		failures.append("Cid at the river tents must camp_on_river (physics poll)")
+	return failures
+
+
+func _check_camp_does_not_restack_goto() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if _runner == null:
+		failures.append("ChapterRunner missing for stacked-goto check")
+		return failures
+	_runner.set("_pending_scene", "")
+	_runner.set("queued_scene_changes", 0)
+	_world.set("_camped", true)
+	if _world.has_method("_physics_process"):
+		for _i in 8:
+			_world._physics_process(0.016)
+	if int(_runner.get("queued_scene_changes")) != 0:
+		failures.append("Burgos physics must not restack goto after the river camp")
 	return failures
 
 
