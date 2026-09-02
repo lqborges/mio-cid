@@ -133,7 +133,9 @@ func goto(beat_id: StringName) -> void:
 		return
 	var loop := Engine.get_main_loop()
 	if loop is SceneTree:
-		(loop as SceneTree).change_scene_to_file(path)
+		# Area3D / _physics_process leave (Vivar gate, Burgos river) cannot
+		# free CollisionObjects in the same physics callback.
+		(loop as SceneTree).change_scene_to_file.call_deferred(path)
 
 
 func _scene_path(beat_id: StringName) -> String:
