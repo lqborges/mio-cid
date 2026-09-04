@@ -2,6 +2,7 @@ extends Node
 ## Builds Cantar portraits on person-sized capsules. Horse stays a horse.
 
 const LookScript := preload("res://game/actors/look/humanoid_look.gd")
+const KitScript := preload("res://game/systems/art/chapter_kit.gd")
 
 
 func _ready() -> void:
@@ -53,6 +54,8 @@ func _walk(node: Node) -> void:
 func _consider(node: Node) -> void:
 	if node == null or not is_instance_valid(node):
 		return
+	if node is WorldEnvironment:
+		KitScript.apply_to(node.get_parent())
 	if node is Label3D and String(node.name) == "Name":
 		fit_nameplate(node as Label3D)
 	if _should_attach(node):

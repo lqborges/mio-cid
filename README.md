@@ -12,7 +12,7 @@ Not Puy du Fou. Not the 1961 film. See [AGENTS.md](AGENTS.md) for engine pins an
 4. Confirm **Project Settings → Physics → 3D → Physics Engine** is `Jolt Physics`.
 5. Default renderer is **GL Compatibility** so Intel HD 4000 boots. On Iris Xe or a discrete GPU you can pass `--rendering-method forward_plus`.
 
-Do not install the `godot-jolt` addon. Jolt is built into 4.7.2. The greybox arena is `content/chapters/_dev/arena.tscn` (high 3/4 isometric, not over-the-shoulder). Playability HUD, journal, and Help live in `PlayerGuide`; see [docs/PLAYABILITY.md](docs/PLAYABILITY.md).
+Do not install the `godot-jolt` addon. Jolt is built into 4.7.2. The greybox arena is `content/chapters/_dev/arena.tscn` (high 3/4 isometric, not over-the-shoulder). Playability HUD, journal, and Help live in `PlayerGuide`; regional CSG kits and the style sheet live in [docs/STYLE_SHEET.md](docs/STYLE_SHEET.md) and [docs/PLAYABILITY.md](docs/PLAYABILITY.md).
 
 Windows and Linux are the v1 store targets. The Android test APK and touch controls stay as a test build. Do not treat a green CI badge as engine evidence: import/tests skip when Godot is missing.
 

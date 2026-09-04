@@ -32,6 +32,10 @@ var sword_mesh: MeshInstance3D = null
 
 var _combo_left: float = 0.0
 var _attack_left: float = 0.0
+var _windup_left: float = 0.0
+var _active_left: float = 0.0
+var _pending_move: Dictionary = {}
+var _pending_id: StringName = &""
 var _dead: bool = false
 var _spent_stamina: bool = false
 
@@ -84,6 +88,10 @@ func is_attacking() -> bool:
 
 func lower_weapon() -> void:
 	_attack_left = 0.0
+	_windup_left = 0.0
+	_active_left = 0.0
+	_pending_move = {}
+	_pending_id = &""
 	combo_step = 0
 	_combo_left = 0.0
 	if hit_box != null:
@@ -240,11 +248,17 @@ func _try_melee_combo() -> void:
 
 
 func _arm_hit(move: Dictionary, move_id: StringName) -> void:
-	_attack_left = float(move.get("duration", 0.0))
+	var duration := float(move.get("duration", 0.0))
+	_attack_left = duration
+	_pending_move = move
+	_pending_id = move_id
+	_windup_left = duration * float(tunables.get("windup_frac", 0.0))
+	_active_left = duration * float(tunables.get("active_frac", 1.0))
 	if hit_box == null:
 		return
 	hit_box.source = self
-	hit_box.arm(_scaled_damage(move), damage_type_for(move_id), float(move.get("stagger", 0.0)))
+	if _windup_left <= 0.0:
+		hit_box.arm(_scaled_damage(move), damage_type_for(move_id), float(move.get("stagger", 0.0)))
 
 
 func _arm_shout(move: Dictionary) -> void:
@@ -278,12 +292,25 @@ func _spend(cost: float) -> bool:
 func _tick_attack(delta: float) -> void:
 	if _attack_left <= 0.0:
 		return
-	if hit_box != null and hit_box.monitoring:
+	if _windup_left > 0.0:
+		_windup_left = maxf(_windup_left - delta, 0.0)
+		if _windup_left <= 0.0 and hit_box != null and not _pending_move.is_empty():
+			hit_box.arm(
+				_scaled_damage(_pending_move),
+				damage_type_for(_pending_id),
+				float(_pending_move.get("stagger", 0.0))
+			)
+	elif hit_box != null and hit_box.monitoring:
 		hit_box.poll_overlaps()
+		_active_left = maxf(_active_left - delta, 0.0)
+		if _active_left <= 0.0:
+			hit_box.disarm()
 	if shout_ring != null and shout_ring.monitoring:
 		shout_ring.poll_overlaps()
 	_attack_left = maxf(_attack_left - delta, 0.0)
 	if _attack_left <= 0.0:
+		_pending_move = {}
+		_pending_id = &""
 		if hit_box != null:
 			hit_box.disarm()
 		if shout_ring != null:

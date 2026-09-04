@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/art_kit",
+  "title": "Chapter art kit",
+  "type": "object",
+  "required": ["id", "earth", "stone", "wood", "accent", "sky", "ambient", "sun"],
+  "additionalProperties": true,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "earth": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "stone": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "wood": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "plaster": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "accent": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "sky": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "ambient": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "ambient_energy": { "type": "number" },
+    "sun": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "number" } },
+    "sun_energy": { "type": "number" }
+  }
+}
