@@ -12,6 +12,7 @@ const COPY := {
 	&"alfonso_wrath": "the name is empty",
 	&"plazo_expired": "the name is empty",
 	&"avengalvon_dead": "the name is empty",
+	&"steel_in_cortes": "the name is empty",
 }
 
 @onready var _line: Label = $Center/Line
@@ -49,6 +50,10 @@ func _on_reload() -> void:
 	var payload: Dictionary = SaveService.load_file(SaveService.autosave_path())
 	if payload.is_empty():
 		_on_menu()
+		return
+	var chapter := GameState.chapter_id() if GameState else &""
+	if chapter != &"" and ChapterRunner != null and ChapterRunner.has_method("goto"):
+		ChapterRunner.goto(chapter)
 		return
 	var vivar := "res://content/chapters/a1_vivar/world.tscn"
 	if ResourceLoader.exists(vivar):

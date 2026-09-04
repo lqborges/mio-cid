@@ -51,12 +51,119 @@ hud.leap,Salto,Leap
 hud.shout,Grito,Shout
 hud.dodge,Esquiva,Dodge
 hud.interact,Hablar,Talk
+hud.interact_verb,Hablar,Talk
+hud.leave_verb,Salir,Leave
 hud.interact_hint,E — Hablar,E — Talk
 hud.leave_hint,E — Salir,E — Leave
 ui.pause.title,Pausa,Pause
 ui.pause.resume,Continuar,Resume
+ui.pause.journal,Dietario,Journal
+ui.pause.help,Ayuda,Help
+ui.pause.settings,Ajustes,Settings
+ui.pause.back,Volver,Back
 ui.pause.menu,Menú principal,Main menu
 ui.pause.quit,Salir,Quit
+ui.journal.empty,Aún no hay recuerdos.,There are no memories yet.
+ui.settings.reduced_motion,Menos movimiento,Reduced motion
+ui.settings.shake,Sacudida de cámara,Camera shake
+ui.settings.flash,Destellos,Flashes
+ui.settings.vol_master,Volumen,Volume
+ui.settings.vol_vo,Voces,Voices
+ui.settings.vol_sfx,Efectos,Effects
+ui.settings.vol_music,Música,Music
+ui.settings.subtitle,Subtítulos,Subtitles
+tip.dismiss,Entendido,Understood
+tip.move.title,El solar,The solar
+tip.move.body,"WASD o tocad el suelo para andar. El ratón apunta.","WASD or tap the ground to walk. The mouse aims."
+tip.move.verb,Mover,Move
+tip.interact.title,La mesnada,The warband
+tip.interact.body,"Acercaos a Álvar o a Martín. El anillo marca a quién habláis.","Go to Álvar or Martín. The ring marks who you will address."
+tip.dialogue.title,La palabra,The word
+tip.dialogue.body,"Clic o E cierra la línea. El mundo no anda mientras habláis.","Click or E dismisses the line. The world does not walk while you speak."
+tip.choice.title,La elección,The choice
+tip.choice.body,"Elegid con el ratón o el foco. No se deshace en silencio.","Choose with the mouse or focus. Nothing is undone in silence."
+tip.mesura.title,Mesura,Mesura
+tip.mesura.body,"Mantened Q / Mesura para esperar. Mientras tanto no hay golpe ni salto ni grito.","Hold Q / Mesura to wait. Attacks stay unavailable while it is active."
+lock.generic,El camino aún no abre.,The road is not open yet.
+lock.arcas_choose,Debéis elegir: las arcas o el ayuno.,You must choose: the chests or hunger.
+lock.cardena_closed,El adiós está hecho. No hay vuelta a Cardeña.,The farewell is done. There is no return to Cardeña.
+lock.castejon_keep,Vender. Quedarse es la ira de Alfonso.,Sell. To stay is Alfonso's wrath.
+loc.vivar,Vivar,Vivar
+loc.vivar_gate,La puerta del solar,The solar gate
+loc.burgos,Burgos,Burgos
+loc.arcas,El campamento del río,The river camp
+loc.cardena,San Pedro de Cardeña,San Pedro de Cardeña
+loc.navapalos,Navapalos,Navapalos
+loc.poyo,El Poyo,El Poyo
+loc.tevar,Pinar de Tévar,Pinewood of Tévar
+loc.valencia,Valencia,Valencia
+obj.vivar_talk.title,Llamad a los primeros nombres,Call the first names
+obj.vivar_talk.detail,El solar está vacío. Álvar y Martín os esperan.,The solar is empty. Álvar and Martín wait.
+obj.vivar_talk.done,Los nombres respondieron.,The names answered.
+obj.vivar_leave.title,Salid por la puerta del sur,Leave by the south gate
+obj.vivar_leave.detail,Nueve días. Cruzad hacia Burgos.,Nine days. Cross toward Burgos.
+obj.burgos_town.title,Burgos cierra las puertas,Burgos shuts its gates
+obj.burgos_town.detail,Oíd al niño. Pedid posada. Campad junto al río.,Hear the child. Ask for lodging. Camp by the river.
+obj.arcas_choose.title,Las arcas de arena,The sand chests
+obj.arcas_choose.detail,Hablad con Martín. La elección mancha o ayuna.,Talk to Martín. The choice stains or starves.
+obj.arcas_leave.title,El camino a Cardeña,The road to Cardeña
+obj.arcas_leave.detail,La elección queda. Seguid hacia San Pedro.,The choice stands. Ride on to San Pedro.
+obj.arcas_cheat.done,Las arcas se llenaron. La honra se manchó.,The chests were filled. The name was stained.
+obj.arcas_refuse.done,Rehusasteis el engaño. La mesnada ayuna.,You refused the cheat. The warband goes hungry.
+obj.cardena_farewell.title,El adiós de Cardeña,The Cardeña farewell
+obj.cardena_farewell.detail,Jimena Elvira y Sol. No hay vuelta.,Jimena Elvira and Sol. There is no return.
+obj.navapalos_sleep.title,El sueño de Gabriel,Gabriel's dream
+obj.navapalos_sleep.detail,Dormid. El plazo se cumple.,Sleep. The plazo is done.
+obj.castejon_take.title,Tomad Castejón al alba,Take Castejón at dawn
+obj.castejon_take.detail,Saquead y vended. Quedarse es morir.,Loot and sell. To stay is to die.
+obj.alcocer_sortie.title,La salida de Alcocer,The Alcocer sortie
+obj.alcocer_sortie.detail,Ocupad esperad y salid al alba.,Occupy wait and sortie at dawn.
+obj.embassy1.title,El primer presente,The first gift
+obj.embassy1.detail,Álvar lleva el presente al rey.,Álvar takes the gift to the king.
+obj.poyo.title,El Poyo del Cid,El Poyo del Cid
+obj.poyo.detail,El campamento tiene nombre. Tévar espera.,The camp has a name. Tévar waits.
+obj.tevar.title,La mesa de Tévar,The table at Tévar
+obj.tevar.detail,Venced. Hacedle comer. Quedaos con Colada.,Win. Make him eat. Keep Colada.
+obj.murviedro.title,Cortad Valencia,Cut Valencia off
+obj.murviedro.detail,Tomad el campo de Murviedro.,Take the field at Murviedro.
+obj.siege.title,El cerco de Valencia,The siege of Valencia
+obj.siege.detail,Nueve meses. No asaltéis el muro.,Nine months. Do not storm the wall.
+obj.jeronimo.title,El obispado,The bishopric
+obj.jeronimo.detail,Nombrad a Jerónimo. El león sigue cerrado.,Appoint Jerónimo. The lion stays locked.
+obj.embassy2.title,El segundo presente,The second gift
+obj.embassy2.detail,Reclutad a Avengalvón. La familia vuelve.,Recruit Avengalvón. The family returns.
+obj.yusuf.title,Yusuf en la huerta,Yusuf in the huerta
+obj.yusuf.detail,El campo el primer día. Una carga el segundo.,The field on day one. One charge on day two.
+obj.embassy3.title,El tercer presente,The third gift
+obj.embassy3.detail,El perdón se acerca.,Pardon draws near.
+obj.repay.title,Devolver a Raquel y Vidas,Repay Raquel and Vidas
+obj.repay.detail,La mancha se lava con marcos.,The stain is washed with marks.
+obj.tagus.title,El perdón del Tajo,The Tagus pardon
+obj.tagus.detail,Alfonso perdona. Las bodas se aceptan.,Alfonso pardons. The marriages are accepted.
+obj.bodas.title,Las bodas,The weddings
+obj.bodas.detail,Los infantes están en Valencia.,The Infantes are in Valencia.
+obj.leon.title,El león,The lion
+obj.leon.detail,Mesura o ira para devolverlo. No matéis.,Mesura or rage to return it. Do not kill.
+obj.bucar.title,Búcar en la orilla,Búcar on the shore
+obj.bucar.detail,Tizona queda en la mano.,Tizona remains in hand.
+obj.despedida.title,La despedida,The departure
+obj.despedida.detail,Las espadas se regalan. Avengalvón vive.,The swords are gifted. Avengalvón lives.
+obj.corpes.title,La noticia de Corpes,News from Corpes
+obj.corpes.detail,Oíd a Félez. El hecho no se salta.,Hear Félez. The fact cannot be skipped.
+obj.querella.title,La querella,The complaint
+obj.querella.detail,Una sola pregunta. La mesura abre Toledo.,One ask. Mesura opens Toledo.
+obj.toledo.title,Las Cortes de Toledo,The Cortes of Toledo
+obj.toledo.detail,La palabra no el acero.,Speech not steel.
+obj.wait.title,Tres semanas,Three weeks
+obj.wait.detail,Jimena descansa. Las lides esperan.,Jimena rests. The lists wait.
+obj.carrion.title,Las lides de Carrión,The lists of Carrión
+obj.carrion.detail,Mirad. Un grito por lid. No desenvainéis.,Watch. One shout per duel. Do not draw.
+obj.pentecost.title,Pentecostés,Pentecost
+obj.pentecost.detail,El cantar se cierra.,The song closes.
+fail.you_fell,Caísteis. El nombre espera el último guardado.,You fell. The name waits at the last save.
+fail.alfonso_host,El host de Alfonso os halla. Recargad.,Alfonso's host finds you. Reload.
+fail.alfonso_wrath,Toledo es suya. Quedarse es su ira. Recargad.,Toledo is his. To stay is his wrath. Reload.
+fail.plazo_expired,Los nueve días se cumplieron. Recargad.,The nine days ran out. Reload.
 ui.keep_or_sell.title,¿Guardar o vender?,Keep or sell?
 ui.keep_or_sell.keep,Guardar,Keep
 ui.keep_or_sell.sell,Vender,Sell

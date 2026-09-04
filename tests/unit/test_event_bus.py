@@ -27,6 +27,7 @@ AUTOLOAD_ORDER = [
     "MobileLook",
     "HumanoidLooks",
     "DialogueManager",
+    "PlayerGuide",
     "PauseMenu",
 ]
 AUTOLOAD_SCRIPTS = {
@@ -41,6 +42,7 @@ AUTOLOAD_SCRIPTS = {
     "MobileLook": "game/autoload/mobile_look.gd",
     "HumanoidLooks": "game/autoload/humanoid_looks.gd",
     "DialogueManager": "addons/dialogue_manager/dialogue_manager.gd",
+    "PlayerGuide": "game/autoload/player_guide.gd",
     "PauseMenu": "game/ui/pause_menu.gd",
 }
 # ChapterRunner is implemented in PR-06. No remaining autoload stubs.

@@ -148,6 +148,7 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertIn("func _try_advance", balloon)
         self.assertIn("func _on_panel_gui_input", balloon)
         self.assertIn("PauseMenu", _read("project.godot"))
+        self.assertIn("PlayerGuide", _read("project.godot"))
         self.assertIn("func open", _read("game/ui/pause_menu.gd"))
         self.assertIn("ui_cancel", _read("game/ui/pause_menu.gd"))
         self.assertIn("func _input", _read("game/ui/pause_menu.gd"))

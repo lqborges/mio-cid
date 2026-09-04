@@ -25,6 +25,7 @@ func _check_autoloads_are_nodes() -> PackedStringArray:
 		"MobileLook",
 		"HumanoidLooks",
 		"DialogueManager",
+		"PlayerGuide",
 		"PauseMenu",
 	])
 	for name in names:

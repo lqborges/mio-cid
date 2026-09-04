@@ -1,8 +1,10 @@
 # Mio Cid — playable slice
 
-This branch (`playable/0e9dbd46-ready`) is the review-clean three-cantar campaign through Pentecost. It is **not** merged to `main`.
+`main` is the review-clean three-cantar campaign through Pentecost.
 
 **Tip:** Vivar through Tagus, marriages, lion, Búcar / Tizona, Corpes, querella, Cortes de Toledo, three-week wait, spectator lists, Pentecost credits.
+
+In-game: the top bar is the current objective. Pause → **Dietario** / **Ayuda** / **Ajustes**. Ayuda replays the opening tips (move, talk, dismiss, choice, held Mesura). See [docs/PLAYABILITY.md](docs/PLAYABILITY.md) and issue #12. The external walkthrough stays issue #11.
 
 ## How to run
 

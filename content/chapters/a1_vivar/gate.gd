@@ -18,7 +18,7 @@ func interact() -> bool:
 
 
 func interact_prompt_key() -> String:
-	return "hud.leave_hint"
+	return "hud.leave_verb"
 
 
 func _chapter() -> Node:

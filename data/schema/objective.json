@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mio-cid/objective",
+  "title": "Objective",
+  "type": "object",
+  "required": ["id", "chapter", "title_key"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "chapter": { "type": "string", "minLength": 1 },
+    "priority": { "type": "integer", "default": 0 },
+    "when_all_flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "when_any_flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "when_none_flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "title_key": { "type": "string" },
+    "detail_key": { "type": "string" },
+    "place_key": { "type": "string" },
+    "person_key": { "type": "string" },
+    "done_key": { "type": "string" },
+    "lock_reason_key": { "type": "string" },
+    "journal": { "type": "boolean", "default": true },
+    "spoiler": { "type": "boolean", "default": false }
+  }
+}
