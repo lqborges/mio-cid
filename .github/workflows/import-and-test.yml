@@ -190,6 +190,16 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_event_bus.gd
 
+      - name: Run objective catalog headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_objective_catalog.gd
+
+      - name: Run PlayerGuide headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_player_guide.gd
+
       - name: Run HonorState headless test
         if: steps.godot.outputs.found == 'true'
         run: |

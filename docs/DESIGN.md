@@ -256,15 +256,16 @@ Pin at bootstrap: Godot **4.7.2** (current stable as of 2026-08). Upgrade only o
 | CI | Headless Godot `--import` + **gdUnit4** on GitHub Actions | Linux runner. Pin gdUnit4 to a 4.7-compatible tag in `addons/gdUnit4/` at PR-00. Not GUT. |
 | Data import | `tools/import_*.py` is the **only** author of `.tres` from JSON | CI runs import. EditorPlugin is a thin button that shells the same scripts. No parallel hand-authored `.tres`. |
 
-**Performance and hardware (one table).** Min spec **is** the 30 fps budget machine.
+**Performance and hardware (one table).** Two floors: the **current playable** greybox budget (do not silently raise this), and the **production-art** 30 fps machine once kits replace CSG.
 
 | Class | GPU / RAM | Resolution | Min fps | Target fps | Settings |
 | --- | --- | --- | --- | --- | --- |
-| **Min spec** (30 fps budget) | GTX 1660 / RX 580, **16 GB** RAM, 4-core CPU, Vulkan 1.2 | 1080p | **30** | 40 | Medium: **2** shadow cascades, **4** shadow-casting lights, no SDFGI, 24 skinned + LOD |
-| Recommended | RTX 3060 / RX 6600, 16 GB | 1080p | 45 | **60** | High: 4 cascades, 6 shadow-casting lights |
+| **Current playable** (greybox / GL Compatibility) | **Intel HD 4000 / HP Envy**, 8 GB RAM, **720p** | **720p** | **30** | 30 | GL Compatibility default. 1 directional light. No SDFGI. See [PLAYABILITY.md](PLAYABILITY.md). |
+| **Production-art min** (30 fps budget) | GTX 1660 / RX 580, **16 GB** RAM, 4-core CPU | 1080p | **30** | 40 | Medium: **2** shadow cascades, **4** shadow-casting lights, no SDFGI, 24 skinned + LOD. Not the current greybox requirement. |
+| Recommended | RTX 3060 / RX 6600, 16 GB | 1080p | 45 | **60** | High: 4 cascades, 6 shadow-casting lights. Forward+ optional via `--rendering-method forward_plus`. |
 | Steam Deck (stretch, not a v1 gate) | Deck APU, 16 GB shared | **800p** | 30 | 40 | Low: 1 cascade, 2 shadow-casting lights |
 
-Draw budget on min spec: **≤ 4** realtime shadow-casting lights, **2** cascades, ≤ **24** skinned meshes in combat (player + 8 named + ~12 LOD), impostors beyond 25 m, ≤ 1.5M triangles typical chapter. Valencia wall crowd is impostors. Do not ship 50 full-skin actors on min spec.
+Draw budget on the **current playable** floor: **1** directional light, greybox CSG, capsules, ≤ a handful of skinned placeholders. Proposed production-art budget (measure before locking): **≤ 4** realtime shadow-casting lights, **2** cascades, ≤ **24** skinned meshes in combat (player + 8 named + ~12 LOD), impostors beyond 25 m, ≤ 1.5M triangles typical chapter. Valencia wall crowd is impostors. Do not ship 50 full-skin actors on min spec. Unmeasured hardware is a blocked gate, not a pass.
 
 **Install size:** VO 1.2–1.8 GB (compress); textures/meshes 6–8 GB (2K cap on min, 4K optional); engine+code < 0.5 GB. **Install cap 16 GB.** Raise the old 12 GB claim; it did not fit VO + art.
 
@@ -463,7 +464,7 @@ sequenceDiagram
 
 **Player controller (v1 spec):**
 
-- Camera: third-person, right-stick / mouse orbit, lock-on *soft* (target bias, not Souls hard lock). Default to battlefield awareness, not duel tunnel.
+- Camera: **high three-quarter / isometric, locked** (see `CidController._lock_isometric_camera`). Mouse aims on the ground plane; it is not an orbit pivot. Right-stick aims facing. Soft target bias for interact / selected NPC, not a Souls hard lock. Default to battlefield awareness. Motivated cinematic cameras (shutter pan, Jimena on the wall, Carrión lists) are authored shots, not a wholesale TPS redesign. Do not restore over-the-shoulder orbit.
 - Locomotion: walk / run / sprint (sprint drains `stamina`, not `honra`). Crouch only for Castejón dawn crawl.
 - Mount: **v1 companion horse is on.** Unnamed in destierro; named Babieca from Valencia hub onward. Hold interact to mount. Horse is an actor with stamina and fear, not a motorcycle. Greybox gait set (walk/trot/canter/couch) is required before Castejón. Travel still uses short scripted camera rides in corridors.
 - Interact: context prompt (talk, gift, open, mount, plant banner).
@@ -1770,7 +1771,7 @@ Armor: mail, coif, kettle/nasal helm, kite or round shield. Infantes overdress. 
 
 Faces: Iberian, not generic northern-European steam-page heroes. Avengalvón is a person and an ally, not a masked “Moor” extra.
 
-Camera: human height. No drone tourism of cathedrals (AC kitsch). Valencia from the wall when Jimena watches Yusuf — that is a motivated shot.
+Camera: high three-quarter play camera at human-readable scale. No drone tourism of cathedrals (AC kitsch). Valencia from the wall when Jimena watches Yusuf — that is a motivated shot, not a change of the play camera.
 
 ---
 
@@ -1797,14 +1798,15 @@ Difficulty Resources: `data/difficulty/{infanzon,mesura,campeador}.json` as tabl
 
 | Platform | v1 | Notes |
 | --- | --- | --- |
-| Windows 10/11 (Steam) | Yes | DX12 / Vulkan via Godot |
+| Windows 10/11 (Steam) | Yes | GL Compatibility default; DX12 / Vulkan via Godot when the GPU allows. |
 | Linux x86_64 (Steam) | Yes | Native. This team develops on Linux. |
+| Android test APK | Test only | Existing touch HUD and export stay. **Not** a v1 Steam/store release. Do not silently expand store scope. |
 | Steam Deck | Stretch | 800p / 30 fps row in the hardware table. **Not a v1 gate.** Deck Verified is an external Steam process, not claimed here. |
 | macOS | Non-goal v1 | Godot export possible later |
 | Consoles | Non-goal v1 | Input/save should not block a later port |
 | Always-online | No | |
 
-Hardware: see the **one table** under Engine / Performance. Min spec **is** GTX 1660 / 16 GB / 1080p / 30 fps. Disk: **16 GB** install cap.
+Hardware: see the **one table** under Engine / Performance. **Do not raise** the current playable floor (Intel HD 4000 / Envy / 720p30 / GL Compatibility). GTX 1660 / 16 GB / 1080p / 30 fps is the **production-art** budget target once kits replace greybox, not a silent requirement bump. Disk: **16 GB** install cap.
 
 **Steamworks, PEGI, academic consultant** are external process owners (publisher / rating producer / design lead). This repo does not claim partner status or a guaranteed PEGI 16 outcome. The depiction board is what we submit; the certificate is not ours to mint.
 
@@ -1950,7 +1952,7 @@ content review]
 | **Historical / political reception** (holy war, Francoist Cid, contemporary Spain) | High | Med | Bible is the *Cantar*, Avengalvón essential, sell-towns, *parias*, no Santa Gadea. Public design note in Steam page. Do not argue Twitter in-game. |
 | **Small-team scope** | High | High | Four people, 18 months, greybox-first. Optional raids cut. Yusuf day 2 scripted. Corridors 90 s–3 min. 15–18h from authored road + hubs, not combat density. |
 | **Horse animation** | Med | High | v1 greybox companion (walk/trot/canter/couch) **before Castejón**. Unnamed in destierro; Babieca from Valencia. No flute. |
-| **Godot 3D ceiling** (large battles, Valencia crowd) | Med | Med | LOD/impostors, **24 skinned** + impostors on **min spec** (GTX 1660 / 16 GB / 30 fps). Unity escape hatch at 90 days if M1 fps fails on that machine, not a vague “mid-range.” |
+| **Godot 3D ceiling** (large battles, Valencia crowd) | Med | Med | LOD/impostors, **24 skinned** + impostors on the **production-art** 30 fps machine (GTX 1660 / 16 GB). Current playable floor stays Intel HD 4000 / 720p30. Unity escape hatch at 90 days if M1 fps fails on the named machine, not a vague “mid-range.” |
 | **Sand-chest antisemitic reading** | High | Med | Raquel y Vidas are persons in Burgos, not a caricature. Cheat is *Cid’s* crime against them, allowed by the poem because the *king* beggared him. Repayment beat in Act II is **on the critical path** if they cheated. Art/VO direction: no noses, no greedy-hands animation. Consult a sensitivity reader. |
 | **Alfonso as unkillable feels like a scripted leash** | Low | Med | The leash *is* the poem. Honor meter makes gifts the weapon. |
 | **Localization quality of Old Spanish formulas** | Med | Med | Montaner edition; linguist pass; never Google-translate verses. |
@@ -1990,7 +1992,7 @@ Do **not** reopen: Puy du Fou, Heston corpse, Santa Gadea, Jimena’s father, ho
 13. **Keep or sell.** Castejón keep = immediate fail. Alcocer keep past 3 days = `alcocer_keep` fail.
 14. **Marriages: you say yes because he is the king.** v1 cannot refuse.
 15. **Vertical slice = Vivar (short) → Burgos → sand chests → Cardeña, 20–40 min,** with menu, save/load, fail-copy. Do not lead with a combat playground.
-16. **Platforms v1 = PC Steam Windows + Linux, offline.** Min spec = 30 fps budget machine (GTX 1660 / 16 GB). Deck is a stretch, not a gate. Consoles later. No PII. Telemetry is opt-in first-party HTTPS or compiled out.
+16. **Platforms v1 = PC Steam Windows + Linux, offline.** Current playable floor = Intel HD 4000 / Envy / 720p30 / GL Compatibility. Production-art 30 fps target = GTX 1660 / 16 GB. Android is a test APK, not store scope. Deck is a stretch, not a gate. Consoles later. No PII. Telemetry is opt-in first-party HTTPS or compiled out.
 17. **Title mechanic:** *mio* is possessive. Fail copy: “the name is empty,” not “You Died.”
 18. **Epilogue = Pentecost, then death. No corpse on Babieca.**
 19. **Repo `/home/lqborges/mio-cid/`.** Autoload `ChapterRunner` holds `ChapterGraph` Resource. `GameState` is a facade. JSON import is the only `.tres` author. Staff: four people, ~18 months.
@@ -2033,7 +2035,7 @@ Each PR is independently reviewable and mergeable. Paths are under `/home/lqborg
 
 - **Files/components:** `game/actors/player/cid_controller.gd`, `cid_combat.gd` (stub), `content/art/characters/cid/` placeholder capsule, test arena `content/chapters/_dev/arena.tscn`.
 - **Dependencies:** PR-01.
-- **Description:** Third-person `CharacterBody3D`, walk/run, camera orbit, interact ray. No Souls roll as identity. 60 fps on the empty arena.
+- **Description:** High 3/4 isometric `CharacterBody3D`, walk/run, locked camera, interact ray. No Souls roll as identity. 60 fps on the empty arena.
 
 ### PR-03 — Honor meters (data + HUD)
 

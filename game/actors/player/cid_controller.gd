@@ -51,6 +51,7 @@ var _block_click_move: bool = false
 var _click_move_from_hud: bool = false
 var _prompt_layer: CanvasLayer = null
 var _prompt_label: Label = null
+var _target_ring: MeshInstance3D = null
 var _horse: HorseCompanionScript = null
 ## Chapter sleep (lion hall). Walk_speed 0 is not enough: dodge uses dodge_speed.
 var chapter_asleep: bool = false
@@ -70,6 +71,7 @@ func _ready() -> void:
 	_horse = _find_horse()
 	_ensure_touch_hud()
 	_ensure_interact_prompt()
+	_ensure_target_ring()
 	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
 	if looks and looks.has_method("ensure"):
 		looks.call("ensure", self)
@@ -178,6 +180,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	InputGlyphs.note_event(event)
 	if event.is_echo():
 		return
 	if chapter_asleep:
@@ -283,6 +286,10 @@ func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
 	_resolve_queued_click()
 	var wish := _movement_wish()
+	if wish.length_squared() > 0.0001:
+		var guide := get_node_or_null("/root/PlayerGuide")
+		if guide != null and guide.has_method("note_moved"):
+			guide.call("note_moved")
 	_update_facing(wish)
 	if _dodge_left > 0.0:
 		_apply_dodge_xz(delta)
@@ -621,11 +628,13 @@ func _try_interact_node(node: Node) -> bool:
 		var result: Variant = owner.call("interact")
 		if result is bool and result == false:
 			return false
+		_note_guide_interact()
 		return true
 	if owner.has_method("action"):
 		var result: Variant = owner.call("action")
 		if result is bool and result == false:
 			return false
+		_note_guide_interact()
 		return true
 	return false
 
@@ -693,16 +702,62 @@ func _update_interact_prompt() -> void:
 		return
 	if _modal_ui_open() or chapter_asleep or chapter_locked:
 		_prompt_label.visible = false
+		_set_target_ring(null)
 		return
 	var target := _focus_interactable()
 	_prompt_label.visible = target != null
+	_set_target_ring(target)
 	if target:
-		var key := "hud.interact_hint"
+		var key := "hud.interact_verb"
 		if target.has_method("interact_prompt_key"):
 			var custom := str(target.call("interact_prompt_key"))
 			if not custom.is_empty():
 				key = custom
-		_prompt_label.text = _loc_text(key, "E — Hablar")
+		var fallback := _loc_text("hud.interact_verb", "Hablar")
+		var guide := get_node_or_null("/root/PlayerGuide")
+		if guide != null and guide.has_method("format_interact_prompt"):
+			_prompt_label.text = str(guide.call("format_interact_prompt", key, fallback))
+		else:
+			_prompt_label.text = _loc_text(key, "E — Hablar")
+
+
+func _ensure_target_ring() -> void:
+	if _target_ring != null or not is_inside_tree():
+		return
+	_target_ring = MeshInstance3D.new()
+	_target_ring.name = "SelectedTarget"
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.58
+	mesh.bottom_radius = 0.58
+	mesh.height = 0.05
+	mesh.radial_segments = 24
+	_target_ring.mesh = mesh
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.91, 0.85, 0.72, 0.82)
+	_target_ring.material_override = mat
+	_target_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_target_ring.visible = false
+	add_child(_target_ring)
+
+
+func _set_target_ring(target: Node) -> void:
+	if _target_ring == null:
+		return
+	if target == null or not (target is Node3D):
+		_target_ring.visible = false
+		return
+	var node := target as Node3D
+	_target_ring.visible = true
+	var world := node.global_position
+	_target_ring.global_position = Vector3(world.x, world.y + 0.04, world.z)
+
+
+func _note_guide_interact() -> void:
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("note_interacted"):
+		guide.call("note_interacted")
 
 
 func _ensure_interact_prompt() -> void:

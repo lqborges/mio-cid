@@ -1,0 +1,48 @@
+{
+  "id": "opening",
+  "tips": [
+    {
+      "id": "move",
+      "order": 1,
+      "title_key": "tip.move.title",
+      "body_key": "tip.move.body",
+      "when": "chapter_start",
+      "chapters": ["a1_vivar"],
+      "complete_on": "moved"
+    },
+    {
+      "id": "interact",
+      "order": 2,
+      "title_key": "tip.interact.title",
+      "body_key": "tip.interact.body",
+      "when": "after",
+      "after": "move",
+      "complete_on": "interacted"
+    },
+    {
+      "id": "dialogue",
+      "order": 3,
+      "title_key": "tip.dialogue.title",
+      "body_key": "tip.dialogue.body",
+      "when": "dialogue_open",
+      "complete_on": "dialogue_closed"
+    },
+    {
+      "id": "choice",
+      "order": 4,
+      "title_key": "tip.choice.title",
+      "body_key": "tip.choice.body",
+      "when": "modal_choice",
+      "complete_on": "choice_closed"
+    },
+    {
+      "id": "mesura",
+      "order": 5,
+      "title_key": "tip.mesura.title",
+      "body_key": "tip.mesura.body",
+      "when": "chapter_start",
+      "chapters": ["a1_castejon", "a1_alcocer", "a1_tevar"],
+      "complete_on": "mesura_held"
+    }
+  ]
+}

@@ -1,0 +1,272 @@
+{
+  "id": "campaign",
+  "objectives": [
+    {
+      "id": "vivar_talk",
+      "chapter": "a1_vivar",
+      "priority": 20,
+      "when_none_flags": ["vivar_seen"],
+      "title_key": "obj.vivar_talk.title",
+      "detail_key": "obj.vivar_talk.detail",
+      "place_key": "loc.vivar",
+      "person_key": "char.alvar_fanez"
+    },
+    {
+      "id": "vivar_leave",
+      "chapter": "a1_vivar",
+      "priority": 10,
+      "when_all_flags": ["vivar_seen"],
+      "title_key": "obj.vivar_leave.title",
+      "detail_key": "obj.vivar_leave.detail",
+      "place_key": "loc.vivar_gate",
+      "done_key": "obj.vivar_talk.done"
+    },
+    {
+      "id": "burgos_town",
+      "chapter": "a1_burgos",
+      "priority": 10,
+      "title_key": "obj.burgos_town.title",
+      "detail_key": "obj.burgos_town.detail",
+      "place_key": "loc.burgos",
+      "person_key": "char.burgos_child"
+    },
+    {
+      "id": "arcas_choose",
+      "chapter": "a1_arcas",
+      "priority": 20,
+      "when_none_flags": ["arcas_cheated", "arcas_refused"],
+      "title_key": "obj.arcas_choose.title",
+      "detail_key": "obj.arcas_choose.detail",
+      "place_key": "loc.arcas",
+      "person_key": "char.martin_antolinez",
+      "lock_reason_key": "lock.arcas_choose"
+    },
+    {
+      "id": "arcas_cheat_done",
+      "chapter": "a1_arcas",
+      "priority": 10,
+      "when_all_flags": ["arcas_cheated"],
+      "title_key": "obj.arcas_leave.title",
+      "detail_key": "obj.arcas_leave.detail",
+      "place_key": "loc.arcas",
+      "done_key": "obj.arcas_cheat.done"
+    },
+    {
+      "id": "arcas_refuse_done",
+      "chapter": "a1_arcas",
+      "priority": 10,
+      "when_all_flags": ["arcas_refused"],
+      "title_key": "obj.arcas_leave.title",
+      "detail_key": "obj.arcas_leave.detail",
+      "place_key": "loc.arcas",
+      "done_key": "obj.arcas_refuse.done"
+    },
+    {
+      "id": "cardena_farewell",
+      "chapter": "a1_cardena",
+      "priority": 10,
+      "when_none_flags": ["hub_lock_cardena"],
+      "title_key": "obj.cardena_farewell.title",
+      "detail_key": "obj.cardena_farewell.detail",
+      "place_key": "loc.cardena",
+      "person_key": "char.jimena"
+    },
+    {
+      "id": "navapalos_sleep",
+      "chapter": "a1_navapalos",
+      "priority": 10,
+      "title_key": "obj.navapalos_sleep.title",
+      "detail_key": "obj.navapalos_sleep.detail",
+      "place_key": "loc.navapalos",
+      "person_key": "char.gabriel"
+    },
+    {
+      "id": "castejon_take",
+      "chapter": "a1_castejon",
+      "priority": 10,
+      "title_key": "obj.castejon_take.title",
+      "detail_key": "obj.castejon_take.detail",
+      "place_key": "location.castejon",
+      "person_key": "char.alvar_fanez",
+      "lock_reason_key": "lock.castejon_keep"
+    },
+    {
+      "id": "alcocer_sortie",
+      "chapter": "a1_alcocer",
+      "priority": 10,
+      "title_key": "obj.alcocer_sortie.title",
+      "detail_key": "obj.alcocer_sortie.detail",
+      "place_key": "location.alcocer"
+    },
+    {
+      "id": "embassy1_gift",
+      "chapter": "a1_embassy1",
+      "priority": 10,
+      "title_key": "obj.embassy1.title",
+      "detail_key": "obj.embassy1.detail",
+      "person_key": "char.alvar_fanez"
+    },
+    {
+      "id": "poyo_rest",
+      "chapter": "a1_poyo",
+      "priority": 10,
+      "title_key": "obj.poyo.title",
+      "detail_key": "obj.poyo.detail",
+      "place_key": "loc.poyo"
+    },
+    {
+      "id": "tevar_table",
+      "chapter": "a1_tevar",
+      "priority": 10,
+      "title_key": "obj.tevar.title",
+      "detail_key": "obj.tevar.detail",
+      "place_key": "loc.tevar"
+    },
+    {
+      "id": "murviedro",
+      "chapter": "a2_murviedro",
+      "priority": 10,
+      "title_key": "obj.murviedro.title",
+      "detail_key": "obj.murviedro.detail"
+    },
+    {
+      "id": "siege",
+      "chapter": "a2_siege",
+      "priority": 10,
+      "title_key": "obj.siege.title",
+      "detail_key": "obj.siege.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "jeronimo",
+      "chapter": "a2_jeronimo",
+      "priority": 10,
+      "title_key": "obj.jeronimo.title",
+      "detail_key": "obj.jeronimo.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "embassy2",
+      "chapter": "a2_embassy2",
+      "priority": 10,
+      "title_key": "obj.embassy2.title",
+      "detail_key": "obj.embassy2.detail"
+    },
+    {
+      "id": "yusuf",
+      "chapter": "a2_yusuf",
+      "priority": 10,
+      "title_key": "obj.yusuf.title",
+      "detail_key": "obj.yusuf.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "embassy3",
+      "chapter": "a2_embassy3",
+      "priority": 10,
+      "title_key": "obj.embassy3.title",
+      "detail_key": "obj.embassy3.detail"
+    },
+    {
+      "id": "repay",
+      "chapter": "a2_repay_raquel",
+      "priority": 10,
+      "title_key": "obj.repay.title",
+      "detail_key": "obj.repay.detail",
+      "person_key": "char.raquel"
+    },
+    {
+      "id": "tagus",
+      "chapter": "a2_tagus",
+      "priority": 10,
+      "title_key": "obj.tagus.title",
+      "detail_key": "obj.tagus.detail"
+    },
+    {
+      "id": "bodas",
+      "chapter": "a2_bodas",
+      "priority": 10,
+      "title_key": "obj.bodas.title",
+      "detail_key": "obj.bodas.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "leon",
+      "chapter": "a3_leon",
+      "priority": 10,
+      "title_key": "obj.leon.title",
+      "detail_key": "obj.leon.detail"
+    },
+    {
+      "id": "bucar",
+      "chapter": "a3_bucar",
+      "priority": 10,
+      "title_key": "obj.bucar.title",
+      "detail_key": "obj.bucar.detail"
+    },
+    {
+      "id": "despedida",
+      "chapter": "a3_despedida",
+      "priority": 10,
+      "title_key": "obj.despedida.title",
+      "detail_key": "obj.despedida.detail"
+    },
+    {
+      "id": "corpes",
+      "chapter": "a3_corpes",
+      "priority": 10,
+      "title_key": "obj.corpes.title",
+      "detail_key": "obj.corpes.detail"
+    },
+    {
+      "id": "querella",
+      "chapter": "a3_querella",
+      "priority": 10,
+      "title_key": "obj.querella.title",
+      "detail_key": "obj.querella.detail"
+    },
+    {
+      "id": "toledo",
+      "chapter": "a3_toledo",
+      "priority": 10,
+      "title_key": "obj.toledo.title",
+      "detail_key": "obj.toledo.detail"
+    },
+    {
+      "id": "wait",
+      "chapter": "a3_valencia_wait",
+      "priority": 10,
+      "title_key": "obj.wait.title",
+      "detail_key": "obj.wait.detail"
+    },
+    {
+      "id": "carrion",
+      "chapter": "a3_carrion",
+      "priority": 10,
+      "title_key": "obj.carrion.title",
+      "detail_key": "obj.carrion.detail"
+    },
+    {
+      "id": "pentecost",
+      "chapter": "a3_pentecost",
+      "priority": 10,
+      "title_key": "obj.pentecost.title",
+      "detail_key": "obj.pentecost.detail"
+    }
+  ],
+  "locks": [
+    {
+      "id": "cardena_closed",
+      "to": "a1_cardena",
+      "when_all_flags": ["hub_lock_cardena"],
+      "reason_key": "lock.cardena_closed"
+    },
+    {
+      "id": "arcas_unresolved",
+      "from": "a1_arcas",
+      "to": "a1_cardena",
+      "when_none_flags": ["arcas_cheated", "arcas_refused"],
+      "reason_key": "lock.arcas_choose"
+    }
+  ]
+}

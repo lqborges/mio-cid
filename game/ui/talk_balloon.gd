@@ -18,6 +18,7 @@ func _ready() -> void:
 		_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		if not _panel.gui_input.is_connected(_on_panel_gui_input):
 			_panel.gui_input.connect(_on_panel_gui_input)
+	_apply_subtitle_size()
 
 
 func start(resource: Resource, cue: String = "", extra_game_states: Array = []) -> void:
@@ -45,7 +46,17 @@ func _apply(line: Variant) -> void:
 	if _body:
 		var key := str(line.text) if "text" in line else ""
 		_body.text = Loc.text(key) if Loc else key
+	_apply_subtitle_size()
 	_waiting = true
+
+
+func _apply_subtitle_size() -> void:
+	var size := 18
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("subtitle_size"):
+		size = int(guide.call("subtitle_size"))
+	if _body:
+		_body.add_theme_font_size_override("font_size", size)
 
 
 func _input(event: InputEvent) -> void:

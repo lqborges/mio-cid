@@ -29,6 +29,7 @@ Loc="*res://game/autoload/loc.gd"
 MobileLook="*res://game/autoload/mobile_look.gd"
 HumanoidLooks="*res://game/autoload/humanoid_looks.gd"
 DialogueManager="*res://addons/dialogue_manager/dialogue_manager.gd"
+PlayerGuide="*res://game/autoload/player_guide.gd"
 PauseMenu="*res://game/ui/pause_menu.gd"
 
 [display]
