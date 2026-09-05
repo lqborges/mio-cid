@@ -54,7 +54,7 @@ jobs:
           while IFS= read -r candidate; do
             bin="${candidate}"
             break
-          done < <(find "${GODOT_CACHE_DIR}" -type f -name 'Godot_v*-linux.x86_64' ! -name '*.zip' | sort)
+          done < <(find "${GODOT_CACHE_DIR}" -type f -name 'Godot_v*_linux.x86_64' ! -name '*.zip' | sort)
           if [ -n "${bin}" ]; then
             chmod +x "${bin}"
             ln -sfn "${bin}" "${GODOT_CACHE_DIR}/godot"
