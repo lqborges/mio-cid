@@ -113,6 +113,7 @@ func lock_reason(to_id: String) -> String:
 
 func note_moved() -> void:
 	_moved = true
+	_complete_tip_if("moved")
 
 
 func note_interacted() -> void:

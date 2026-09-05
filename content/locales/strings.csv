@@ -94,6 +94,9 @@ ui.settings.language.en,Inglés,English
 ui.menu.new,Nueva partida,New game
 ui.menu.load,Cargar,Load
 ui.menu.quit,Salir,Quit
+ui.menu.cancel,Cancelar,Cancel
+ui.menu.overwrite,Las cinco partidas están ocupadas. Elegid una para reemplazarla.,All five slots are full. Choose one to replace.
+ui.menu.overwrite_confirm,Pulsad de nuevo el hueco %d para reemplazarlo.,Press slot %d again to replace it.
 tip.dismiss,Entendido,Understood
 tip.move.title,Andar,Walk
 tip.move.body,"WASD o clic en el suelo para andar. El ratón apunta.","WASD or click the ground to walk. The mouse aims."

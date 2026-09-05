@@ -56,9 +56,11 @@ func journal(chapter_id: String, flags: PackedStringArray) -> Array:
 	var out: Array = []
 	var seen := {}
 	for chapter in _chapter_order():
-		if chapter != chapter_id and not _chapter_passed(chapter, chapter_id):
-			continue
-		var row := current(chapter, flags) if chapter == chapter_id else _completed_for(chapter, flags)
+		var row: Dictionary = {}
+		if chapter == chapter_id:
+			row = current(chapter, flags)
+		elif _chapter_visited(chapter, flags):
+			row = _completed_for(chapter, flags)
 		if row.is_empty():
 			continue
 		if bool(row.get("spoiler", false)) or not bool(row.get("journal", true)):
@@ -73,9 +75,8 @@ func journal(chapter_id: String, flags: PackedStringArray) -> Array:
 
 func _completed_for(chapter: String, flags: PackedStringArray) -> Dictionary:
 	var match := current(chapter, flags)
-	if not match.is_empty() and str(match.get("done_key", "")) != "":
+	if not match.is_empty() and _row_has_visit_evidence(match):
 		return match
-	var fallback: Dictionary = {}
 	for item in objectives:
 		if not item is Dictionary:
 			continue
@@ -84,9 +85,21 @@ func _completed_for(chapter: String, flags: PackedStringArray) -> Dictionary:
 			continue
 		if str(row.get("done_key", "")) != "" and _flags_match(row, flags):
 			return row.duplicate(true)
-		if fallback.is_empty():
-			fallback = row.duplicate(true)
-	return fallback
+	return {}
+
+
+func _chapter_visited(chapter: String, flags: PackedStringArray) -> bool:
+	return not _completed_for(chapter, flags).is_empty()
+
+
+func _row_has_visit_evidence(row: Dictionary) -> bool:
+	if str(row.get("done_key", "")) != "":
+		return true
+	var all_flags: Variant = row.get("when_all_flags", [])
+	if all_flags is Array and not (all_flags as Array).is_empty():
+		return true
+	var any_flags: Variant = row.get("when_any_flags", [])
+	return any_flags is Array and not (any_flags as Array).is_empty()
 
 
 func lock_reason(from_id: String, to_id: String, flags: PackedStringArray) -> String:

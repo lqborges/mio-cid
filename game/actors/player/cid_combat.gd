@@ -152,6 +152,9 @@ func leap() -> void:
 	var move := moveset.move(&"leap")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_cancel_attack_phases()
+	combo_step = 0
+	_combo_left = 0.0
 	_note_strike()
 	last_move = &"leap"
 	_arm_hit(move, &"leap")
@@ -172,10 +175,11 @@ func shout() -> void:
 	var move := moveset.move(&"shout")
 	if not _spend(float(move.get("stamina", 0.0))):
 		return
+	_cancel_attack_phases()
+	combo_step = 0
+	_combo_left = 0.0
 	_note_strike()
 	last_move = &"shout"
-	if hit_box != null:
-		hit_box.disarm()
 	_arm_shout(move)
 	_play_sfx(&"shout")
 
@@ -191,8 +195,9 @@ func dump_strike() -> bool:
 		return false
 	_note_strike()
 	last_move = &"dump"
-	if hit_box != null:
-		hit_box.disarm()
+	_cancel_attack_phases()
+	combo_step = 0
+	_combo_left = 0.0
 	_arm_shout(move)
 	_play_sfx(&"shout")
 	return true
@@ -241,13 +246,25 @@ func _try_melee_combo() -> void:
 	combo_step += 1
 	_combo_left = float(tunables.get("combo_window", 0.0))
 	last_move = move_id
-	if shout_ring != null:
-		shout_ring.disarm()
+	_cancel_attack_phases()
 	_arm_hit(move, move_id)
 	_play_sfx(&"slam")
 
 
+func _cancel_attack_phases() -> void:
+	_pending_move = {}
+	_pending_id = &""
+	_windup_left = 0.0
+	_active_left = 0.0
+	_attack_left = 0.0
+	if hit_box != null:
+		hit_box.disarm()
+	if shout_ring != null:
+		shout_ring.disarm()
+
+
 func _arm_hit(move: Dictionary, move_id: StringName) -> void:
+	_cancel_attack_phases()
 	var duration := float(move.get("duration", 0.0))
 	_attack_left = duration
 	_pending_move = move
@@ -262,6 +279,7 @@ func _arm_hit(move: Dictionary, move_id: StringName) -> void:
 
 
 func _arm_shout(move: Dictionary) -> void:
+	_cancel_attack_phases()
 	_attack_left = float(move.get("duration", 0.0))
 	if shout_ring == null:
 		return

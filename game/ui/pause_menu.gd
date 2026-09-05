@@ -452,10 +452,12 @@ func _step(key: String, label: String, value: int) -> HBoxContainer:
 	up.text = "+"
 	up.focus_mode = Control.FOCUS_ALL
 	var apply := func(delta: int) -> void:
-		var next := clampi(value + delta, 14, 26)
-		value = next
-		name.text = "%s: %d" % [label, value]
 		var guide := _guide()
+		var current := value
+		if guide != null and "settings" in guide:
+			current = int((guide.settings as Dictionary).get(key, value))
+		var next := clampi(current + delta, 14, 26)
+		name.text = "%s: %d" % [label, next]
 		if guide and guide.has_method("set_setting"):
 			guide.call("set_setting", key, next)
 	down.pressed.connect(func() -> void: apply.call(-4))
@@ -507,6 +509,9 @@ func _clear_world_input() -> void:
 		var mesura: Node = node.get_node_or_null("Mesura")
 		if mesura != null and mesura.has_method("set_holding"):
 			mesura.call("set_holding", false)
+	for hud in tree.get_nodes_in_group("touch_hud"):
+		if hud.has_method("release_pointer"):
+			hud.call("release_pointer")
 
 
 func _guide() -> Node:

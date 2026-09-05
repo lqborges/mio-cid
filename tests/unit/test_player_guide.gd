@@ -10,7 +10,9 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_test_guide_autoload())
+	failures.append_array(_test_move_tip_completes_from_note_moved())
 	failures.append_array(_test_pause_pages())
+	failures.append_array(_test_subtitle_step_accumulates())
 	failures.append_array(_test_locale_switch())
 	failures.append_array(_test_glyphs())
 	_finish(failures)
@@ -94,6 +96,26 @@ func _test_guide_autoload() -> PackedStringArray:
 	return failures
 
 
+func _test_move_tip_completes_from_note_moved() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var guide: Node = get_root().get_node_or_null("PlayerGuide")
+	if guide == null or not guide.has_method("note_moved"):
+		failures.append("PlayerGuide.note_moved missing")
+		return failures
+	var runner: Node = get_root().get_node_or_null("ChapterRunner")
+	if runner and "current_id" in runner:
+		runner.current_id = &"a1_vivar"
+	guide.set("dismissed_tips", PackedStringArray())
+	guide.set("_active_tip", "move")
+	guide.call("note_moved")
+	if str(guide.get("_active_tip")) == "move":
+		failures.append("note_moved must complete the move tip for click/tap walk")
+	var dismissed: PackedStringArray = guide.get("dismissed_tips")
+	if "move" not in dismissed:
+		failures.append("completed move tip must be dismissed")
+	return failures
+
+
 func _test_pause_pages() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	var pause: Node = get_root().get_node_or_null("PauseMenu")
@@ -135,6 +157,61 @@ func _test_pause_pages() -> PackedStringArray:
 	pause.notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
 	if pause.visible:
 		failures.append("Android back should close an open pause menu")
+	return failures
+
+
+func _test_subtitle_step_accumulates() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var pause: Node = get_root().get_node_or_null("PauseMenu")
+	var guide: Node = get_root().get_node_or_null("PlayerGuide")
+	if pause == null or guide == null or not pause.has_method("_open_settings"):
+		failures.append("PauseMenu settings missing")
+		return failures
+	guide.call("set_setting", "subtitle_size", 18)
+	pause.call("_open_settings")
+	var box: VBoxContainer = pause.get("_settings_box") as VBoxContainer
+	if box == null or box.get_child_count() == 0:
+		failures.append("settings box missing subtitle stepper")
+		return failures
+	var row: Node = box.get_child(box.get_child_count() - 1)
+	if row.get_child_count() < 3:
+		failures.append("subtitle stepper missing +/- buttons")
+		return failures
+	var down := row.get_child(1) as Button
+	var up := row.get_child(2) as Button
+	if down == null or up == null:
+		failures.append("subtitle stepper buttons missing")
+		return failures
+	var sizes: Array = []
+	up.pressed.emit()
+	sizes.append(int(guide.settings.get("subtitle_size", 0)))
+	up.pressed.emit()
+	sizes.append(int(guide.settings.get("subtitle_size", 0)))
+	down.pressed.emit()
+	sizes.append(int(guide.settings.get("subtitle_size", 0)))
+	if sizes != [22, 26, 22]:
+		failures.append("subtitle +,+,- from 18 must be 22,26,22 got %s" % str(sizes))
+	guide.call("set_setting", "subtitle_size", 26)
+	pause.call("_open_settings")
+	box = pause.get("_settings_box") as VBoxContainer
+	row = box.get_child(box.get_child_count() - 1)
+	up = row.get_child(2) as Button
+	up.pressed.emit()
+	if int(guide.settings.get("subtitle_size", 0)) != 26:
+		failures.append("subtitle size must clamp at 26")
+	guide.call("set_setting", "subtitle_size", 14)
+	pause.call("_open_settings")
+	box = pause.get("_settings_box") as VBoxContainer
+	row = box.get_child(box.get_child_count() - 1)
+	down = row.get_child(1) as Button
+	down.pressed.emit()
+	if int(guide.settings.get("subtitle_size", 0)) != 14:
+		failures.append("subtitle size must clamp at 14")
+	guide.call("set_setting", "subtitle_size", 18)
+	if pause.has_method("_hide_page"):
+		pause.call("_hide_page")
+	if pause.visible:
+		pause.call("resume")
 	return failures
 
 

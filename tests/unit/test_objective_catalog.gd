@@ -61,6 +61,22 @@ func _test_locks_and_journal() -> PackedStringArray:
 		failures.append("journal must recap Vivar after leaving it")
 	if "arcas_choose" in ids:
 		failures.append("journal must not spoil Arcas before the chapter")
+	var honest := PackedStringArray(["hub_lock_cardena", "arcas_refused"])
+	var tagus: Array = catalog.journal("a2_tagus", honest)
+	for item in tagus:
+		if not (item is Dictionary):
+			continue
+		var row: Dictionary = item
+		if str(row.get("id", "")) == "repay" or str(row.get("chapter", "")) == "a2_repay_raquel":
+			failures.append("honest Arcas path must not journal the skipped repay branch")
+	var cheated := PackedStringArray(["hub_lock_cardena", "arcas_cheated"])
+	var repaid: Array = catalog.journal("a2_tagus", cheated)
+	var repaid_ids: PackedStringArray = PackedStringArray()
+	for item in repaid:
+		if item is Dictionary:
+			repaid_ids.append(str(item.get("id", "")))
+	if "repay" not in repaid_ids:
+		failures.append("cheated path at Tagus must recap the repay visit")
 	return failures
 
 

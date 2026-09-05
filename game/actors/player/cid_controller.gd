@@ -342,6 +342,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if _leap_airborne and is_on_floor() and velocity.y <= 0.0:
 		_leap_airborne = false
+	_lock_isometric_camera()
 	_update_interact_prompt()
 
 
@@ -656,6 +657,8 @@ func _fade_occluders() -> void:
 		return
 	_occluders.append(geom)
 	var mat := geom.material_override
+	if geom.has_meta("kit_fade_prev") and geom.get_meta("kit_fade_prev") is StandardMaterial3D:
+		mat = geom.get_meta("kit_fade_prev")
 	if mat == null:
 		mat = StandardMaterial3D.new()
 		if geom is CSGShape3D and (geom as CSGShape3D).material is StandardMaterial3D:

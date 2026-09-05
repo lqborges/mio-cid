@@ -5,6 +5,12 @@ const VIVAR_SCENE := "res://content/chapters/a1_vivar/world.tscn"
 @onready var _status: Label = $Center/Status
 @onready var _slots: HBoxContainer = $Center/Slots
 
+var _slots_mode: StringName = &""
+var _pending_overwrite_slot: int = 0
+var debug_full_slots: bool = false
+var debug_skip_enter: bool = false
+var debug_started_slot: int = 0
+
 
 func _ready() -> void:
 	$Center/NewGame.pressed.connect(_on_new_game)
@@ -24,22 +30,22 @@ func _ready() -> void:
 
 
 func _on_new_game() -> void:
-	# Always start. A two-click overwrite confirm looked like a dead menu
-	# once all five slots existed from prior play.
+	if _slots_mode == &"overwrite":
+		_cancel_overwrite()
+		return
 	var slot := _first_empty_slot()
-	if slot == 0:
-		slot = 1
-	_reset_campaign()
-	if SaveService:
-		SaveService.save(slot)
-		SaveService.autosave()
-	_rebuild_slots()
-	_enter_game()
+	if slot != 0:
+		_start_new_game(slot)
+		return
+	_begin_overwrite_pick()
 
 
 func _on_load_pressed() -> void:
+	if _slots_mode == &"overwrite":
+		_cancel_overwrite()
 	_rebuild_slots()
 	_slots.visible = not _slots.visible
+	_slots_mode = &"load" if _slots.visible else &""
 
 
 func _on_quit() -> void:
@@ -64,7 +70,10 @@ func _on_locale_changed(_code: String) -> void:
 func _apply_labels() -> void:
 	var new_game := get_node_or_null("Center/NewGame") as Button
 	if new_game:
-		new_game.text = _loc("ui.menu.new", "Nueva partida")
+		if _slots_mode == &"overwrite":
+			new_game.text = _loc("ui.menu.cancel", "Cancelar")
+		else:
+			new_game.text = _loc("ui.menu.new", "Nueva partida")
 	var load_btn := get_node_or_null("Center/Load") as Button
 	if load_btn:
 		load_btn.text = _loc("ui.menu.load", "Cargar")
@@ -94,6 +103,17 @@ func _loc(key: String, fallback: String) -> String:
 
 
 func _on_slot(slot: int) -> void:
+	if _slots_mode == &"overwrite":
+		if _pending_overwrite_slot == slot:
+			_start_new_game(slot)
+		else:
+			_pending_overwrite_slot = slot
+			if _status:
+				_status.text = _loc(
+					"ui.menu.overwrite_confirm",
+					"Pulsad de nuevo el hueco %d para reemplazarlo."
+				) % slot
+		return
 	if SaveService == null:
 		return
 	var payload: Dictionary = SaveService.load(slot)
@@ -101,6 +121,44 @@ func _on_slot(slot: int) -> void:
 		if _status:
 			_status.text = String(SaveService.last_error)
 		return
+	_enter_game()
+
+
+func _begin_overwrite_pick() -> void:
+	_slots_mode = &"overwrite"
+	_pending_overwrite_slot = 0
+	if _slots:
+		_slots.visible = true
+	if _status:
+		_status.text = _loc(
+			"ui.menu.overwrite",
+			"Las cinco partidas están ocupadas. Elegid una para reemplazarla."
+		)
+	_rebuild_slots()
+	_apply_labels()
+
+
+func _cancel_overwrite() -> void:
+	_slots_mode = &""
+	_pending_overwrite_slot = 0
+	if _slots:
+		_slots.visible = false
+	if _status:
+		_status.text = ""
+	_apply_labels()
+
+
+func _start_new_game(slot: int) -> void:
+	_slots_mode = &""
+	_pending_overwrite_slot = 0
+	debug_started_slot = slot
+	if debug_skip_enter:
+		return
+	_reset_campaign()
+	if SaveService:
+		SaveService.save(slot)
+		SaveService.autosave()
+	_rebuild_slots()
 	_enter_game()
 
 
@@ -124,12 +182,16 @@ func _reset_campaign() -> void:
 
 
 func _first_empty_slot() -> int:
-	if SaveService == null or not SaveService.has_method("slot_exists"):
-		return 1
 	for slot in range(1, 6):
-		if not SaveService.slot_exists(slot):
+		if not _slot_exists(slot):
 			return slot
 	return 0
+
+
+func _slot_exists(slot: int) -> bool:
+	if debug_full_slots:
+		return true
+	return SaveService != null and SaveService.has_method("slot_exists") and SaveService.slot_exists(slot)
 
 
 func _enter_game() -> void:
@@ -165,7 +227,7 @@ func _rebuild_slots() -> void:
 		var btn := Button.new()
 		btn.text = str(slot)
 		btn.custom_minimum_size = Vector2(48, 36)
-		var exists := SaveService != null and SaveService.has_method("slot_exists") and SaveService.slot_exists(slot)
+		var exists := _slot_exists(slot)
 		btn.disabled = not exists
 		var captured := slot
 		btn.pressed.connect(func() -> void: _on_slot(captured))

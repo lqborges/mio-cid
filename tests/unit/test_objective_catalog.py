@@ -42,6 +42,7 @@ class TestObjectiveCatalog(unittest.TestCase):
         locks = {row["id"]: row for row in data["locks"]}
         self.assertEqual(locks["cardena_closed"]["to"], "a1_cardena")
         self.assertIn("hub_lock_cardena", locks["cardena_closed"]["when_all_flags"])
+        self.assertIn("arcas_cheated", by_id["repay"]["when_all_flags"])
 
     def test_schema_and_scripts_exist(self) -> None:
         for rel in (

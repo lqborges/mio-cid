@@ -36,6 +36,8 @@ class TestCombatFeel(unittest.TestCase):
         feel = _read("game/combat/combat_feel.gd")
         self.assertIn("flash_enabled", feel)
         self.assertIn("shake_enabled", feel)
+        self.assertIn("Visual/Humanoid", feel)
+        self.assertIn("_visible_look_meshes", feel)
         self.assertNotIn("GPUParticles", feel)
         dummy = _read("game/combat/dummy_enemy.gd")
         self.assertIn("data/combat/roles.json", dummy)

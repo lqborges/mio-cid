@@ -9,6 +9,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_check_feel_and_roles())
+	failures.append_array(_check_flash_uses_visible_look())
 	failures.append_array(_check_mount_progress())
 	_finish(failures)
 
@@ -32,6 +33,47 @@ func _check_feel_and_roles() -> PackedStringArray:
 	if not is_equal_approx(hurt.hp, 8.0):
 		failures.append("hit after feel want 8 got %s" % hurt.hp)
 	hurt.free()
+	return failures
+
+
+func _check_flash_uses_visible_look() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var host := Node3D.new()
+	host.name = "DummyHost"
+	var visual := Node3D.new()
+	visual.name = "Visual"
+	host.add_child(visual)
+	var cap := MeshInstance3D.new()
+	cap.name = "MeshInstance3D"
+	cap.visible = false
+	cap.mesh = CapsuleMesh.new()
+	var cap_mat := StandardMaterial3D.new()
+	cap_mat.albedo_color = Color(0.2, 0.2, 0.2)
+	cap.material_override = cap_mat
+	visual.add_child(cap)
+	var human := Node3D.new()
+	human.name = "Humanoid"
+	visual.add_child(human)
+	var torso := MeshInstance3D.new()
+	torso.name = "Torso"
+	torso.visible = true
+	torso.mesh = BoxMesh.new()
+	var torso_mat := StandardMaterial3D.new()
+	torso_mat.albedo_color = Color(0.1, 0.2, 0.4)
+	torso.material_override = torso_mat
+	human.add_child(torso)
+	var hurt := HurtBox.new()
+	host.add_child(hurt)
+	get_root().add_child(host)
+	CombatFeel.note_hit(hurt, 2.0, host)
+	if cap.get_surface_override_material(0) != null:
+		failures.append("hit flash must not paint the hidden capsule")
+	var flashed := torso.get_surface_override_material(0) as StandardMaterial3D
+	if flashed == null:
+		failures.append("hit flash must paint the visible Humanoid mesh")
+	elif flashed.albedo_color.is_equal_approx(torso_mat.albedo_color):
+		failures.append("visible torso material should change during flash")
+	host.free()
 	return failures
 
 

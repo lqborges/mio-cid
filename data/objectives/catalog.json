@@ -284,6 +284,7 @@
       "id": "repay",
       "chapter": "a2_repay_raquel",
       "priority": 10,
+      "when_all_flags": ["arcas_cheated"],
       "title_key": "obj.repay.title",
       "detail_key": "obj.repay.detail",
       "person_key": "char.raquel"

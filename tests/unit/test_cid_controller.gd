@@ -185,6 +185,7 @@ func _begin_input_routing_checks() -> void:
 	_failures.append_array(_check_dialogue_does_not_queue_interact())
 	_failures.append_array(_check_false_interact_does_not_block_walk())
 	_failures.append_array(_check_interact_chip_follows_npc())
+	_failures.append_array(_check_foot_camera_nudge())
 	_begin_leap_tick()
 
 
@@ -237,6 +238,43 @@ func _check_interact_chip_follows_npc() -> PackedStringArray:
 	cid.free()
 	if layer != null and is_instance_valid(layer):
 		layer.free()
+	return failures
+
+
+func _check_foot_camera_nudge() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("foot camera: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	if cid == null:
+		failures.append("foot camera: Cid is not CharacterBody3D")
+		return failures
+	get_root().add_child(cid)
+	var camera: Camera3D = cid.get_node_or_null("CameraRig/Camera3D") as Camera3D
+	if camera == null:
+		failures.append("foot camera: Camera3D missing")
+		cid.free()
+		return failures
+	var rest := Vector3(float(cid.get("camera_offset")), float(cid.get("camera_height")), float(cid.get("camera_offset")))
+	if cid.has_method("apply_camera_nudge"):
+		cid.call("apply_camera_nudge", Vector3(0.0, 0.0, 0.4), 0.25)
+	else:
+		failures.append("foot camera: apply_camera_nudge missing")
+		cid.free()
+		return failures
+	cid.set("chapter_asleep", false)
+	cid.set("chapter_locked", false)
+	cid._physics_process(0.016)
+	if camera.position.distance_to(rest + Vector3(0.0, 0.0, 0.4)) > 0.05:
+		failures.append("ordinary foot tick must apply camera nudge, pos=%s rest=%s" % [camera.position, rest])
+	cid.set("_nudge_left", 0.0)
+	cid.set("_nudge", Vector3.ZERO)
+	cid._physics_process(0.016)
+	if camera.position.distance_to(rest) > 0.05:
+		failures.append("foot tick must restore the locked camera after the nudge, pos=%s" % camera.position)
+	cid.free()
 	return failures
 
 
