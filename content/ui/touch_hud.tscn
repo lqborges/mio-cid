@@ -96,3 +96,13 @@ focus_mode = 0
 mouse_filter = 0
 action_mode = 0
 text = "Hablar"
+
+[node name="Pause" type="Button" parent="Root"]
+layout_mode = 0
+offset_left = 1184.0
+offset_top = 24.0
+offset_right = 1256.0
+offset_bottom = 96.0
+focus_mode = 0
+mouse_filter = 0
+text = "Pausa"

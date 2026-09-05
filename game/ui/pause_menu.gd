@@ -19,6 +19,7 @@ var _page_body: RichTextLabel
 var _page_back: Button
 var _settings_box: VBoxContainer
 var _page_mode: StringName = &""
+var _ignore_cancel_until_msec: int = 0
 
 
 func _ready() -> void:
@@ -29,11 +30,34 @@ func _ready() -> void:
 	_apply_labels()
 
 
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_WM_GO_BACK_REQUEST:
+		return
+	# Android Back also emits ui_cancel. Ignore that echo so the menu does not
+	# open and close on the same press.
+	_ignore_cancel_until_msec = Time.get_ticks_msec() + 250
+	if _is_main_menu():
+		get_tree().quit()
+		return
+	if visible:
+		if _page and _page.visible:
+			_hide_page()
+			_focus_resume()
+		else:
+			resume()
+	else:
+		open()
+
+
 func _input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
 	InputGlyphs.note_event(event)
-	if not event.is_action_pressed("pause") and not event.is_action_pressed("ui_cancel"):
+	var cancel := event.is_action_pressed("ui_cancel")
+	if cancel and Time.get_ticks_msec() < _ignore_cancel_until_msec:
+		get_viewport().set_input_as_handled()
+		return
+	if not event.is_action_pressed("pause") and not cancel:
 		return
 	if _is_main_menu():
 		return
