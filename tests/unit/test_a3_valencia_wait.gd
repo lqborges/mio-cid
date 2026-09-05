@@ -39,8 +39,13 @@ func _check_rest_three_weeks() -> PackedStringArray:
 	root.add_child(world)
 	if world.get_node_or_null("Jimena") == null:
 		failures.append("Jimena must rest in Valencia")
+	if world.get_node_or_null("JimenaZone") == null:
+		failures.append("JimenaZone missing")
 	if world.get_node_or_null("RestZone") == null:
 		failures.append("RestZone missing")
+	var jimena: Node = world.get_node_or_null("Jimena")
+	if jimena == null or not jimena.is_in_group("interactable"):
+		failures.append("Jimena must be interactable")
 	if _clock and str(_clock.segment_id()) != "lists_wait":
 		failures.append("clock segment want lists_wait got %s" % _clock.segment_id())
 	var marks_before := 0.0

@@ -43,6 +43,10 @@ func _ready() -> void:
 	_show_place_name()
 	_name_horse()
 	_label_people()
+	if _has_flag(&"ride_host"):
+		_host_ridden = true
+		_fail_ride_host()
+		return
 	_whisper(TABLE_KEY)
 
 
@@ -245,6 +249,15 @@ func _apply_ride_host() -> void:
 	_set_flag(&"ride_host")
 	_apply_honor(RIDE_EVENT)
 	_whisper(RIDE_KEY)
+	_fail_ride_host()
+
+
+func _fail_ride_host() -> void:
+	var script: Script = load("res://game/ui/fail_copy.gd") as Script
+	if script and "last_reason" in script:
+		script.last_reason = &"ride_host"
+	if EventBus and EventBus.has_signal("hard_fail"):
+		EventBus.hard_fail.emit(&"ride_host")
 
 
 func _send_muno() -> void:
@@ -257,6 +270,7 @@ func _finish_beat() -> void:
 	if _left:
 		return
 	if _host_ridden:
+		_fail_ride_host()
 		if EventBus and EventBus.has_signal("beat_completed"):
 			EventBus.beat_completed.emit(BEAT_ID)
 		_checkpoint()
@@ -468,6 +482,15 @@ func _can_travel(to_id: StringName) -> bool:
 	if "flags" in runner:
 		flags = runner.flags
 	return bool(runner.can_travel(from_id, to_id, flags))
+
+
+func _has_flag(flag_id: StringName) -> bool:
+	var runner := _runner()
+	if runner != null and runner.has_method("has_flag"):
+		return bool(runner.has_flag(flag_id))
+	if runner != null and "flags" in runner:
+		return String(flag_id) in runner.flags
+	return false
 
 
 func _set_flag(flag_id: StringName) -> void:

@@ -307,7 +307,7 @@ collision_layer = 1
 collision_mask = 0
 script = ExtResource("11_court")
 character_id = &"alfonso"
-cue = "pardon"
+cue = "court"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Alfonso"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)

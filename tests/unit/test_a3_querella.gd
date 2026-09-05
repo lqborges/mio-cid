@@ -54,6 +54,7 @@ func _run() -> void:
 	failures.append_array(_check_mesura_files_querella())
 	failures.append_array(_check_ira_does_not_commit())
 	failures.append_array(_check_ride_host_blocks_toledo())
+	failures.append_array(_check_ride_host_restored())
 	failures.append_array(_check_missing_toledo_no_scene_change())
 	failures.append_array(_check_graph_spine())
 	failures.append_array(_check_later_beats_not_shipped())
@@ -396,8 +397,14 @@ func _check_ride_host_blocks_toledo() -> PackedStringArray:
 			failures.append("ride_host must not travel to Toledo")
 	if bool(world.get("_left")):
 		failures.append("ride_host must not _left to Toledo")
+	if "ride_host" not in _fails:
+		failures.append("ride_host must hard_fail ride_host, got %s" % str(_fails))
 	if current_scene != scene_before:
-		failures.append("ride_host must not change_scene")
+		var path := ""
+		if current_scene:
+			path = str(current_scene.scene_file_path)
+		if path.find("a3_toledo") >= 0:
+			failures.append("ride_host must not change_scene to Toledo")
 	if bool(world.call("try_travel_toledo")):
 		failures.append("ride_host try_travel_toledo must fail")
 	var whisper_text := _whisper_text(world)
@@ -410,6 +417,38 @@ func _check_ride_host_blocks_toledo() -> PackedStringArray:
 		failures.append("legal after ride_host must not file")
 	if _sent > 0:
 		failures.append("legal after ride_host must not emit querella_sent")
+	world.free()
+	return failures
+
+
+func _check_ride_host_restored() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	if _runner == null:
+		failures.append("ride_host restore: ChapterRunner missing")
+		return failures
+	var flags: PackedStringArray = PackedStringArray()
+	if "flags" in _runner:
+		flags = _runner.flags.duplicate()
+	if "ride_host" not in flags:
+		flags.append("ride_host")
+	if _runner.has_method("restore"):
+		_runner.restore(&"a3_querella", flags)
+	else:
+		_runner.flags = flags
+	_fails.clear()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("ride_host restore: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	if not bool(world.call("host_ridden")):
+		failures.append("saved ride_host must restore host_ridden")
+	if "ride_host" not in _fails:
+		failures.append("saved ride_host must hard_fail on load, got %s" % str(_fails))
+	if bool(world.call("try_travel_toledo")):
+		failures.append("saved ride_host must still block Toledo")
 	world.free()
 	return failures
 

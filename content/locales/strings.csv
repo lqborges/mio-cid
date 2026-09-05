@@ -115,6 +115,7 @@ lock.generic,El camino aún no abre.,The road is not open yet.
 lock.arcas_choose,Debéis elegir: las arcas o el ayuno.,You must choose: the chests or hunger.
 lock.cardena_closed,El adiós está hecho. No hay vuelta a Cardeña.,The farewell is done. There is no return to Cardeña.
 lock.castejon_keep,Vender. Quedarse es la ira de Alfonso.,Sell. To stay is Alfonso's wrath.
+lock.ride_host,La hueste cierra Toledo. Recargad.,The host closes Toledo. Reload.
 loc.vivar,Vivar,Vivar
 loc.vivar_gate,La puerta del solar,The solar gate
 loc.burgos,Burgos,Burgos
@@ -209,6 +210,8 @@ obj.corpes.title,La noticia de Corpes,News from Corpes
 obj.corpes.detail,Oíd a Félez. El hecho no se salta.,Hear Félez. The fact cannot be skipped.
 obj.querella.title,La querella,The complaint
 obj.querella.detail,Una sola pregunta. La mesura abre Toledo.,One ask. Mesura opens Toledo.
+obj.querella_host.title,La hueste no es ley,The host is not law
+obj.querella_host.detail,Alfonso no oirá esto en Toledo. Recargad.,Alfonso will not hear this in Toledo. Reload.
 obj.toledo_garcia.title,García habla primero,García speaks first
 obj.toledo_garcia.detail,Oíd al juez. Luego las tres demandas.,Hear the judge. Then the three asks.
 obj.toledo.title,Las Cortes de Toledo,The Cortes of Toledo
@@ -473,6 +476,7 @@ a3_toledo.colada_martin,Colada va a Martín Antolínez.,Colada goes to Martín A
 a3_toledo.princes,Navarra pide a Elvira. Aragón pide a Sol.,Navarre asks for Elvira. Aragon asks for Sol.
 a3_toledo.wait,Valencia aún no abre. Tres semanas.,Valencia is not open yet. Three weeks.
 fail.steel_in_cortes,En esta corte no se desenvaina. Recargad.,Steel is not drawn in this hall. Reload.
+fail.ride_host,La hueste no es ley. Alfonso no oirá esto. Recargad.,A host is not law. Alfonso will not hear this. Reload.
 fail.name_empty,El nombre está vacío. Recargad.,The name is empty. Reload.
 a3_valencia_wait.table,Tres semanas. Jimena descansa. Los campeones cabalgan.,Three weeks. Jimena rests. The champions ride.
 a3_valencia_wait.rested,Pasaron veintiún días. La lid espera en Carrión.,Twenty-one days passed. The lists wait in Carrión.

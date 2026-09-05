@@ -223,7 +223,12 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             "if not _dest_ready()", 1
         )[0]
         self.assertIn("return", host_block)
+        self.assertIn("_fail_ride_host", host_block)
         self.assertNotIn("WAIT_KEY", host_block)
+        self.assertIn("func _fail_ride_host", source)
+        self.assertIn('&"ride_host"', source)
+        fail = _read("game/ui/fail_copy.gd")
+        self.assertIn('&"ride_host"', fail)
         submit = source.split("func _submit", 1)[1].split("func _load_querella", 1)[0]
         self.assertIn("if _filed or _host_ridden:", submit)
         travel_try = source.split("func try_travel_toledo", 1)[1].split(
@@ -319,6 +324,9 @@ class TestA3QuerellaSpeechTrial(unittest.TestCase):
             "a3_querella.sent",
             "a3_querella.ride_host",
             "a3_querella.toledo_wait",
+            "fail.ride_host",
+            "obj.querella_host.title",
+            "lock.ride_host",
             "char.muno_gustioz",
         ):
             self.assertIn(key, rows, key)

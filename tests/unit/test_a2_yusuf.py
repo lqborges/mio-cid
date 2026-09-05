@@ -493,8 +493,12 @@ class TestA2YusufDay2(unittest.TestCase):
             )
         charge_size = _subresource_size(scene, "Box_charge")
         self.assertGreaterEqual(charge_size[0], 48.0)
+        self.assertLessEqual(charge_size[2], 4.0)
         yusuf = _origin(scene, "Yusuf")
+        charge_origin = _origin(scene, "ChargeZone")
         self.assertGreater(abs(cid[2] - yusuf[2]), 4.0)
+        self.assertLess(abs(charge_origin[2] - yusuf[2]), 3.0)
+        self.assertGreater(abs(cid[2] - charge_origin[2]), 10.0)
 
     def test_day2_goto_embassy3_when_present(self) -> None:
         self.assertTrue((ROOT / "content/chapters/a2_embassy3/world.tscn").is_file())

@@ -353,8 +353,18 @@
       "id": "querella",
       "chapter": "a3_querella",
       "priority": 10,
+      "when_none_flags": ["querella_filed", "ride_host"],
       "title_key": "obj.querella.title",
       "detail_key": "obj.querella.detail"
+    },
+    {
+      "id": "querella_host",
+      "chapter": "a3_querella",
+      "priority": 20,
+      "when_all_flags": ["ride_host"],
+      "title_key": "obj.querella_host.title",
+      "detail_key": "obj.querella_host.detail",
+      "lock_reason_key": "lock.ride_host"
     },
     {
       "id": "toledo_garcia",

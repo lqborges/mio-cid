@@ -13,6 +13,8 @@ const REST_KEY := "a3_valencia_wait.rested"
 const WAIT_KEY := "a3_valencia_wait.carrion_wait"
 const DEST_SCENE := "res://content/chapters/a3_carrion/world.tscn"
 const WAIT_DAYS := 21
+const DIALOGUE_PATH := "res://content/chapters/a3_valencia_wait/wait.dialogue"
+const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 
 var _rested: bool = false
 var _left: bool = false
@@ -66,6 +68,8 @@ func rest_three_weeks(_cue: String = "rest") -> bool:
 	_set_flag(&"lists_wait_done")
 	_whisper(REST_KEY)
 	_checkpoint()
+	if _try_wait_balloon():
+		return true
 	return try_travel_carrion()
 
 
@@ -119,6 +123,31 @@ func _on_rest_entered(body: Node) -> void:
 	if not (body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir")):
 		return
 	rest_three_weeks()
+
+
+func _try_wait_balloon() -> bool:
+	var tree := get_tree()
+	if tree == null or tree.current_scene != self:
+		return false
+	if not ResourceLoader.exists(DIALOGUE_PATH) or not ResourceLoader.exists(BALLOON_PATH):
+		return false
+	var dm := _autoload("DialogueManager")
+	if dm == null or not dm.has_method("show_dialogue_balloon_scene"):
+		return false
+	var resource: Resource = load(DIALOGUE_PATH)
+	if resource == null:
+		return false
+	if dm.has_signal("dialogue_ended") and not dm.dialogue_ended.is_connected(_on_wait_dialogue_ended):
+		dm.dialogue_ended.connect(_on_wait_dialogue_ended)
+	dm.show_dialogue_balloon_scene(BALLOON_PATH, resource, "rest", [self])
+	return true
+
+
+func _on_wait_dialogue_ended(_resource: Variant = null) -> void:
+	var dm := _autoload("DialogueManager")
+	if dm and dm.has_signal("dialogue_ended") and dm.dialogue_ended.is_connected(_on_wait_dialogue_ended):
+		dm.dialogue_ended.disconnect(_on_wait_dialogue_ended)
+	try_travel_carrion()
 
 
 func _dest_ready() -> bool:

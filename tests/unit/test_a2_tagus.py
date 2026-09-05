@@ -247,7 +247,13 @@ class TestA2TagusPardon(unittest.TestCase):
         self.assertNotIn("Headless:", source)
         courtier = _read(f"{CHAPTER}/courtier.gd")
         self.assertIn("start_cue", courtier)
+        self.assertIn("start_court", courtier)
         self.assertIn("cue", courtier)
+        interact = courtier.split("func interact", 1)[1].split("func _chapter", 1)[0]
+        court_at = interact.find("start_court")
+        cue_at = interact.find("start_cue")
+        self.assertGreaterEqual(court_at, 0)
+        self.assertGreater(cue_at, court_at)
         dialogue = _read(f"{CHAPTER}/tagus.dialogue")
         self.assertIn("~ pardon", dialogue)
         self.assertIn("~ ask", dialogue)
