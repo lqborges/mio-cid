@@ -2,11 +2,9 @@ name: Export Linux
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
-    paths:
-      - "export_presets.cfg"
-      - "project.godot"
-      - ".github/workflows/export-linux.yml"
+    branches: [main]
 
 jobs:
   export-linux:
@@ -70,6 +68,8 @@ jobs:
           name: mio-cid-linux
           path: build/linux/
 
-      - name: Skip notice
+      - name: Fail if Godot was missing
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot missing; Linux export skipped. Steam partner status is not claimed by this repo."
+        run: |
+          echo "Godot missing; Linux export did not run."
+          exit 1

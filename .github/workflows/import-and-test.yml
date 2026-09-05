@@ -68,8 +68,9 @@ jobs:
             echo "Download failed."
           fi
 
-          echo "Godot binary missing in CI cache; skipping import and tests."
+          echo "Godot binary missing; failing so engine tests cannot be skipped."
           echo "found=false" >> "${GITHUB_OUTPUT}"
+          exit 1
 
       - name: Run Python autoload tests
         run: python3 -m unittest discover -s tests/unit -p 'test_*.py'
@@ -445,6 +446,8 @@ jobs:
           fi
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s "${cmd}" -- --add res://tests --continue
 
-      - name: Skip notice
+      - name: Fail if Godot was missing
         if: steps.godot.outputs.found != 'true'
-        run: echo "Godot binary missing in CI cache; import, EventBus/loyalty/CidController/Tagus headless tests, and gdUnit4 skipped."
+        run: |
+          echo "Godot binary missing; engine tests did not run."
+          exit 1

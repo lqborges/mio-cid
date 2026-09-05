@@ -27,6 +27,8 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn("user://player_guide.json", guide)
         self.assertNotIn("collect_payload", guide)
         self.assertIn("func current_objective(", guide)
+        self.assertIn("var _hud_panel: Control", guide)
+        self.assertIn("_hud_panel.visible = true", guide)
         self.assertIn("func journal_entries(", guide)
         self.assertIn("func replay_tips(", guide)
         self.assertIn("func format_interact_prompt(", guide)

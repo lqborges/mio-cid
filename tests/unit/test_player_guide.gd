@@ -33,8 +33,13 @@ func _test_guide_autoload() -> PackedStringArray:
 	var obj: Variant = guide.call("current_objective")
 	if typeof(obj) != TYPE_DICTIONARY or str(obj.get("id", "")) != "vivar_talk":
 		failures.append("Vivar start must show first-names objective")
-	if guide.get_node_or_null("ObjectiveHud") == null:
+	if guide.has_method("_refresh_hud"):
+		guide.call("_refresh_hud")
+	var hud: CanvasItem = guide.get_node_or_null("ObjectiveHud") as CanvasItem
+	if hud == null:
 		failures.append("ObjectiveHud missing")
+	elif not hud.visible:
+		failures.append("ObjectiveHud stays hidden while vivar_talk is current")
 	if guide.get_node_or_null("OnboardingToast") == null:
 		failures.append("OnboardingToast missing")
 	if guide.has_method("replay_tips"):
