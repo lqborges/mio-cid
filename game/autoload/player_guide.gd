@@ -4,9 +4,12 @@ extends CanvasLayer
 
 const CATALOG_SCRIPT := preload("res://game/systems/objectives/objective_catalog.gd")
 const TIPS_PATH := "res://data/onboarding/tips.json"
+const PLACES_PATH := "res://data/travel/places.json"
 const SETTINGS_PATH := "user://player_guide.json"
 const IRON := Color(0.18, 0.16, 0.13, 0.92)
 const PARCHMENT := Color(0.91, 0.85, 0.72)
+const DIM := Color(0.05, 0.04, 0.03, 0.62)
+const TRAVEL_HOLD_MSEC := 1600
 
 const DEFAULT_SETTINGS := {
 	"reduced_motion": false,
@@ -23,6 +26,7 @@ const DEFAULT_SETTINGS := {
 
 var catalog: ObjectiveCatalog
 var tips: Array = []
+var places: Dictionary = {}
 var dismissed_tips: PackedStringArray = PackedStringArray()
 var settings: Dictionary = DEFAULT_SETTINGS.duplicate(true)
 var _active_tip: String = ""
@@ -33,6 +37,11 @@ var _hold_bar: ColorRect
 var _toast: Control
 var _toast_title: Label
 var _toast_body: Label
+var _travel_panel: Control
+var _travel_kicker: Label
+var _travel_place: Label
+var _travel_dest: String = ""
+var _travel_until_msec: int = 0
 var _last_chapter: String = ""
 var _moved: bool = false
 var _interacted: bool = false
@@ -47,11 +56,13 @@ func _ready() -> void:
 	layer = 22
 	catalog = CATALOG_SCRIPT.from_file()
 	_load_tips()
+	_load_places()
 	_load_settings()
 	_apply_locale()
 	_apply_audio()
 	_build_hud()
 	_build_toast()
+	_build_travel()
 	var bus := _bus()
 	if bus:
 		if bus.has_signal("beat_started") and not bus.beat_started.is_connected(_on_beat_started):
@@ -69,6 +80,7 @@ func _input(event: InputEvent) -> void:
 
 func _process(_delta: float) -> void:
 	_poll_onboarding()
+	_tick_travel()
 	_refresh_hud()
 
 
@@ -178,6 +190,41 @@ func help_lines() -> PackedStringArray:
 	return lines
 
 
+func announce_travel(to_id: String) -> void:
+	if to_id.is_empty():
+		return
+	_travel_dest = to_id
+	_travel_until_msec = Time.get_ticks_msec() + TRAVEL_HOLD_MSEC
+	if _travel_kicker:
+		_travel_kicker.text = _loc("travel.arrive", "Llegáis a")
+	if _travel_place:
+		_travel_place.text = place_title(to_id)
+	if _travel_panel:
+		_travel_panel.visible = true
+	_hide_toast()
+
+
+func place_title(chapter_id: String) -> String:
+	var row: Variant = places.get(chapter_id, {})
+	var key := ""
+	if row is Dictionary:
+		key = str((row as Dictionary).get("title_key", ""))
+	if key.is_empty():
+		return chapter_id
+	return _loc(key, chapter_id)
+
+
+func travel_visible() -> bool:
+	return _travel_panel != null and _travel_panel.visible
+
+
+func dismiss_travel() -> void:
+	_travel_dest = ""
+	_travel_until_msec = 0
+	if _travel_panel:
+		_travel_panel.visible = false
+
+
 func format_interact_prompt(verb_key: String, fallback: String) -> String:
 	var verb := _loc(verb_key, fallback)
 	if verb.begins_with("E — ") or verb.begins_with("E - "):
@@ -187,6 +234,9 @@ func format_interact_prompt(verb_key: String, fallback: String) -> String:
 
 func _on_beat_started(id: StringName) -> void:
 	_last_chapter = String(id)
+	if _travel_panel != null and _travel_panel.visible:
+		if _travel_dest.is_empty() or String(id) == _travel_dest:
+			_travel_until_msec = Time.get_ticks_msec() + 900
 	_consider_tips()
 	_refresh_hud()
 
@@ -287,10 +337,28 @@ func _hide_toast() -> void:
 		_toast.visible = false
 
 
+func _tick_travel() -> void:
+	if _travel_panel == null or not _travel_panel.visible:
+		return
+	if _is_main_menu():
+		dismiss_travel()
+		return
+	if Time.get_ticks_msec() < _travel_until_msec:
+		return
+	if not _travel_dest.is_empty() and _chapter_id() != _travel_dest:
+		# Scene change is still queued; keep the card until arrival or timeout.
+		if Time.get_ticks_msec() < _travel_until_msec + 1200:
+			return
+	dismiss_travel()
+
+
 func _refresh_hud() -> void:
 	if _hud_title == null or _hud_panel == null:
 		return
 	if _is_main_menu():
+		_hud_panel.visible = false
+		return
+	if _travel_panel != null and _travel_panel.visible:
 		_hud_panel.visible = false
 		return
 	var obj := current_objective()
@@ -467,6 +535,64 @@ func _build_toast() -> void:
 	dismiss.text = _loc("tip.dismiss", "Entendido")
 	dismiss.pressed.connect(dismiss_active_tip)
 	col.add_child(dismiss)
+
+
+func _build_travel() -> void:
+	_travel_panel = Control.new()
+	_travel_panel.name = "TravelCard"
+	_travel_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_travel_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_travel_panel.add_to_group("hud_click_sink")
+	_travel_panel.visible = false
+	add_child(_travel_panel)
+	var dim := ColorRect.new()
+	dim.name = "Dim"
+	dim.color = DIM
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_travel_panel.add_child(dim)
+	var card := ColorRect.new()
+	card.name = "Card"
+	card.color = IRON
+	card.set_anchors_preset(Control.PRESET_CENTER)
+	card.offset_left = -220.0
+	card.offset_right = 220.0
+	card.offset_top = -70.0
+	card.offset_bottom = 70.0
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_travel_panel.add_child(card)
+	var col := VBoxContainer.new()
+	col.set_anchors_preset(Control.PRESET_FULL_RECT)
+	col.offset_left = 16.0
+	col.offset_right = -16.0
+	col.offset_top = 18.0
+	col.offset_bottom = -18.0
+	col.add_theme_constant_override("separation", 8)
+	card.add_child(col)
+	_travel_kicker = Label.new()
+	_travel_kicker.name = "Kicker"
+	_travel_kicker.add_theme_color_override("font_color", Color(0.82, 0.76, 0.64))
+	_travel_kicker.add_theme_font_size_override("font_size", 14)
+	_travel_kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(_travel_kicker)
+	_travel_place = Label.new()
+	_travel_place.name = "Place"
+	_travel_place.add_theme_color_override("font_color", PARCHMENT)
+	_travel_place.add_theme_font_size_override("font_size", 28)
+	_travel_place.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_travel_place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(_travel_place)
+
+
+func _load_places() -> void:
+	places.clear()
+	if not FileAccess.file_exists(PLACES_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PLACES_PATH))
+	if parsed is Dictionary:
+		var raw: Variant = parsed.get("places", {})
+		if raw is Dictionary:
+			places = (raw as Dictionary).duplicate(true)
 
 
 func _load_tips() -> void:

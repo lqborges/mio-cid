@@ -1,0 +1,33 @@
+{
+  "id": "camino",
+  "places": {
+    "a1_vivar": { "title_key": "loc.vivar" },
+    "a1_burgos": { "title_key": "loc.burgos" },
+    "a1_arcas": { "title_key": "loc.arcas" },
+    "a1_cardena": { "title_key": "loc.cardena" },
+    "a1_navapalos": { "title_key": "loc.navapalos" },
+    "a1_castejon": { "title_key": "location.castejon" },
+    "a1_alcocer": { "title_key": "location.alcocer" },
+    "a1_embassy1": { "title_key": "obj.embassy1.title" },
+    "a1_poyo": { "title_key": "loc.poyo" },
+    "a1_tevar": { "title_key": "loc.tevar" },
+    "a2_murviedro": { "title_key": "location.murviedro" },
+    "a2_siege": { "title_key": "obj.siege.title" },
+    "a2_jeronimo": { "title_key": "loc.valencia" },
+    "a2_embassy2": { "title_key": "obj.embassy2.title" },
+    "a2_yusuf": { "title_key": "obj.yusuf.title" },
+    "a2_embassy3": { "title_key": "obj.embassy3.title" },
+    "a2_repay_raquel": { "title_key": "obj.repay.title" },
+    "a2_tagus": { "title_key": "obj.tagus.title" },
+    "a2_bodas": { "title_key": "obj.bodas.title" },
+    "a3_leon": { "title_key": "obj.leon.title" },
+    "a3_bucar": { "title_key": "obj.bucar.title" },
+    "a3_despedida": { "title_key": "obj.despedida.title" },
+    "a3_corpes": { "title_key": "obj.corpes.title" },
+    "a3_querella": { "title_key": "obj.querella.title" },
+    "a3_toledo": { "title_key": "obj.toledo.title" },
+    "a3_valencia_wait": { "title_key": "obj.wait.title" },
+    "a3_carrion": { "title_key": "obj.carrion.title" },
+    "a3_pentecost": { "title_key": "obj.pentecost.title" }
+  }
+}

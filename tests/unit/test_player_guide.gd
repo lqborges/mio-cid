@@ -44,6 +44,26 @@ func _test_guide_autoload() -> PackedStringArray:
 		failures.append("OnboardingToast missing")
 	if guide.has_method("replay_tips"):
 		guide.call("replay_tips")
+	if guide.has_method("announce_travel"):
+		guide.call("announce_travel", "a1_burgos")
+		if guide.has_method("travel_visible") and not bool(guide.call("travel_visible")):
+			failures.append("announce_travel must show the travel card")
+		if guide.has_method("place_title"):
+			var place := str(guide.call("place_title", "a1_burgos"))
+			if place != "Burgos":
+				failures.append("place_title a1_burgos want Burgos got %s" % place)
+		var card: Node = guide.get_node_or_null("TravelCard")
+		if card == null:
+			failures.append("TravelCard missing")
+		else:
+			var place_label: Label = card.find_child("Place", true, false) as Label
+			if place_label == null or place_label.text != "Burgos":
+				failures.append("travel card must name Burgos")
+			var kicker: Label = card.find_child("Kicker", true, false) as Label
+			if kicker == null or kicker.text != "Llegáis a":
+				failures.append("travel card kicker want Llegáis a got %s" % (kicker.text if kicker else "missing"))
+		if guide.has_method("dismiss_travel"):
+			guide.call("dismiss_travel")
 	if guide.has_method("format_interact_prompt"):
 		InputGlyphs.set_device(InputGlyphs.DEVICE_KEYBOARD)
 		var prompt := str(guide.call("format_interact_prompt", "hud.interact_verb", "Hablar"))

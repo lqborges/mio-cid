@@ -4,12 +4,15 @@ extends Node3D
 
 const BEAT_ID := &"a1_burgos"
 const SEEN_FLAG := &"burgos_shutters_seen"
+const CHILD_HEARD := &"burgos_child_heard"
+const INN_ASKED := &"burgos_inn_asked"
 const BEATS_PATH := "res://content/chapters/a1_burgos/beats.json"
 const DIALOGUE_PATH := "res://content/chapters/a1_burgos/burgos.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 const DRAW_STEEL_EVENT := &"burgos_draw_steel"
 const CAMP_RIVER_EVENT := &"burgos_camp_river"
 const V20_KEY := "poem.v20"
+const HEAR_CHILD_KEY := "a1_burgos.hear_child_first"
 
 var _talking: bool = false
 var _steel_drawn: bool = false
@@ -53,6 +56,7 @@ func start_child_v20(_cue: String = "child_v20") -> void:
 	if _talking:
 		return
 	_talking = true
+	_set_flag(CHILD_HEARD)
 	_whisper_v20()
 	var resource := _load_dialogue()
 	if resource == null:
@@ -67,6 +71,7 @@ func start_child_v20(_cue: String = "child_v20") -> void:
 func run_child_v20() -> void:
 	# Headless: whisper + walk the cue, no balloon.
 	_talking = true
+	_set_flag(CHILD_HEARD)
 	_whisper_v20()
 	var resource := _load_dialogue()
 	if resource:
@@ -78,6 +83,7 @@ func start_inn_refusal(_cue: String = "innkeeper") -> void:
 	if _talking:
 		return
 	_talking = true
+	_set_flag(INN_ASKED)
 	var resource := _load_dialogue()
 	if resource == null:
 		_talking = false
@@ -90,6 +96,7 @@ func start_inn_refusal(_cue: String = "innkeeper") -> void:
 
 func run_inn_refusal() -> void:
 	_talking = true
+	_set_flag(INN_ASKED)
 	var resource := _load_dialogue()
 	if resource:
 		await _walk_lines(resource, "innkeeper")
@@ -117,6 +124,15 @@ func camp_on_river() -> void:
 	_travel_to_arcas()
 
 
+func _try_camp_on_river() -> void:
+	# Walk-through is the exit. The child verse must land first so Burgos
+	# is not a three-meter skip into Arcas.
+	if _has_flag(CHILD_HEARD):
+		camp_on_river()
+		return
+	_hint_hear_child()
+
+
 func _physics_process(_delta: float) -> void:
 	if _camped:
 		# camp_on_river already queued one deferred goto. Do not restack it.
@@ -124,9 +140,9 @@ func _physics_process(_delta: float) -> void:
 	var cid: Node3D = get_node_or_null("Cid") as Node3D
 	if cid == null:
 		return
-	# Spawn is z=6.5. The old Camp box (layer 1) blocked before RiverCamp (z~8.5).
+	# Spawn sits in the square (z~1.5). River tents start at z>=9.4.
 	if cid.global_position.z >= 9.4:
-		camp_on_river()
+		_try_camp_on_river()
 
 
 func _travel_to_arcas() -> void:
@@ -187,7 +203,7 @@ func _on_burgales_exited(body: Node) -> void:
 
 func _on_camp_entered(body: Node) -> void:
 	if body != null and body.has_method("facing_dir"):
-		camp_on_river()
+		_try_camp_on_river()
 
 
 func _whisper_v20() -> void:
@@ -213,6 +229,23 @@ func _try_balloon(resource: Resource, cue: String) -> bool:
 			dm.dialogue_ended.connect(_on_dialogue_ended)
 		dm.show_dialogue_balloon_scene(BALLOON_PATH, resource, cue, [self])
 		return true
+	return false
+
+
+func _hint_hear_child() -> void:
+	var whisper: Node = find_child("HallWhisper", true, false)
+	if whisper and whisper.has_method("whisper_key"):
+		whisper.call("whisper_key", HEAR_CHILD_KEY)
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("note_blocked"):
+		guide.call("note_blocked", HEAR_CHILD_KEY)
+
+
+func _has_flag(flag_id: StringName) -> bool:
+	if ChapterRunner and ChapterRunner.has_method("has_flag"):
+		return bool(ChapterRunner.has_flag(flag_id))
+	if ChapterRunner and "flags" in ChapterRunner:
+		return String(flag_id) in ChapterRunner.flags
 	return false
 
 

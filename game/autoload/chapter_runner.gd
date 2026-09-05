@@ -140,6 +140,7 @@ func goto(beat_id: StringName) -> void:
 	# frees the new CollisionObjects while HumanoidLooks still has callbacks.
 	if path == _pending_scene:
 		return
+	_announce_travel(String(beat_id))
 	var loop := Engine.get_main_loop()
 	if loop is SceneTree:
 		_pending_scene = path
@@ -148,6 +149,17 @@ func goto(beat_id: StringName) -> void:
 		# free CollisionObjects in the same physics callback.
 		(loop as SceneTree).change_scene_to_file.call_deferred(path)
 		_clear_pending_scene.call_deferred(path)
+
+
+func _announce_travel(to_id: String) -> void:
+	if to_id.is_empty():
+		return
+	var root := _scene_root()
+	if root == null:
+		return
+	var guide := root.get_node_or_null("PlayerGuide")
+	if guide != null and guide.has_method("announce_travel"):
+		guide.call("announce_travel", to_id)
 
 
 func _clear_pending_scene(path: String) -> void:

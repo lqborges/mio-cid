@@ -22,13 +22,35 @@
       "done_key": "obj.vivar_talk.done"
     },
     {
-      "id": "burgos_town",
+      "id": "burgos_child",
       "chapter": "a1_burgos",
-      "priority": 10,
-      "title_key": "obj.burgos_town.title",
-      "detail_key": "obj.burgos_town.detail",
+      "priority": 30,
+      "when_none_flags": ["burgos_child_heard"],
+      "title_key": "obj.burgos_child.title",
+      "detail_key": "obj.burgos_child.detail",
       "place_key": "loc.burgos",
       "person_key": "char.burgos_child"
+    },
+    {
+      "id": "burgos_inn",
+      "chapter": "a1_burgos",
+      "priority": 20,
+      "when_all_flags": ["burgos_child_heard"],
+      "when_none_flags": ["burgos_inn_asked"],
+      "title_key": "obj.burgos_inn.title",
+      "detail_key": "obj.burgos_inn.detail",
+      "place_key": "loc.burgos",
+      "person_key": "char.burgos_innkeeper"
+    },
+    {
+      "id": "burgos_camp",
+      "chapter": "a1_burgos",
+      "priority": 10,
+      "when_all_flags": ["burgos_child_heard", "burgos_inn_asked"],
+      "title_key": "obj.burgos_camp.title",
+      "detail_key": "obj.burgos_camp.detail",
+      "place_key": "loc.burgos",
+      "done_key": "obj.burgos_town.done"
     },
     {
       "id": "arcas_choose",

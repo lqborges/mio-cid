@@ -48,6 +48,7 @@ File reproduced defects as separate issues with captures. Do not treat this chec
 | --- | --- |
 | DESIGN/README/PLAYABLE hardware + camera reconciliation | Done (#13) |
 | Objective HUD + journal + onboarding + pause Help/Settings | Done (#13) |
+| Travel arrival card + Burgos stepped objectives / child-first river | Done (this PR) |
 | Style sheet + license manifest + regional CSG kits | Done (this PR) |
 | Foreground occluder fade (locked camera) | Done |
 | Combat windup/active/recovery + hit flash + Mesura block copy | Done |
@@ -65,6 +66,8 @@ godot --headless --path . -s res://tests/unit/test_player_guide.gd
 godot --headless --path . -s res://tests/unit/test_chapter_kit.gd
 godot --headless --path . -s res://tests/unit/test_combat_feel.gd
 godot --headless --path . -s res://tests/unit/test_a1_vivar.gd
+godot --headless --path . -s res://tests/unit/test_a1_burgos.gd
+godot --headless --path . -s res://tests/unit/test_early_game_travel.gd
 ```
 
 If Godot is missing, report those scripts as **unverified**, not as a pass.

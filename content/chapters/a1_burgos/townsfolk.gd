@@ -10,6 +10,16 @@ func _ready() -> void:
 		add_to_group("interactable")
 
 
+func interact_prompt_key() -> String:
+	match role:
+		"child":
+			return "hud.hear_verb"
+		"innkeeper":
+			return "hud.lodge_verb"
+		_:
+			return "hud.interact_verb"
+
+
 func interact() -> bool:
 	var host := _chapter()
 	if host == null:

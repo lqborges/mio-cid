@@ -55,6 +55,9 @@ hud.dodge,Esquiva,Dodge
 hud.interact,Hablar,Talk
 hud.interact_verb,Hablar,Talk
 hud.leave_verb,Salir,Leave
+hud.call_verb,Llamar,Call
+hud.hear_verb,Oír,Hear
+hud.lodge_verb,Pedir posada,Ask for lodging
 hud.interact_hint,E — Hablar,E — Talk
 hud.leave_hint,E — Salir,E — Leave
 ui.pause.title,Pausa,Pause
@@ -92,6 +95,11 @@ tip.choice.title,La elección,The choice
 tip.choice.body,"Elegid con el ratón o el foco. No se deshace en silencio.","Choose with the mouse or focus. Nothing is undone in silence."
 tip.mesura.title,Mesura,Mesura
 tip.mesura.body,"Mantened Q / Mesura para esperar. Mientras tanto no hay golpe ni salto ni grito.","Hold Q / Mesura to wait. Attacks stay unavailable while it is active."
+tip.burgos.title,La plaza,The square
+tip.burgos.body,"Oíd al niño. Pedid posada. El río y las tiendas quedan al sur.","Hear the child. Ask for lodging. The river and tents are to the south."
+travel.arrive,Llegáis a,You arrive in
+a1_burgos.hear_child_first,Oíd al niño en la plaza. El río espera.,Hear the child in the square. The river can wait.
+char.burgos_innkeeper,Posadero,Innkeeper
 lock.generic,El camino aún no abre.,The road is not open yet.
 lock.arcas_choose,Debéis elegir: las arcas o el ayuno.,You must choose: the chests or hunger.
 lock.cardena_closed,El adiós está hecho. No hay vuelta a Cardeña.,The farewell is done. There is no return to Cardeña.
@@ -110,8 +118,15 @@ obj.vivar_talk.detail,El solar está vacío. Álvar y Martín os esperan.,The so
 obj.vivar_talk.done,Los nombres respondieron.,The names answered.
 obj.vivar_leave.title,Salid por la puerta del sur,Leave by the south gate
 obj.vivar_leave.detail,Nueve días. Cruzad hacia Burgos.,Nine days. Cross toward Burgos.
+obj.burgos_child.title,Oíd al niño,Hear the child
+obj.burgos_child.detail,En la plaza. Las puertas se cierran.,In the square. The gates are shutting.
+obj.burgos_inn.title,Pedid posada,Ask for lodging
+obj.burgos_inn.detail,El posadero está a la puerta. Luego el río al sur.,The innkeeper stands at the door. Then the river to the south.
+obj.burgos_camp.title,Campad junto al río,Camp by the river
+obj.burgos_camp.detail,Al sur de la plaza. Las tiendas marcan el vado.,South of the square. The tents mark the ford.
 obj.burgos_town.title,Burgos cierra las puertas,Burgos shuts its gates
 obj.burgos_town.detail,Oíd al niño. Pedid posada. Campad junto al río.,Hear the child. Ask for lodging. Camp by the river.
+obj.burgos_town.done,Campasteis junto al río.,You camped by the river.
 obj.arcas_choose.title,Las arcas de arena,The sand chests
 obj.arcas_choose.detail,Hablad con Martín. La elección mancha o ayuna.,Talk to Martín. The choice stains or starves.
 obj.arcas_leave.title,El camino a Cardeña,The road to Cardeña

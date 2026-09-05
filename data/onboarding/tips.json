@@ -36,8 +36,17 @@
       "complete_on": "choice_closed"
     },
     {
-      "id": "mesura",
+      "id": "burgos",
       "order": 5,
+      "title_key": "tip.burgos.title",
+      "body_key": "tip.burgos.body",
+      "when": "chapter_start",
+      "chapters": ["a1_burgos"],
+      "complete_on": "interacted"
+    },
+    {
+      "id": "mesura",
+      "order": 6,
       "title_key": "tip.mesura.title",
       "body_key": "tip.mesura.body",
       "when": "chapter_start",

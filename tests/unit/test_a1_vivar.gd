@@ -143,6 +143,8 @@ func _check_companions_interactable() -> PackedStringArray:
 			continue
 		if not npc.has_method("interact"):
 			failures.append("%s missing interact()" % name)
+		if not npc.has_method("interact_prompt_key") or str(npc.call("interact_prompt_key")) != "hud.call_verb":
+			failures.append("%s prompt want hud.call_verb" % name)
 		if not npc.is_in_group("interactable"):
 			failures.append("%s must be in interactable group" % name)
 	var cid: Node = _world.get_node_or_null("Cid")

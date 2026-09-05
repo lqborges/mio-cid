@@ -26,6 +26,9 @@ class TestObjectiveCatalog(unittest.TestCase):
         self.assertEqual(by_id["vivar_talk"]["chapter"], "a1_vivar")
         self.assertIn("vivar_seen", by_id["vivar_talk"]["when_none_flags"])
         self.assertIn("vivar_seen", by_id["vivar_leave"]["when_all_flags"])
+        self.assertIn("burgos_child_heard", by_id["burgos_child"]["when_none_flags"])
+        self.assertIn("burgos_child_heard", by_id["burgos_inn"]["when_all_flags"])
+        self.assertIn("burgos_inn_asked", by_id["burgos_camp"]["when_all_flags"])
         self.assertEqual(by_id["arcas_choose"]["lock_reason_key"], "lock.arcas_choose")
         self.assertEqual(by_id["castejon_take"]["place_key"], "location.castejon")
         locks = {row["id"]: row for row in data["locks"]}
@@ -54,6 +57,10 @@ class TestObjectiveCatalog(unittest.TestCase):
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         for key in (
             "obj.vivar_talk.title",
+            "obj.burgos_child.title",
+            "obj.burgos_inn.title",
+            "obj.burgos_camp.title",
+            "travel.arrive",
             "obj.arcas_choose.title",
             "obj.cardena_farewell.title",
             "obj.castejon_take.title",
