@@ -130,9 +130,11 @@ func _test_locale_switch() -> PackedStringArray:
 		failures.append("English ui.pause.title want Pause got %s" % pause_en)
 	if loc.has_method("normalize_locale") and str(loc.call("normalize_locale", "en_US")) != "en":
 		failures.append("en_US should normalize to en")
-	var meters := HonorMeters.new()
+	var meters_script: Script = load("res://game/ui/honor_meters.gd")
+	var plazo_script: Script = load("res://game/ui/plazo_bar.gd")
+	var meters: Node = meters_script.new()
+	var plazo: Node = plazo_script.new()
 	get_root().add_child(meters)
-	var plazo := PlazoBar.new()
 	get_root().add_child(plazo)
 	var en_onores := str(meters.call("_meter_label", &"onores"))
 	if en_onores != "Means":

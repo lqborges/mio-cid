@@ -37,6 +37,7 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn("func _update_controls_hint(", guide)
         self.assertIn("ControlsHint", guide)
         self.assertNotIn("ObjectiveCatalog", guide)
+        self.assertIn("var catalog: Variant", guide)
         self.assertNotIn("InputGlyphs.", guide)
         self.assertIn('preload("res://game/systems/objectives/objective_catalog.gd")', guide)
         self.assertIn('preload("res://game/systems/input/input_glyphs.gd")', guide)

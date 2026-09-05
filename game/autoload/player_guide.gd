@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS := {
 	"locale": "es",
 }
 
-var catalog
+var catalog: Variant = null
 var tips: Array = []
 var places: Dictionary = {}
 var dismissed_tips: PackedStringArray = PackedStringArray()
@@ -90,19 +90,19 @@ func _process(_delta: float) -> void:
 func current_objective() -> Dictionary:
 	if catalog == null:
 		return {}
-	return catalog.current(_chapter_id(), _guide_flags())
+	return catalog.current(_chapter_id(), _guide_flags()) as Dictionary
 
 
 func journal_entries() -> Array:
 	if catalog == null:
 		return []
-	return catalog.journal(_chapter_id(), _guide_flags())
+	return catalog.journal(_chapter_id(), _guide_flags()) as Array
 
 
 func lock_reason(to_id: String) -> String:
 	if catalog == null:
 		return ""
-	var key := catalog.lock_reason(_chapter_id(), to_id, _guide_flags())
+	var key: String = str(catalog.lock_reason(_chapter_id(), to_id, _guide_flags()))
 	if key.is_empty():
 		var runner := _runner()
 		if runner != null and runner.has_method("can_travel"):
