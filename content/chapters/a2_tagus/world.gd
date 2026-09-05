@@ -153,6 +153,7 @@ func rest_day2() -> bool:
 	if court_day >= _court_days():
 		return false
 	court_day = _court_days()
+	_set_flag(&"tagus_day2_done")
 	_advance_court_day()
 	_whisper("a2_tagus.day3")
 	return true

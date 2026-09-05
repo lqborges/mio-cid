@@ -23,6 +23,8 @@ func _initialize() -> void:
 func _run() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_check_spectator())
+	failures.append_array(_check_list_zone_sees_spectator())
+	failures.append_array(_check_shout_before_resolve())
 	failures.append_array(_check_generous_resolve())
 	failures.append_array(_check_all_losses_name_empty())
 	_finish(failures)
@@ -51,6 +53,54 @@ func _check_spectator() -> PackedStringArray:
 			failures.append("possess_pawn must denylist Cid")
 	if world.get_node_or_null("ListCamera") == null:
 		failures.append("ListCamera missing")
+	world.free()
+	return failures
+
+
+func _check_list_zone_sees_spectator() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep(true)
+	var packed: Resource = load(WORLD)
+	if packed == null:
+		failures.append("carrion world failed to load for ListZone mask")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	var zone: Area3D = world.get_node_or_null("ListZone") as Area3D
+	if zone == null:
+		failures.append("ListZone missing")
+	elif (zone.collision_mask & LAYER_SPECTATOR) == 0:
+		failures.append("ListZone must see spectator Cid (layer 64), mask=%s" % zone.collision_mask)
+	world.free()
+	return failures
+
+
+func _check_shout_before_resolve() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep(true)
+	var packed: Resource = load(WORLD)
+	if packed == null:
+		failures.append("carrion world failed to load for shout choice")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	root.add_child(world)
+	if world.has_method("present_shout"):
+		world.call("present_shout")
+	else:
+		failures.append("carrion missing present_shout")
+		world.free()
+		return failures
+	if world.has_method("shout_visible") and not bool(world.call("shout_visible")):
+		failures.append("walking the lists must offer a shout, not auto-resolve")
+	if bool(world.call("lists_resolved")):
+		failures.append("present_shout must not resolve the lists")
+	world.call("choose_shout", &"shout_once")
+	if bool(world.call("lists_resolved")):
+		failures.append("first shout must wait for the other two duels")
+	world.call("choose_shout", &"shout_silence")
+	world.call("choose_shout", &"shout_once")
+	if not bool(world.call("lists_resolved")):
+		failures.append("third shout must resolve the lists")
 	world.free()
 	return failures
 

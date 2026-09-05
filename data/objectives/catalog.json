@@ -113,12 +113,43 @@
       "lock_reason_key": "lock.castejon_keep"
     },
     {
+      "id": "alcocer_occupy",
+      "chapter": "a1_alcocer",
+      "priority": 40,
+      "when_none_flags": ["alcocer_occupied"],
+      "title_key": "obj.alcocer_occupy.title",
+      "detail_key": "obj.alcocer_occupy.detail",
+      "place_key": "location.alcocer"
+    },
+    {
+      "id": "alcocer_wait",
+      "chapter": "a1_alcocer",
+      "priority": 30,
+      "when_all_flags": ["alcocer_occupied"],
+      "when_none_flags": ["alcocer_waited"],
+      "title_key": "obj.alcocer_wait.title",
+      "detail_key": "obj.alcocer_wait.detail",
+      "place_key": "location.alcocer"
+    },
+    {
       "id": "alcocer_sortie",
       "chapter": "a1_alcocer",
-      "priority": 10,
+      "priority": 20,
+      "when_all_flags": ["alcocer_waited"],
+      "when_none_flags": ["alcocer_sortie_won"],
       "title_key": "obj.alcocer_sortie.title",
       "detail_key": "obj.alcocer_sortie.detail",
       "place_key": "location.alcocer"
+    },
+    {
+      "id": "alcocer_divide",
+      "chapter": "a1_alcocer",
+      "priority": 10,
+      "when_all_flags": ["alcocer_sortie_won"],
+      "title_key": "obj.alcocer_divide.title",
+      "detail_key": "obj.alcocer_divide.detail",
+      "place_key": "location.alcocer",
+      "done_key": "obj.alcocer_divide.done"
     },
     {
       "id": "embassy1_gift",
@@ -145,11 +176,22 @@
       "place_key": "loc.tevar"
     },
     {
+      "id": "murviedro_roads",
+      "chapter": "a2_murviedro",
+      "priority": 20,
+      "when_none_flags": ["murviedro_roads_cut"],
+      "title_key": "obj.murviedro_roads.title",
+      "detail_key": "obj.murviedro_roads.detail",
+      "place_key": "location.murviedro"
+    },
+    {
       "id": "murviedro",
       "chapter": "a2_murviedro",
       "priority": 10,
+      "when_all_flags": ["murviedro_roads_cut"],
       "title_key": "obj.murviedro.title",
-      "detail_key": "obj.murviedro.detail"
+      "detail_key": "obj.murviedro.detail",
+      "place_key": "location.murviedro"
     },
     {
       "id": "siege",
@@ -162,24 +204,73 @@
     {
       "id": "jeronimo",
       "chapter": "a2_jeronimo",
-      "priority": 10,
+      "priority": 30,
+      "when_none_flags": ["jeronimo_appointed"],
       "title_key": "obj.jeronimo.title",
       "detail_key": "obj.jeronimo.detail",
       "place_key": "loc.valencia"
     },
     {
+      "id": "jeronimo_embassy",
+      "chapter": "a2_jeronimo",
+      "priority": 20,
+      "when_all_flags": ["jeronimo_appointed"],
+      "when_none_flags": ["embassy2_done"],
+      "title_key": "obj.jeronimo_embassy.title",
+      "detail_key": "obj.jeronimo_embassy.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "jeronimo_yusuf",
+      "chapter": "a2_jeronimo",
+      "priority": 10,
+      "when_all_flags": ["jeronimo_appointed", "embassy2_done"],
+      "title_key": "obj.jeronimo_yusuf.title",
+      "detail_key": "obj.jeronimo_yusuf.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "embassy2_recruit",
+      "chapter": "a2_embassy2",
+      "priority": 30,
+      "when_none_flags": ["avengalvon_recruited"],
+      "title_key": "obj.embassy2_recruit.title",
+      "detail_key": "obj.embassy2_recruit.detail",
+      "person_key": "char.avengalvon"
+    },
+    {
+      "id": "embassy2_escort",
+      "chapter": "a2_embassy2",
+      "priority": 20,
+      "when_all_flags": ["avengalvon_recruited"],
+      "when_none_flags": ["medinaceli_escort_done"],
+      "title_key": "obj.embassy2_escort.title",
+      "detail_key": "obj.embassy2_escort.detail"
+    },
+    {
       "id": "embassy2",
       "chapter": "a2_embassy2",
       "priority": 10,
+      "when_all_flags": ["avengalvon_recruited", "medinaceli_escort_done"],
       "title_key": "obj.embassy2.title",
       "detail_key": "obj.embassy2.detail"
     },
     {
       "id": "yusuf",
       "chapter": "a2_yusuf",
-      "priority": 10,
+      "priority": 20,
+      "when_none_flags": ["yusuf_day1_done"],
       "title_key": "obj.yusuf.title",
       "detail_key": "obj.yusuf.detail",
+      "place_key": "loc.valencia"
+    },
+    {
+      "id": "yusuf_day2",
+      "chapter": "a2_yusuf",
+      "priority": 10,
+      "when_all_flags": ["yusuf_day1_done"],
+      "title_key": "obj.yusuf_day2.title",
+      "detail_key": "obj.yusuf_day2.detail",
       "place_key": "loc.valencia"
     },
     {
@@ -200,9 +291,27 @@
     {
       "id": "tagus",
       "chapter": "a2_tagus",
-      "priority": 10,
+      "priority": 30,
+      "when_none_flags": ["pardon"],
       "title_key": "obj.tagus.title",
       "detail_key": "obj.tagus.detail"
+    },
+    {
+      "id": "tagus_day2",
+      "chapter": "a2_tagus",
+      "priority": 20,
+      "when_all_flags": ["pardon"],
+      "when_none_flags": ["tagus_day2_done"],
+      "title_key": "obj.tagus_day2.title",
+      "detail_key": "obj.tagus_day2.detail"
+    },
+    {
+      "id": "tagus_marry",
+      "chapter": "a2_tagus",
+      "priority": 10,
+      "when_all_flags": ["pardon", "tagus_day2_done"],
+      "title_key": "obj.tagus_marry.title",
+      "detail_key": "obj.tagus_marry.detail"
     },
     {
       "id": "bodas",
@@ -248,9 +357,18 @@
       "detail_key": "obj.querella.detail"
     },
     {
+      "id": "toledo_garcia",
+      "chapter": "a3_toledo",
+      "priority": 20,
+      "when_none_flags": ["garcia_done"],
+      "title_key": "obj.toledo_garcia.title",
+      "detail_key": "obj.toledo_garcia.detail"
+    },
+    {
       "id": "toledo",
       "chapter": "a3_toledo",
       "priority": 10,
+      "when_all_flags": ["garcia_done"],
       "title_key": "obj.toledo.title",
       "detail_key": "obj.toledo.detail"
     },

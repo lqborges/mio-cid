@@ -56,6 +56,7 @@ File reproduced defects as separate issues with captures. Do not treat this chec
 | Foreground occluder fade (locked camera) | Done |
 | Combat windup/active/recovery + hit flash + Mesura block copy | Done |
 | Horse hold-progress bar | Done |
+| Campaign spine: load resume, Valencia hub → Yusuf, Carrión shout, stepped mid-game HUD | Done (this PR) |
 | P0 screenshots / device captures | **Deferred** — no named min-spec capture yet |
 | Production skinned kits / Mixamo-free hero mesh | **Deferred** — dedicated art PRs |
 | Formative 4-of-5 player test | **Deferred** — see `tests/playtest/opening_slice.md` |
@@ -72,6 +73,9 @@ godot --headless --path . -s res://tests/unit/test_combat_feel.gd
 godot --headless --path . -s res://tests/unit/test_a1_vivar.gd
 godot --headless --path . -s res://tests/unit/test_a1_burgos.gd
 godot --headless --path . -s res://tests/unit/test_early_game_travel.gd
+godot --headless --path . -s res://tests/unit/test_a2_jeronimo.gd
+godot --headless --path . -s res://tests/unit/test_a3_carrion.gd
+python3 tests/unit/test_campaign_spine.py
 ```
 
 If Godot is missing, report those scripts as **unverified**, not as a pass.

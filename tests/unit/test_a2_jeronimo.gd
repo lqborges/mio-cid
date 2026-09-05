@@ -67,6 +67,7 @@ func _run() -> void:
 	failures.append_array(await _check_cage_walk_does_not_leave_hub())
 	failures.append_array(_check_graph_spine())
 	failures.append_array(_check_later_beats_not_shipped())
+	failures.append_array(_check_yusuf_exit_after_embassy2())
 	_finish(failures)
 
 
@@ -484,6 +485,51 @@ func _check_graph_spine() -> PackedStringArray:
 		failures.append("hub must not skip embassy2 into Yusuf")
 	if bool(_runner.can_travel(&"a2_jeronimo", &"a3_leon", flags)):
 		failures.append("hub must not run the lion scene")
+	var after := PackedStringArray(["hub_lock_cardena", "embassy2_done", "jeronimo_appointed"])
+	if bool(_runner.can_travel(&"a2_jeronimo", &"a2_embassy2", after)):
+		failures.append("hub must not repeat embassy 2 after embassy2_done")
+	if not bool(_runner.can_travel(&"a2_jeronimo", &"a2_yusuf", after)):
+		failures.append("after embassy 2 the hub must open Yusuf")
+	return failures
+
+
+func _check_yusuf_exit_after_embassy2() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign_at(
+		&"a2_jeronimo",
+		PackedStringArray([
+			"hub_lock_cardena",
+			"horse_companion",
+			"colada_acquired",
+			"valencia_held",
+			"jeronimo_appointed",
+			"embassy2_done",
+			"family_in_valencia",
+		])
+	)
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("hub world.tscn failed to load for Yusuf exit")
+		return failures
+	var hub: Node = (packed as PackedScene).instantiate()
+	root.add_child(hub)
+	if hub.has_method("can_leave_to_embassy2") and bool(hub.call("can_leave_to_embassy2")):
+		failures.append("EmbassyExit must not reopen embassy 2 after embassy2_done")
+	if hub.has_method("can_leave_to_yusuf") and not bool(hub.call("can_leave_to_yusuf")):
+		failures.append("EmbassyExit must open Yusuf after embassy2_done")
+	if hub.has_method("travel_next"):
+		if not bool(hub.call("travel_next")):
+			failures.append("travel_next after embassy 2 must leave for Yusuf")
+		elif _runner and String(_runner.current_id) != "a2_yusuf":
+			failures.append("travel_next after embassy 2 want a2_yusuf, got %s" % _runner.current_id)
+	else:
+		failures.append("hub missing travel_next")
+	var label: Label3D = hub.get_node_or_null("EmbassyExit/Name") as Label3D
+	if label and _loc and _loc.has_method("text"):
+		var want := str(_loc.text("a2_jeronimo.to_yusuf"))
+		if label.text != want:
+			failures.append("exit label after embassy 2 want %s got %s" % [want, label.text])
+	hub.free()
 	return failures
 
 

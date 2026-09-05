@@ -179,6 +179,10 @@ class TestA1VivarPrologue(unittest.TestCase):
         self.assertNotIn("_overwrite_armed", menu)
         self.assertIn("_first_empty_slot", menu)
         self.assertIn("_enter_game", menu)
+        self.assertIn("_resume_chapter", menu)
+        enter = menu.split("func _enter_game", 1)[1].split("func _rebuild_slots", 1)[0]
+        self.assertIn("_resume_chapter", enter)
+        self.assertNotIn('goto(&"a1_vivar")', enter)
         project = _read("project.godot")
         self.assertIn('run/main_scene="res://game/ui/main_menu.tscn"', project)
         self.assertIn("viewport_width=1280", project)

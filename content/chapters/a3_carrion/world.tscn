@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a3_carrion/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://game/systems/speech/dialogue_bridge.gd" id="10_bridge"]
 [ext_resource type="Script" path="res://game/systems/speech/speech_trial.gd" id="11_trial"]
 [ext_resource type="PackedScene" path="res://game/ui/speech_trial.tscn" id="12_ui"]
+[ext_resource type="PackedScene" path="res://content/chapters/a3_carrion/shout_choice.tscn" id="13_shout"]
 
 [sub_resource type="Environment" id="Environment_hall"]
 background_mode = 1
@@ -270,7 +271,7 @@ member_id = &"pero_bermudez"
 [node name="ListZone" type="Area3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, -3.2)
 collision_layer = 0
-collision_mask = 130
+collision_mask = 194
 monitoring = true
 monitorable = false
 
@@ -296,6 +297,8 @@ visible = false
 [node name="HallWhisper" parent="HUD" instance=ExtResource("5_whisper")]
 
 [node name="SpeechTrialUI" parent="HUD" instance=ExtResource("12_ui")]
+
+[node name="ShoutChoice" parent="HUD" instance=ExtResource("13_shout")]
 
 [node name="ListCamera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 8, 10)
