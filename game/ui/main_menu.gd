@@ -10,10 +10,17 @@ func _ready() -> void:
 	$Center/NewGame.pressed.connect(_on_new_game)
 	$Center/Load.pressed.connect(_on_load_pressed)
 	$Center/Quit.pressed.connect(_on_quit)
+	var language := get_node_or_null("Center/Language") as Button
+	if language and not language.pressed.is_connected(_on_language_pressed):
+		language.pressed.connect(_on_language_pressed)
 	_rebuild_slots()
 	_slots.visible = false
 	if _status:
 		_status.text = ""
+	_apply_labels()
+	var loc := get_node_or_null("/root/Loc")
+	if loc != null and loc.has_signal("locale_changed") and not loc.locale_changed.is_connected(_on_locale_changed):
+		loc.locale_changed.connect(_on_locale_changed)
 
 
 func _on_new_game() -> void:
@@ -37,6 +44,53 @@ func _on_load_pressed() -> void:
 
 func _on_quit() -> void:
 	get_tree().quit()
+
+
+func _on_language_pressed() -> void:
+	var next := "en" if _current_locale() == "es" else "es"
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("set_setting"):
+		guide.call("set_setting", "locale", next)
+		return
+	var loc := get_node_or_null("/root/Loc")
+	if loc != null and loc.has_method("set_locale"):
+		loc.call("set_locale", next)
+
+
+func _on_locale_changed(_code: String) -> void:
+	_apply_labels()
+
+
+func _apply_labels() -> void:
+	var new_game := get_node_or_null("Center/NewGame") as Button
+	if new_game:
+		new_game.text = _loc("ui.menu.new", "Nueva partida")
+	var load_btn := get_node_or_null("Center/Load") as Button
+	if load_btn:
+		load_btn.text = _loc("ui.menu.load", "Cargar")
+	var quit := get_node_or_null("Center/Quit") as Button
+	if quit:
+		quit.text = _loc("ui.menu.quit", "Salir")
+	var language := get_node_or_null("Center/Language") as Button
+	if language:
+		language.text = "Español" if _current_locale() == "en" else "English"
+
+
+func _current_locale() -> String:
+	var loc := get_node_or_null("/root/Loc")
+	if loc != null and "locale" in loc:
+		return str(loc.get("locale"))
+	return "es"
+
+
+func _loc(key: String, fallback: String) -> String:
+	var loc := get_node_or_null("/root/Loc")
+	if loc == null or not loc.has_method("text"):
+		return fallback
+	var t := str(loc.call("text", key))
+	if t.is_empty() or t == key:
+		return fallback
+	return t
 
 
 func _on_slot(slot: int) -> void:

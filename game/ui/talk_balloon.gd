@@ -19,6 +19,8 @@ func _ready() -> void:
 		if not _panel.gui_input.is_connected(_on_panel_gui_input):
 			_panel.gui_input.connect(_on_panel_gui_input)
 	_apply_subtitle_size()
+	if Loc != null and Loc.has_signal("locale_changed") and not Loc.locale_changed.is_connected(_on_locale_changed):
+		Loc.locale_changed.connect(_on_locale_changed)
 
 
 func start(resource: Resource, cue: String = "", extra_game_states: Array = []) -> void:
@@ -48,6 +50,11 @@ func _apply(line: Variant) -> void:
 		_body.text = Loc.text(key) if Loc else key
 	_apply_subtitle_size()
 	_waiting = true
+
+
+func _on_locale_changed(_code: String) -> void:
+	if _line != null:
+		_apply(_line)
 
 
 func _apply_subtitle_size() -> void:

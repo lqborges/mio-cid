@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS := {
 	"vol_sfx": 1.0,
 	"vol_music": 0.8,
 	"vol_ui": 1.0,
+	"locale": "es",
 }
 
 var catalog: ObjectiveCatalog
@@ -46,6 +47,7 @@ func _ready() -> void:
 	catalog = CATALOG_SCRIPT.from_file()
 	_load_tips()
 	_load_settings()
+	_apply_locale()
 	_apply_audio()
 	_build_hud()
 	_build_toast()
@@ -140,6 +142,8 @@ func replay_tips() -> void:
 
 func set_setting(key: String, value: Variant) -> void:
 	settings[key] = value
+	if key == "locale":
+		_apply_locale()
 	_apply_audio()
 	_save_settings()
 
@@ -493,6 +497,9 @@ func _load_settings() -> void:
 	for key in DEFAULT_SETTINGS:
 		if data.has(key):
 			settings[key] = data[key]
+	var loc := get_node_or_null("/root/Loc")
+	if loc != null and loc.has_method("normalize_locale"):
+		settings["locale"] = loc.call("normalize_locale", str(settings.get("locale", "es")))
 	var raw_tips: Variant = data.get("dismissed_tips", [])
 	dismissed_tips = PackedStringArray()
 	if raw_tips is Array:
@@ -511,6 +518,16 @@ func _save_settings() -> void:
 		return
 	file.store_string(JSON.stringify(body, "", true, true))
 	file.close()
+
+
+func _apply_locale() -> void:
+	var loc := get_node_or_null("/root/Loc")
+	if loc == null:
+		var tree := get_tree()
+		if tree and tree.root:
+			loc = tree.root.get_node_or_null("Loc")
+	if loc != null and loc.has_method("set_locale"):
+		loc.call("set_locale", str(settings.get("locale", "es")))
 
 
 func _apply_audio() -> void:
