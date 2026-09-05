@@ -153,6 +153,8 @@ class TestAutoloadsAndEventBus(unittest.TestCase):
         self.assertIn("poem_formulas.csv", source)
         self.assertIn("strings.csv", source)
         self.assertIn("TranslationServer.set_locale(DEFAULT_LOCALE)", source)
+        self.assertIn("func set_locale(", source)
+        self.assertIn("signal locale_changed", source)
 
     def test_godot_headless_event_bus_if_available(self) -> None:
         godot = None

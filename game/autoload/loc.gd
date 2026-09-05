@@ -4,6 +4,8 @@ const POEM_FORMULAS_PATH := "res://content/locales/poem_formulas.csv"
 const STRINGS_PATH := "res://content/locales/strings.csv"
 const DEFAULT_LOCALE := "es"
 
+signal locale_changed(code: String)
+
 var locale: String = DEFAULT_LOCALE
 var _table: Dictionary = {}
 
@@ -11,6 +13,25 @@ var _table: Dictionary = {}
 func _ready() -> void:
 	TranslationServer.set_locale(DEFAULT_LOCALE)
 	_reload()
+
+
+func set_locale(code: String) -> void:
+	var next := normalize_locale(code)
+	if locale == next:
+		TranslationServer.set_locale(next)
+		return
+	locale = next
+	TranslationServer.set_locale(next)
+	locale_changed.emit(next)
+
+
+func normalize_locale(code: String) -> String:
+	var raw := code.strip_edges().to_lower()
+	if raw.begins_with("en"):
+		return "en"
+	if raw.begins_with("es"):
+		return "es"
+	return DEFAULT_LOCALE
 
 
 func text(key: String) -> String:

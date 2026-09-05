@@ -61,6 +61,9 @@ func _ready() -> void:
 	_wire_buttons()
 	_wire_pause()
 	_apply_labels()
+	var loc := get_node_or_null("/root/Loc")
+	if loc != null and loc.has_signal("locale_changed") and not loc.locale_changed.is_connected(_on_locale_changed):
+		loc.locale_changed.connect(_on_locale_changed)
 	var stick := _stick()
 	if stick:
 		stick.gui_input.connect(_on_stick_gui_input)
@@ -276,6 +279,10 @@ func _circle_style(color: Color, radius: int) -> StyleBoxFlat:
 	box.corner_radius_bottom_right = radius
 	box.set_content_margin_all(4)
 	return box
+
+
+func _on_locale_changed(_code: String) -> void:
+	_apply_labels()
 
 
 func _apply_labels() -> void:

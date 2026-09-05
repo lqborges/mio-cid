@@ -30,6 +30,8 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn("func journal_entries(", guide)
         self.assertIn("func replay_tips(", guide)
         self.assertIn("func format_interact_prompt(", guide)
+        self.assertIn('"locale": "es"', guide)
+        self.assertIn("_apply_locale()", guide)
         pause = _read("game/ui/pause_menu.gd")
         self.assertIn('_make_button("Resume"', pause)
         self.assertIn('_make_button("Menu"', pause)
@@ -46,6 +48,11 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn('name="Pause"', hud)
         self.assertIn("Pausa", hud)
         self.assertIn('_wire_pause()', _read("game/ui/touch_hud.gd"))
+        self.assertIn('_language_button', pause)
+        self.assertIn("ui.settings.language", _read("content/locales/strings.csv"))
+        self.assertIn("ui.menu.new", _read("content/locales/strings.csv"))
+        self.assertIn('name="Language"', _read("game/ui/main_menu.tscn"))
+        self.assertIn("Nueva partida", _read("game/ui/main_menu.tscn"))
 
     def test_controller_uses_glyphs_and_target(self) -> None:
         source = _read("game/actors/player/cid_controller.gd")

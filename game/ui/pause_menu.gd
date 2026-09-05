@@ -28,6 +28,9 @@ func _ready() -> void:
 	visible = false
 	_build()
 	_apply_labels()
+	var loc := _autoload("Loc")
+	if loc != null and loc.has_signal("locale_changed") and not loc.locale_changed.is_connected(_on_locale_changed):
+		loc.locale_changed.connect(_on_locale_changed)
 
 
 func _notification(what: int) -> void:
@@ -265,6 +268,16 @@ func _make_button(node_name: String, cb: Callable) -> Button:
 	return btn
 
 
+func _on_locale_changed(_code: String) -> void:
+	_apply_labels()
+	if _page and _page.visible and _page_mode == &"settings":
+		_open_settings()
+	elif _page and _page.visible and _page_mode == &"help":
+		_open_help()
+	elif _page and _page.visible and _page_mode == &"journal":
+		_open_journal()
+
+
 func _apply_labels() -> void:
 	if _title:
 		_title.text = _loc("ui.pause.title", "Pausa")
@@ -330,6 +343,7 @@ func _rebuild_settings() -> void:
 	var data: Dictionary = {}
 	if guide != null and "settings" in guide:
 		data = guide.settings
+	_settings_box.add_child(_language_button(str(data.get("locale", "es"))))
 	_settings_box.add_child(_check("reduced_motion", _loc("ui.settings.reduced_motion", "Menos movimiento"), bool(data.get("reduced_motion", false))))
 	_settings_box.add_child(_check("shake", _loc("ui.settings.shake", "Sacudida de cámara"), bool(data.get("shake", true))))
 	_settings_box.add_child(_check("flash", _loc("ui.settings.flash", "Destellos"), bool(data.get("flash", true))))
@@ -338,6 +352,40 @@ func _rebuild_settings() -> void:
 	_settings_box.add_child(_slider("vol_sfx", _loc("ui.settings.vol_sfx", "Efectos"), float(data.get("vol_sfx", 1.0))))
 	_settings_box.add_child(_slider("vol_music", _loc("ui.settings.vol_music", "Música"), float(data.get("vol_music", 0.8))))
 	_settings_box.add_child(_step("subtitle_size", _loc("ui.settings.subtitle", "Subtítulos"), int(data.get("subtitle_size", 18))))
+
+
+func _language_button(current: String) -> Button:
+	var btn := Button.new()
+	btn.name = "Language"
+	btn.focus_mode = Control.FOCUS_ALL
+	btn.custom_minimum_size = Vector2(0, 36)
+	btn.text = _language_label(current)
+	btn.pressed.connect(_on_language_pressed)
+	return btn
+
+
+func _on_language_pressed() -> void:
+	var next := "en" if _current_locale() == "es" else "es"
+	var guide := _guide()
+	if guide and guide.has_method("set_setting"):
+		guide.call("set_setting", "locale", next)
+	_apply_labels()
+
+
+func _current_locale() -> String:
+	var loc := _autoload("Loc")
+	if loc != null and "locale" in loc:
+		return str(loc.get("locale"))
+	var guide := _guide()
+	if guide != null and "settings" in guide:
+		return str((guide.settings as Dictionary).get("locale", "es"))
+	return "es"
+
+
+func _language_label(current: String) -> String:
+	var heading := _loc("ui.settings.language", "Idioma / Language")
+	var name := _loc("ui.settings.language.es", "Español") if current == "es" else _loc("ui.settings.language.en", "English")
+	return "%s: %s" % [heading, name]
 
 
 func _check(key: String, label: String, on: bool) -> CheckButton:

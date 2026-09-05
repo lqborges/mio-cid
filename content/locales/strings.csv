@@ -74,6 +74,12 @@ ui.settings.vol_vo,Voces,Voices
 ui.settings.vol_sfx,Efectos,Effects
 ui.settings.vol_music,Música,Music
 ui.settings.subtitle,Subtítulos,Subtitles
+ui.settings.language,Idioma / Language,Language / Idioma
+ui.settings.language.es,Español,Spanish
+ui.settings.language.en,Inglés,English
+ui.menu.new,Nueva partida,New game
+ui.menu.load,Cargar,Load
+ui.menu.quit,Salir,Quit
 tip.dismiss,Entendido,Understood
 tip.move.title,El solar,The solar
 tip.move.body,"WASD o tocad el suelo para andar. El ratón apunta.","WASD or tap the ground to walk. The mouse aims."
