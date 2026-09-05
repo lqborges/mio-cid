@@ -27,8 +27,6 @@ jobs:
 
       - name: Resolve Godot 4.7.2
         id: godot
-        env:
-          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -44,23 +42,17 @@ jobs:
             exit 0
           fi
           archive="${GODOT_CACHE_DIR}/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
-          gh release download "${GODOT_VERSION}-stable" \
-            --repo godotengine/godot \
-            --pattern "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" \
-            --dir "${GODOT_CACHE_DIR}" \
-            --clobber
-          unzip -qo "${archive}" -d "${GODOT_CACHE_DIR}"
-          bin=""
-          while IFS= read -r candidate; do
-            bin="${candidate}"
-            break
-          done < <(find "${GODOT_CACHE_DIR}" -type f -name 'Godot_v*_linux.x86_64' ! -name '*.zip' | sort)
-          if [ -n "${bin}" ]; then
-            chmod +x "${bin}"
-            ln -sfn "${bin}" "${GODOT_CACHE_DIR}/godot"
-            echo "godot_bin=${GODOT_CACHE_DIR}/godot" >> "${GITHUB_OUTPUT}"
-            echo "found=true" >> "${GITHUB_OUTPUT}"
-            exit 0
+          url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          if curl -fsSL -o "${archive}" "${url}"; then
+            unzip -qo "${archive}" -d "${GODOT_CACHE_DIR}"
+            bin="$(find "${GODOT_CACHE_DIR}" -maxdepth 2 -type f -name 'Godot_v*-linux.x86_64' | head -n 1)"
+            if [ -n "${bin}" ]; then
+              chmod +x "${bin}"
+              ln -sfn "${bin}" "${GODOT_CACHE_DIR}/godot"
+              echo "godot_bin=${GODOT_CACHE_DIR}/godot" >> "${GITHUB_OUTPUT}"
+              echo "found=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
           fi
           echo "found=false" >> "${GITHUB_OUTPUT}"
 
