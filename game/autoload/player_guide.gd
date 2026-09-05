@@ -272,6 +272,8 @@ func _consider_tips() -> void:
 	if _is_main_menu():
 		_hide_toast()
 		return
+	if travel_visible():
+		return
 	if not _active_tip.is_empty():
 		return
 	var chapter := _chapter_id()
@@ -352,6 +354,7 @@ func _tick_travel() -> void:
 		if Time.get_ticks_msec() < _travel_until_msec + 1800:
 			return
 	dismiss_travel()
+	_consider_tips()
 
 
 func _refresh_hud() -> void:
