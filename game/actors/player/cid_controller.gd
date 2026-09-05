@@ -83,6 +83,7 @@ func _ready() -> void:
 	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
 	if looks and looks.has_method("ensure"):
 		looks.call("ensure", self)
+	tree_exiting.connect(_on_tree_exiting)
 
 
 func facing_dir() -> Vector3:
@@ -933,6 +934,18 @@ func _ensure_world_prompt() -> void:
 	_prompt_world.position = Vector3(0.0, 2.55, 0.0)
 	_prompt_world.visible = false
 	_target_ring.add_child(_prompt_world)
+
+
+func _on_tree_exiting() -> void:
+	if _prompt_layer == null or not is_instance_valid(_prompt_layer):
+		return
+	var tree := get_tree()
+	if tree:
+		for node in tree.get_nodes_in_group("player"):
+			if node != self:
+				return
+	_prompt_layer.queue_free()
+	_prompt_layer = null
 
 
 func interact_prompt_text() -> String:
