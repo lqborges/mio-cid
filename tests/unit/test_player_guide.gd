@@ -62,6 +62,10 @@ func _test_guide_autoload() -> PackedStringArray:
 			var kicker: Label = card.find_child("Kicker", true, false) as Label
 			if kicker == null or kicker.text != "Llegáis a":
 				failures.append("travel card kicker want Llegáis a got %s" % (kicker.text if kicker else "missing"))
+		if guide.has_method("_tick_travel"):
+			guide.call("_tick_travel")
+			if guide.has_method("travel_visible") and not bool(guide.call("travel_visible")):
+				failures.append("travel card must survive the first tick after announce")
 		if guide.has_method("dismiss_travel"):
 			guide.call("dismiss_travel")
 	if guide.has_method("format_interact_prompt"):

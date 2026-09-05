@@ -17,6 +17,7 @@
       "body_key": "tip.interact.body",
       "when": "after",
       "after": "move",
+      "chapters": ["a1_vivar"],
       "complete_on": "interacted"
     },
     {

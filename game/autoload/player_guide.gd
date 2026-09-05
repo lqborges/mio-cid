@@ -9,7 +9,7 @@ const SETTINGS_PATH := "user://player_guide.json"
 const IRON := Color(0.18, 0.16, 0.13, 0.92)
 const PARCHMENT := Color(0.91, 0.85, 0.72)
 const DIM := Color(0.05, 0.04, 0.03, 0.62)
-const TRAVEL_HOLD_MSEC := 1600
+const TRAVEL_HOLD_MSEC := 2400
 
 const DEFAULT_SETTINGS := {
 	"reduced_motion": false,
@@ -236,7 +236,7 @@ func _on_beat_started(id: StringName) -> void:
 	_last_chapter = String(id)
 	if _travel_panel != null and _travel_panel.visible:
 		if _travel_dest.is_empty() or String(id) == _travel_dest:
-			_travel_until_msec = Time.get_ticks_msec() + 900
+			_travel_until_msec = Time.get_ticks_msec() + 2000
 	_consider_tips()
 	_refresh_hud()
 
@@ -340,14 +340,16 @@ func _hide_toast() -> void:
 func _tick_travel() -> void:
 	if _travel_panel == null or not _travel_panel.visible:
 		return
-	if _is_main_menu():
+	# New Game calls goto while MainMenu is still current_scene. Keep the
+	# card through that deferred change; only drop it if the menu is idle.
+	if _is_main_menu() and _travel_dest.is_empty():
 		dismiss_travel()
 		return
 	if Time.get_ticks_msec() < _travel_until_msec:
 		return
 	if not _travel_dest.is_empty() and _chapter_id() != _travel_dest:
 		# Scene change is still queued; keep the card until arrival or timeout.
-		if Time.get_ticks_msec() < _travel_until_msec + 1200:
+		if Time.get_ticks_msec() < _travel_until_msec + 1800:
 			return
 	dismiss_travel()
 
