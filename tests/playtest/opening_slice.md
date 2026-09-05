@@ -4,10 +4,10 @@ Reproducible scenarios. Record SHA, engine, renderer, device, resolution, and in
 
 ## S1 — Vivar to Cardeña without the guide
 
-1. New Game. Objective bar names Álvar / Martín.
-2. Move (WASD or tap). First tip dismisses.
+1. New Game. A travel card says Vivar. Objective bar names Álvar / Martín. Courtyard HUD shows a WASD / E hint and honor-meter labels in the menu language.
+2. Move (WASD or tap). First tip dismisses. Prompt reads **Llamar**. Hover the three meters and plazo for a tooltip.
 3. Talk to both companions. Ring marks the selected person.
-4. Leave by the south gate. Burgos: child, inn, river camp.
+4. Leave by the south gate. Travel card names Burgos. Hear the child (HUD steps to the inn), ask lodging, then camp south. Walking the river first only whispers.
 5. Arcas: both choices. Journal must not spoil the other path.
 6. Cardeña farewell. Hub lock copy if you try to return.
 

@@ -76,14 +76,23 @@ class TestA1BurgosGreybox(unittest.TestCase):
         world = _read(f"{CHAPTER}/world.gd")
         self.assertIn("func _physics_process", world)
         self.assertIn("camp_on_river", world)
+        self.assertIn("_try_camp_on_river", world)
+        self.assertIn("burgos_child_heard", world)
+        self.assertIn("a1_burgos.hear_child_first", world)
         self.assertIn('ChapterRunner.goto(&"a1_arcas")', world)
+        self.assertIn("0, 0.05, 1.5", scene)
+        self.assertNotIn("0, 0.05, 6.5", scene)
         phys = world.split("func _physics_process", 1)[1].split("func _travel_to_arcas", 1)[0]
         self.assertIn("if _camped:", phys)
+        self.assertIn("_try_camp_on_river()", phys)
         self.assertNotIn("_travel_to_arcas()", phys)
         self.assertNotIn("ChapterRunner.goto", phys)
         self.assertIn("Río", scene)
         folk = _read(f"{CHAPTER}/townsfolk.gd")
         self.assertIn("add_to_group(\"interactable\")", folk)
+        self.assertIn("func interact_prompt_key", folk)
+        self.assertIn("hud.hear_verb", folk)
+        self.assertIn("hud.lodge_verb", folk)
         self.assertIn("func _is_talk_role", folk)
         self.assertIn("return false", folk)
         self.assertNotIn("type=\"OmniLight3D\"", scene)
@@ -135,6 +144,7 @@ class TestA1BurgosGreybox(unittest.TestCase):
             "a1_burgos.inn_refused",
             "a1_burgos.camp_river",
             "a1_burgos.steel_drawn",
+            "a1_burgos.hear_child_first",
         ):
             self.assertIn(key, rows, key)
             self.assertTrue(rows[key]["es"].strip(), key)

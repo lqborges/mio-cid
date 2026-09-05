@@ -8,6 +8,10 @@ func _ready() -> void:
 	add_to_group("interactable")
 
 
+func interact_prompt_key() -> String:
+	return "hud.call_verb"
+
+
 func interact() -> void:
 	var host := _chapter()
 	if host and host.has_method("start_first_names"):

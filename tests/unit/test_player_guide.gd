@@ -27,6 +27,8 @@ func _test_guide_autoload() -> PackedStringArray:
 		runner.current_id = &"a1_vivar"
 		if "flags" in runner:
 			runner.flags = PackedStringArray()
+	if guide.has_method("set_setting"):
+		guide.call("set_setting", "locale", "es")
 	if not guide.has_method("current_objective"):
 		failures.append("PlayerGuide.current_objective missing")
 		return failures
@@ -42,8 +44,44 @@ func _test_guide_autoload() -> PackedStringArray:
 		failures.append("ObjectiveHud stays hidden while vivar_talk is current")
 	if guide.get_node_or_null("OnboardingToast") == null:
 		failures.append("OnboardingToast missing")
+	if guide.get("catalog") == null:
+		failures.append("PlayerGuide.catalog must load without class_name ObjectiveCatalog")
+	var hint: Label = guide.find_child("ControlsHint", true, false) as Label
+	if hint == null:
+		failures.append("ObjectiveHud ControlsHint missing")
 	if guide.has_method("replay_tips"):
 		guide.call("replay_tips")
+	if guide.has_method("announce_travel"):
+		guide.call("announce_travel", "a1_burgos")
+		if guide.has_method("travel_visible") and not bool(guide.call("travel_visible")):
+			failures.append("announce_travel must show the travel card")
+		if guide.has_method("place_title"):
+			var place := str(guide.call("place_title", "a1_burgos"))
+			if place != "Burgos":
+				failures.append("place_title a1_burgos want Burgos got %s" % place)
+		var card: Node = guide.get_node_or_null("TravelCard")
+		if card == null:
+			failures.append("TravelCard missing")
+		else:
+			var place_label: Label = card.find_child("Place", true, false) as Label
+			if place_label == null or place_label.text != "Burgos":
+				failures.append("travel card must name Burgos")
+			var kicker: Label = card.find_child("Kicker", true, false) as Label
+			if kicker == null or kicker.text != "Llegáis a":
+				failures.append("travel card kicker want Llegáis a got %s" % (kicker.text if kicker else "missing"))
+		if guide.has_method("_tick_travel"):
+			guide.call("_tick_travel")
+			if guide.has_method("travel_visible") and not bool(guide.call("travel_visible")):
+				failures.append("travel card must survive the first tick after announce")
+		if guide.has_method("dismiss_travel"):
+			guide.call("dismiss_travel")
+	if guide.has_method("help_lines"):
+		var help: PackedStringArray = guide.call("help_lines")
+		if help.is_empty() or not str(help[0]).begins_with("WASD"):
+			failures.append("Ayuda must list WASD before LMB click-move")
+		var joined := " ".join(help)
+		if not joined.contains("LMB") and not joined.contains("Clic"):
+			failures.append("Ayuda must still name click-to-move")
 	if guide.has_method("format_interact_prompt"):
 		InputGlyphs.set_device(InputGlyphs.DEVICE_KEYBOARD)
 		var prompt := str(guide.call("format_interact_prompt", "hud.interact_verb", "Hablar"))
@@ -101,12 +139,34 @@ func _test_locale_switch() -> PackedStringArray:
 		failures.append("English ui.pause.title want Pause got %s" % pause_en)
 	if loc.has_method("normalize_locale") and str(loc.call("normalize_locale", "en_US")) != "en":
 		failures.append("en_US should normalize to en")
+	var meters_script: Script = load("res://game/ui/honor_meters.gd")
+	var plazo_script: Script = load("res://game/ui/plazo_bar.gd")
+	var meters: Node = meters_script.new()
+	var plazo: Node = plazo_script.new()
+	get_root().add_child(meters)
+	get_root().add_child(plazo)
+	var en_onores := str(meters.call("_meter_label", &"onores"))
+	if en_onores != "Means":
+		failures.append("English onores want Means got %s" % en_onores)
+	var en_tip := str(meters.call("_meter_tip", &"onores"))
+	if not en_tip.to_lower().contains("means"):
+		failures.append("English onores tooltip should gloss the meter")
+	if str(plazo.call("_plazo_label")) != "Term":
+		failures.append("English plazo want Term got %s" % plazo.call("_plazo_label"))
+	if str(loc.call("text", "hud.controls_hint")) != "WASD walk · E talk":
+		failures.append("English controls hint should name WASD and E")
 	guide.call("set_setting", "locale", "es")
 	if str(loc.get("locale")) != "es":
 		failures.append("setting locale=es did not restore Spanish")
 	var pause_es := str(loc.call("text", "ui.pause.title"))
 	if pause_es != "Pausa":
 		failures.append("Spanish ui.pause.title want Pausa got %s" % pause_es)
+	if str(meters.call("_meter_label", &"onores")) != "Honores":
+		failures.append("Spanish onores should stay Honores after locale restore")
+	if str(plazo.call("_plazo_label")) != "Plazo":
+		failures.append("Spanish plazo want Plazo got %s" % plazo.call("_plazo_label"))
+	meters.queue_free()
+	plazo.queue_free()
 	guide.call("set_setting", "locale", saved)
 	return failures
 

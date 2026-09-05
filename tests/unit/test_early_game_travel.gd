@@ -41,6 +41,7 @@ func _walk_vivar_to_cardena() -> PackedStringArray:
 	if vivar.has_method("leave_solar"):
 		vivar.set("_left", false)
 		vivar.leave_solar()
+	failures.append_array(_check_travel_card("a1_burgos", "Burgos"))
 	if vivar.has_method("_physics_process"):
 		for _i in 8:
 			if is_instance_valid(vivar):
@@ -135,6 +136,25 @@ func _check_pause_menu() -> PackedStringArray:
 	if pause.get_node_or_null("Panel/Center/Quit") == null:
 		failures.append("pause missing Salir")
 	pause.call("resume")
+	return failures
+
+
+func _check_travel_card(dest_id: String, place: String) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var guide: Node = get_root().get_node_or_null("PlayerGuide")
+	if guide == null:
+		failures.append("PlayerGuide missing for travel card")
+		return failures
+	if guide.has_method("travel_visible") and not bool(guide.call("travel_visible")):
+		failures.append("leaving a chapter must show the travel card")
+	if guide.has_method("place_title"):
+		var titled := str(guide.call("place_title", dest_id))
+		if titled != place:
+			failures.append("travel place_title %s want %s got %s" % [dest_id, place, titled])
+	var card: Node = guide.get_node_or_null("TravelCard")
+	var label: Label = card.find_child("Place", true, false) as Label if card else null
+	if label == null or label.text != place:
+		failures.append("travel card must read %s" % place)
 	return failures
 
 

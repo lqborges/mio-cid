@@ -23,9 +23,17 @@ func _test_opening_objectives() -> PackedStringArray:
 	var leave: Dictionary = catalog.current("a1_vivar", seen)
 	if str(leave.get("id", "")) != "vivar_leave":
 		failures.append("vivar_seen must point at the south gate")
-	var burgos: Dictionary = catalog.current("a1_burgos", PackedStringArray(["burgos_shutters_seen"]))
-	if str(burgos.get("id", "")) != "burgos_town":
-		failures.append("burgos must keep a town objective")
+	var burgos_start: Dictionary = catalog.current("a1_burgos", PackedStringArray(["burgos_shutters_seen"]))
+	if str(burgos_start.get("id", "")) != "burgos_child":
+		failures.append("burgos without child_heard must ask for the child, got %s" % str(burgos_start.get("id", "")))
+	var after_child := PackedStringArray(["burgos_child_heard"])
+	var burgos_inn: Dictionary = catalog.current("a1_burgos", after_child)
+	if str(burgos_inn.get("id", "")) != "burgos_inn":
+		failures.append("after the child Burgos must point at the inn, got %s" % str(burgos_inn.get("id", "")))
+	var after_inn := PackedStringArray(["burgos_child_heard", "burgos_inn_asked"])
+	var burgos_camp: Dictionary = catalog.current("a1_burgos", after_inn)
+	if str(burgos_camp.get("id", "")) != "burgos_camp":
+		failures.append("after the inn Burgos must point at the river camp, got %s" % str(burgos_camp.get("id", "")))
 	var choose: Dictionary = catalog.current("a1_arcas", empty)
 	if str(choose.get("lock_reason_key", "")) != "lock.arcas_choose":
 		failures.append("unresolved arcas must explain the locked exit")

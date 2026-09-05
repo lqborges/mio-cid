@@ -1,12 +1,17 @@
 extends CanvasLayer
 # Autoload singleton. Do not add class_name.
+# Preload scripts: bare class_name globals miss until .godot/global_script_class_cache.cfg exists.
 # Objectives, onboarding, and settings. Persists to user://, not campaign saves.
 
 const CATALOG_SCRIPT := preload("res://game/systems/objectives/objective_catalog.gd")
+const Glyphs := preload("res://game/systems/input/input_glyphs.gd")
 const TIPS_PATH := "res://data/onboarding/tips.json"
+const PLACES_PATH := "res://data/travel/places.json"
 const SETTINGS_PATH := "user://player_guide.json"
 const IRON := Color(0.18, 0.16, 0.13, 0.92)
 const PARCHMENT := Color(0.91, 0.85, 0.72)
+const DIM := Color(0.05, 0.04, 0.03, 0.62)
+const TRAVEL_HOLD_MSEC := 2400
 
 const DEFAULT_SETTINGS := {
 	"reduced_motion": false,
@@ -21,18 +26,25 @@ const DEFAULT_SETTINGS := {
 	"locale": "es",
 }
 
-var catalog: ObjectiveCatalog
+var catalog: Variant = null
 var tips: Array = []
+var places: Dictionary = {}
 var dismissed_tips: PackedStringArray = PackedStringArray()
 var settings: Dictionary = DEFAULT_SETTINGS.duplicate(true)
 var _active_tip: String = ""
 var _hud_panel: Control
 var _hud_title: Label
 var _hud_detail: Label
+var _hud_hint: Label
 var _hold_bar: ColorRect
 var _toast: Control
 var _toast_title: Label
 var _toast_body: Label
+var _travel_panel: Control
+var _travel_kicker: Label
+var _travel_place: Label
+var _travel_dest: String = ""
+var _travel_until_msec: int = 0
 var _last_chapter: String = ""
 var _moved: bool = false
 var _interacted: bool = false
@@ -47,11 +59,13 @@ func _ready() -> void:
 	layer = 22
 	catalog = CATALOG_SCRIPT.from_file()
 	_load_tips()
+	_load_places()
 	_load_settings()
 	_apply_locale()
 	_apply_audio()
 	_build_hud()
 	_build_toast()
+	_build_travel()
 	var bus := _bus()
 	if bus:
 		if bus.has_signal("beat_started") and not bus.beat_started.is_connected(_on_beat_started):
@@ -62,32 +76,33 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	InputGlyphs.note_event(event)
+	Glyphs.note_event(event)
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		note_moved()
 
 
 func _process(_delta: float) -> void:
 	_poll_onboarding()
+	_tick_travel()
 	_refresh_hud()
 
 
 func current_objective() -> Dictionary:
 	if catalog == null:
 		return {}
-	return catalog.current(_chapter_id(), _guide_flags())
+	return catalog.current(_chapter_id(), _guide_flags()) as Dictionary
 
 
 func journal_entries() -> Array:
 	if catalog == null:
 		return []
-	return catalog.journal(_chapter_id(), _guide_flags())
+	return catalog.journal(_chapter_id(), _guide_flags()) as Array
 
 
 func lock_reason(to_id: String) -> String:
 	if catalog == null:
 		return ""
-	var key := catalog.lock_reason(_chapter_id(), to_id, _guide_flags())
+	var key: String = str(catalog.lock_reason(_chapter_id(), to_id, _guide_flags()))
 	if key.is_empty():
 		var runner := _runner()
 		if runner != null and runner.has_method("can_travel"):
@@ -138,6 +153,10 @@ func replay_tips() -> void:
 	_interacted = false
 	_mesura_held = false
 	_save_settings()
+	# Ayuda already lists the bindings. Do not stack a toast on Pause / dialogue.
+	if _overlay_busy():
+		_hide_toast()
+		return
 	_consider_tips()
 
 
@@ -167,26 +186,65 @@ func subtitle_size() -> int:
 
 func help_lines() -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append(InputGlyphs.prompt("click_move", _loc("tip.move.verb", "Mover")))
-	lines.append(InputGlyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
-	lines.append(InputGlyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
-	lines.append(InputGlyphs.prompt("slam", _loc("hud.slam", "Golpe")))
-	lines.append(InputGlyphs.prompt("leap", _loc("hud.leap", "Salto")))
-	lines.append(InputGlyphs.prompt("dodge", _loc("hud.dodge", "Esquiva")))
-	lines.append(InputGlyphs.prompt("shout", _loc("hud.shout", "Grito")))
-	lines.append(InputGlyphs.prompt("pause", _loc("ui.pause.title", "Pausa")))
+	lines.append("WASD — %s" % _loc("tip.move.verb", "Mover"))
+	lines.append(Glyphs.prompt("click_move", _loc("hud.move_click", "Clic al suelo")))
+	lines.append(Glyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
+	lines.append(Glyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
+	lines.append(Glyphs.prompt("slam", _loc("hud.slam", "Golpe")))
+	lines.append(Glyphs.prompt("leap", _loc("hud.leap", "Salto")))
+	lines.append(Glyphs.prompt("dodge", _loc("hud.dodge", "Esquiva")))
+	lines.append(Glyphs.prompt("shout", _loc("hud.shout", "Grito")))
+	lines.append(Glyphs.prompt("pause", _loc("ui.pause.title", "Pausa")))
 	return lines
+
+
+func announce_travel(to_id: String) -> void:
+	if to_id.is_empty():
+		return
+	_travel_dest = to_id
+	_travel_until_msec = Time.get_ticks_msec() + TRAVEL_HOLD_MSEC
+	if _travel_kicker:
+		_travel_kicker.text = _loc("travel.arrive", "Llegáis a")
+	if _travel_place:
+		_travel_place.text = place_title(to_id)
+	if _travel_panel:
+		_travel_panel.visible = true
+	_hide_toast()
+
+
+func place_title(chapter_id: String) -> String:
+	var row: Variant = places.get(chapter_id, {})
+	var key := ""
+	if row is Dictionary:
+		key = str((row as Dictionary).get("title_key", ""))
+	if key.is_empty():
+		return chapter_id
+	return _loc(key, chapter_id)
+
+
+func travel_visible() -> bool:
+	return _travel_panel != null and _travel_panel.visible
+
+
+func dismiss_travel() -> void:
+	_travel_dest = ""
+	_travel_until_msec = 0
+	if _travel_panel:
+		_travel_panel.visible = false
 
 
 func format_interact_prompt(verb_key: String, fallback: String) -> String:
 	var verb := _loc(verb_key, fallback)
 	if verb.begins_with("E — ") or verb.begins_with("E - "):
 		verb = verb.substr(4)
-	return InputGlyphs.prompt("interact", verb)
+	return Glyphs.prompt("interact", verb)
 
 
 func _on_beat_started(id: StringName) -> void:
 	_last_chapter = String(id)
+	if _travel_panel != null and _travel_panel.visible:
+		if _travel_dest.is_empty() or String(id) == _travel_dest:
+			_travel_until_msec = Time.get_ticks_msec() + 2000
 	_consider_tips()
 	_refresh_hud()
 
@@ -199,6 +257,10 @@ func _poll_onboarding() -> void:
 	if _is_main_menu():
 		_hide_toast()
 		return
+	if _overlay_busy():
+		_hide_toast()
+	elif not _active_tip.is_empty() and _toast != null and not _toast.visible:
+		_reshow_active_tip()
 	if _stick_moving():
 		note_moved()
 		_complete_tip_if("moved")
@@ -220,6 +282,11 @@ func _poll_onboarding() -> void:
 
 func _consider_tips() -> void:
 	if _is_main_menu():
+		_hide_toast()
+		return
+	if travel_visible():
+		return
+	if _overlay_busy():
 		_hide_toast()
 		return
 	if not _active_tip.is_empty():
@@ -278,8 +345,34 @@ func _show_tip(row: Dictionary) -> void:
 		_toast_title.text = _loc(str(row.get("title_key", "")), _active_tip)
 	if _toast_body:
 		_toast_body.text = _loc(str(row.get("body_key", "")), "")
+	if _overlay_busy():
+		_hide_toast()
+		return
 	if _toast:
 		_toast.visible = true
+
+
+func _reshow_active_tip() -> void:
+	if _active_tip.is_empty() or _overlay_busy():
+		return
+	for item in tips:
+		if not item is Dictionary:
+			continue
+		var row: Dictionary = item
+		if str(row.get("id", "")) == _active_tip:
+			_show_tip(row)
+			return
+
+
+func _overlay_busy() -> bool:
+	if _pause_open():
+		return true
+	return _group_visible("talk_balloon") or _group_visible("modal_choice")
+
+
+func _pause_open() -> bool:
+	var pause := _autoload("PauseMenu")
+	return pause != null and bool(pause.visible)
 
 
 func _hide_toast() -> void:
@@ -287,15 +380,39 @@ func _hide_toast() -> void:
 		_toast.visible = false
 
 
+func _tick_travel() -> void:
+	if _travel_panel == null or not _travel_panel.visible:
+		return
+	# New Game calls goto while MainMenu is still current_scene. Keep the
+	# card through that deferred change; only drop it if the menu is idle.
+	if _is_main_menu() and _travel_dest.is_empty():
+		dismiss_travel()
+		return
+	if Time.get_ticks_msec() < _travel_until_msec:
+		return
+	if not _travel_dest.is_empty() and _chapter_id() != _travel_dest:
+		# Scene change is still queued; keep the card until arrival or timeout.
+		if Time.get_ticks_msec() < _travel_until_msec + 1800:
+			return
+	dismiss_travel()
+	_consider_tips()
+
+
 func _refresh_hud() -> void:
 	if _hud_title == null or _hud_panel == null:
 		return
 	if _is_main_menu():
 		_hud_panel.visible = false
+		_update_controls_hint()
+		return
+	if _travel_panel != null and _travel_panel.visible:
+		_hud_panel.visible = false
+		_update_controls_hint()
 		return
 	var obj := current_objective()
 	if obj.is_empty():
 		_hud_panel.visible = false
+		_update_controls_hint()
 		return
 	_hud_panel.visible = true
 	_hud_title.text = _loc(str(obj.get("title_key", "")), "")
@@ -311,6 +428,7 @@ func _refresh_hud() -> void:
 		bits.append(detail)
 	if Time.get_ticks_msec() >= _blocked_until_msec:
 		_hud_detail.text = " · ".join(bits)
+	_update_controls_hint()
 	_update_mount_hold()
 
 
@@ -397,6 +515,13 @@ func _build_hud() -> void:
 	_hud_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hud_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_hud_detail)
+	_hud_hint = Label.new()
+	_hud_hint.name = "ControlsHint"
+	_hud_hint.add_theme_color_override("font_color", Color(0.94, 0.88, 0.72))
+	_hud_hint.add_theme_font_size_override("font_size", 13)
+	_hud_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hud_hint.visible = false
+	col.add_child(_hud_hint)
 	panel.visible = false
 	_hold_bar = ColorRect.new()
 	_hold_bar.name = "MountHold"
@@ -409,6 +534,18 @@ func _build_hud() -> void:
 	_hold_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hold_bar.visible = false
 	panel.add_child(_hold_bar)
+
+
+func _update_controls_hint() -> void:
+	if _hud_hint == null or _hud_panel == null:
+		return
+	var show := _hud_panel.visible and _chapter_id() == "a1_vivar" and (not _moved or not _interacted)
+	_hud_hint.visible = show
+	if show:
+		_hud_hint.text = _loc("hud.controls_hint", "WASD andar · E hablar")
+		_hud_panel.offset_bottom = 94.0
+	else:
+		_hud_panel.offset_bottom = 72.0
 
 
 func _update_mount_hold() -> void:
@@ -427,11 +564,11 @@ func _update_mount_hold() -> void:
 func _build_toast() -> void:
 	_toast = Control.new()
 	_toast.name = "OnboardingToast"
-	_toast.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_toast.offset_left = -260.0
 	_toast.offset_right = 260.0
-	_toast.offset_top = -210.0
-	_toast.offset_bottom = -96.0
+	_toast.offset_top = 88.0
+	_toast.offset_bottom = 200.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_STOP
 	_toast.add_to_group("hud_click_sink")
 	_toast.visible = false
@@ -467,6 +604,64 @@ func _build_toast() -> void:
 	dismiss.text = _loc("tip.dismiss", "Entendido")
 	dismiss.pressed.connect(dismiss_active_tip)
 	col.add_child(dismiss)
+
+
+func _build_travel() -> void:
+	_travel_panel = Control.new()
+	_travel_panel.name = "TravelCard"
+	_travel_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_travel_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_travel_panel.add_to_group("hud_click_sink")
+	_travel_panel.visible = false
+	add_child(_travel_panel)
+	var dim := ColorRect.new()
+	dim.name = "Dim"
+	dim.color = DIM
+	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_travel_panel.add_child(dim)
+	var card := ColorRect.new()
+	card.name = "Card"
+	card.color = IRON
+	card.set_anchors_preset(Control.PRESET_CENTER)
+	card.offset_left = -220.0
+	card.offset_right = 220.0
+	card.offset_top = -70.0
+	card.offset_bottom = 70.0
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_travel_panel.add_child(card)
+	var col := VBoxContainer.new()
+	col.set_anchors_preset(Control.PRESET_FULL_RECT)
+	col.offset_left = 16.0
+	col.offset_right = -16.0
+	col.offset_top = 18.0
+	col.offset_bottom = -18.0
+	col.add_theme_constant_override("separation", 8)
+	card.add_child(col)
+	_travel_kicker = Label.new()
+	_travel_kicker.name = "Kicker"
+	_travel_kicker.add_theme_color_override("font_color", Color(0.82, 0.76, 0.64))
+	_travel_kicker.add_theme_font_size_override("font_size", 14)
+	_travel_kicker.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(_travel_kicker)
+	_travel_place = Label.new()
+	_travel_place.name = "Place"
+	_travel_place.add_theme_color_override("font_color", PARCHMENT)
+	_travel_place.add_theme_font_size_override("font_size", 28)
+	_travel_place.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_travel_place.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(_travel_place)
+
+
+func _load_places() -> void:
+	places.clear()
+	if not FileAccess.file_exists(PLACES_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(PLACES_PATH))
+	if parsed is Dictionary:
+		var raw: Variant = parsed.get("places", {})
+		if raw is Dictionary:
+			places = (raw as Dictionary).duplicate(true)
 
 
 func _load_tips() -> void:

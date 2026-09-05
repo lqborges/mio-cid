@@ -27,7 +27,15 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 1. Open `project.godot` in **Godot 4.7.2** (standard, not .NET).
 2. Physics engine must stay **Jolt Physics** (built-in; no `addons/jolt/`).
 3. Press Play. Main scene is `game/ui/main_menu.tscn`.
-4. **Nuevo juego** starts at Vivar.
+4. **Nuevo juego** starts at Vivar. WASD walks; **E** talks. Menu language also labels the honor meters and plazo bar.
+
+If the Output dock reports parse errors for `ObjectiveCatalog`, `InputGlyphs`, or `CombatFeel` after a pull, the scripts are present — regenerate the gitignored class cache:
+
+```bash
+godot --headless --path . --import
+```
+
+That rewrites `.godot/global_script_class_cache.cfg`. Autoloads also preload those three scripts so an empty `.godot` is less likely to drop WASD / E / pause.
 
 ## What is playable (in order)
 
@@ -35,7 +43,7 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 | --- | --- |
 | Main menu | New game / load / fail-copy |
 | `a1_vivar` | Empty solar, first names, plazo |
-| `a1_burgos` | Shutters, inn refusal, river camp |
+| `a1_burgos` | Hear the child, ask the inn, then camp south. A travel card names the next place. Walking the river early only whispers — the child verse must land first. |
 | `a1_arcas` | Sand chests — cheat or refuse (real branch) |
 | `a1_cardena` | Jimena / Elvira / Sol, monastery gift, hub lock |
 | `a1_navapalos` | Dream of Gabriel; plazo completes and hides |

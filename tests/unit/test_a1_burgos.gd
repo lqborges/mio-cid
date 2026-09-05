@@ -29,6 +29,8 @@ func _run() -> void:
 		failures.append_array(_check_shutters_seen())
 		failures.append_array(_check_steel_on_burgaleses_gated())
 		failures.append_array(_check_talk_npcs_not_camp_click())
+		failures.append_array(_check_named_prompts())
+		failures.append_array(_check_river_waits_for_child())
 		failures.append_array(_check_river_camp_reachable())
 		failures.append_array(_check_camp_does_not_restack_goto())
 		_world.free()
@@ -52,6 +54,8 @@ func _check_scene_loads() -> PackedStringArray:
 	var cid: Node = _world.get_node_or_null("Cid")
 	if cid == null or not (cid is CharacterBody3D):
 		failures.append("world missing instanced Cid")
+	elif (cid as Node3D).global_position.z >= 4.0:
+		failures.append("Cid spawn must sit in the square (z < 4), got %s" % (cid as Node3D).global_position.z)
 	var cid_scene: Resource = load(CID)
 	if cid_scene == null:
 		failures.append("cid.tscn failed to load")
@@ -210,6 +214,60 @@ func _check_talk_npcs_not_camp_click() -> PackedStringArray:
 	return failures
 
 
+func _check_named_prompts() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var child: Node = _world.get_node_or_null("Child")
+	if child == null or not child.has_method("interact_prompt_key"):
+		failures.append("Child missing interact_prompt_key")
+	elif str(child.call("interact_prompt_key")) != "hud.hear_verb":
+		failures.append("Child prompt want hud.hear_verb")
+	var inn: Node = _world.get_node_or_null("Innkeeper")
+	if inn == null or not inn.has_method("interact_prompt_key"):
+		failures.append("Innkeeper missing interact_prompt_key")
+	elif str(inn.call("interact_prompt_key")) != "hud.lodge_verb":
+		failures.append("Innkeeper prompt want hud.lodge_verb")
+	return failures
+
+
+func _strip_flag(flag_id: String) -> void:
+	if _runner == null or not ("flags" in _runner):
+		return
+	var next := PackedStringArray()
+	for flag in _runner.flags:
+		if str(flag) != flag_id:
+			next.append(str(flag))
+	_runner.flags = next
+
+
+func _check_river_waits_for_child() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_world.set("_camped", false)
+	_strip_flag("burgos_child_heard")
+	var cid: Node3D = _world.get_node_or_null("Cid") as Node3D
+	if cid == null:
+		failures.append("Cid missing for river-before-child")
+		return failures
+	var queued := 0
+	if _runner:
+		queued = int(_runner.get("queued_scene_changes"))
+	cid.global_position = Vector3(0.0, 0.05, 9.6)
+	if _world.has_method("_physics_process"):
+		_world._physics_process(0.016)
+	if bool(_world.get("_camped")):
+		failures.append("river camp must wait until the child is heard")
+	if _runner and int(_runner.get("queued_scene_changes")) != queued:
+		failures.append("early river walk must not queue Arcas")
+	var whisper: Node = _world.find_child("HallWhisper", true, false)
+	var shown := ""
+	if whisper:
+		var label: Node = whisper.get_node_or_null("Line")
+		if label and "text" in label:
+			shown = str(label.get("text"))
+	if shown.find("niño") < 0 and shown.find("plaza") < 0:
+		failures.append("early river walk must whisper hear-the-child, got %s" % shown)
+	return failures
+
+
 func _check_river_camp_reachable() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_world.set("_camped", false)
@@ -217,14 +275,16 @@ func _check_river_camp_reachable() -> PackedStringArray:
 	if cid == null:
 		failures.append("Cid missing for river-camp reach")
 		return failures
-	var spawn_z := cid.global_position.z
-	if spawn_z >= 9.4:
-		failures.append("Cid spawn must stay north of the river-camp poll")
+	if _world.has_method("_set_flag"):
+		_world.call("_set_flag", &"burgos_child_heard")
+	cid.global_position = Vector3(0.0, 0.05, 1.5)
+	if cid.global_position.z >= 4.0:
+		failures.append("square spawn z want < 4, got %s" % cid.global_position.z)
 	cid.global_position = Vector3(0.0, 0.05, 9.6)
 	if _world.has_method("_physics_process"):
 		_world._physics_process(0.016)
 	if not bool(_world.get("_camped")):
-		failures.append("Cid at the river tents must camp_on_river (physics poll)")
+		failures.append("Cid at the river tents must camp_on_river after hearing the child")
 	return failures
 
 

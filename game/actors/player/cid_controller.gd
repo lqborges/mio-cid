@@ -21,6 +21,7 @@ extends CharacterBody3D
 const CidCombatScript := preload("res://game/actors/player/cid_combat.gd")
 const HorseCompanionScript := preload("res://game/actors/player/horse_companion.gd")
 const TouchHudScript := preload("res://game/ui/touch_hud.gd")
+const Glyphs := preload("res://game/systems/input/input_glyphs.gd")
 const TOUCH_HUD_SCENE := "res://content/ui/touch_hud.tscn"
 
 @onready var visual: Node3D = $Visual
@@ -52,6 +53,7 @@ var _block_click_move: bool = false
 var _click_move_from_hud: bool = false
 var _prompt_layer: CanvasLayer = null
 var _prompt_label: Label = null
+var _prompt_chip: ColorRect = null
 var _target_ring: MeshInstance3D = null
 var _occluders: Array[GeometryInstance3D] = []
 var _nudge: Vector3 = Vector3.ZERO
@@ -184,7 +186,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	InputGlyphs.note_event(event)
+	Glyphs.note_event(event)
 	if event.is_echo():
 		return
 	if chapter_asleep:
@@ -825,6 +827,8 @@ func _update_interact_prompt() -> void:
 			_prompt_label.text = str(guide.call("format_interact_prompt", key, fallback))
 		else:
 			_prompt_label.text = _loc_text(key, "E — Hablar")
+		_place_prompt_over(target as Node3D)
+	_sync_prompt_chip()
 
 
 func _ensure_target_ring() -> void:
@@ -833,15 +837,15 @@ func _ensure_target_ring() -> void:
 	_target_ring = MeshInstance3D.new()
 	_target_ring.name = "SelectedTarget"
 	var mesh := CylinderMesh.new()
-	mesh.top_radius = 0.58
-	mesh.bottom_radius = 0.58
-	mesh.height = 0.05
-	mesh.radial_segments = 24
+	mesh.top_radius = 0.86
+	mesh.bottom_radius = 0.86
+	mesh.height = 0.09
+	mesh.radial_segments = 28
 	_target_ring.mesh = mesh
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.albedo_color = Color(0.91, 0.85, 0.72, 0.82)
+	mat.albedo_color = Color(1.0, 0.90, 0.38, 0.95)
 	_target_ring.material_override = mat
 	_target_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_target_ring.visible = false
@@ -872,20 +876,51 @@ func _ensure_interact_prompt() -> void:
 	_prompt_layer = CanvasLayer.new()
 	_prompt_layer.name = "InteractPrompt"
 	_prompt_layer.layer = 25
+	_prompt_chip = ColorRect.new()
+	_prompt_chip.name = "Chip"
+	_prompt_chip.color = Color(0.08, 0.06, 0.04, 0.92)
+	_prompt_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_chip.visible = false
+	_prompt_layer.add_child(_prompt_chip)
 	_prompt_label = Label.new()
 	_prompt_label.name = "Hint"
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt_label.add_theme_color_override("font_color", Color(0.91, 0.85, 0.72))
-	_prompt_label.add_theme_font_size_override("font_size", 18)
-	_prompt_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_prompt_label.offset_left = -200.0
-	_prompt_label.offset_right = 200.0
-	_prompt_label.offset_top = -84.0
-	_prompt_label.offset_bottom = -48.0
+	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_label.add_theme_color_override("font_color", Color(0.97, 0.92, 0.80))
+	_prompt_label.add_theme_font_size_override("font_size", 20)
+	_prompt_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_prompt_label.position = Vector2(0.0, 0.0)
 	_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_prompt_label.visible = false
 	_prompt_layer.add_child(_prompt_label)
 	add_child(_prompt_layer)
+
+
+func _place_prompt_over(target: Node3D) -> void:
+	if _prompt_label == null:
+		return
+	var cam := camera
+	if cam == null or not is_instance_valid(cam):
+		return
+	var head := target.global_position + Vector3(0.0, 2.4, 0.0)
+	var screen := cam.unproject_position(head)
+	var text_size := _prompt_label.get_minimum_size()
+	if text_size.x < 8.0:
+		text_size = Vector2(168.0, 28.0)
+	_prompt_label.position = screen + Vector2(-text_size.x * 0.5, -40.0)
+
+
+func _sync_prompt_chip() -> void:
+	if _prompt_chip == null or _prompt_label == null:
+		return
+	_prompt_chip.visible = _prompt_label.visible
+	if not _prompt_chip.visible:
+		return
+	var text_size := _prompt_label.get_minimum_size()
+	if text_size.x < 8.0:
+		text_size = Vector2(168.0, 28.0)
+	_prompt_chip.position = _prompt_label.position + Vector2(-10.0, -4.0)
+	_prompt_chip.size = text_size + Vector2(20.0, 10.0)
 
 
 func _loc_text(key: String, fallback: String) -> String:
@@ -914,6 +949,9 @@ func _modal_ui_open() -> bool:
 		return true
 	if not is_inside_tree():
 		return false
+	var pause := get_tree().root.get_node_or_null("PauseMenu")
+	if pause != null and bool(pause.visible):
+		return true
 	for node in get_tree().get_nodes_in_group("modal_choice"):
 		if node is Control and bool((node as Control).visible):
 			return true
