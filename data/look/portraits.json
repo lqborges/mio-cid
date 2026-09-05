@@ -255,6 +255,15 @@
     "cloth": [0.40, 0.32, 0.22],
     "accent": [0.50, 0.40, 0.24]
   },
+  "innkeeper": {
+    "kit": "merchant",
+    "cap": true,
+    "robe": true,
+    "skin": [0.68, 0.50, 0.38],
+    "hair": [0.22, 0.14, 0.08],
+    "cloth": [0.32, 0.22, 0.16],
+    "accent": [0.52, 0.36, 0.18]
+  },
   "diego_tellez": {
     "kit": "youth",
     "mail": true,

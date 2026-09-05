@@ -19,7 +19,7 @@ func _check_hud() -> PackedStringArray:
 	if node == null:
 		failures.append("touch_hud.tscn instantiate failed")
 		return failures
-	var required := PackedStringArray(["Stick", "Slam", "Leap", "Shout", "Dodge", "Interact", "Mesura"])
+	var required := PackedStringArray(["Stick", "Slam", "Leap", "Shout", "Dodge", "Interact", "Mesura", "Pause"])
 	for name in required:
 		var found: Node = node.find_child(name, true, false)
 		if found == null:
@@ -42,7 +42,10 @@ func _check_hud() -> PackedStringArray:
 		failures.append("Interact label should be Hablar, got %s" % interact.text)
 	if mesura and mesura.text != "Mesura":
 		failures.append("Mesura label should be Mesura, got %s" % mesura.text)
-	for btn_name in ["Slam", "Leap", "Shout", "Dodge", "Interact", "Mesura"]:
+	var pause := node.find_child("Pause", true, false) as Button
+	if pause and pause.text != "Pausa":
+		failures.append("Pause label should be Pausa, got %s" % pause.text)
+	for btn_name in ["Slam", "Leap", "Shout", "Dodge", "Interact", "Mesura", "Pause"]:
 		var btn := node.find_child(btn_name, true, false) as Control
 		if btn and btn.mouse_filter != Control.MOUSE_FILTER_STOP:
 			failures.append("%s mouse_filter is not STOP" % btn_name)

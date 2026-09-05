@@ -68,6 +68,14 @@ func _test_pause_pages() -> PackedStringArray:
 		failures.append("pause missing Quit")
 	if not pause.has_method("_open_help") or not pause.has_method("_open_journal"):
 		failures.append("pause missing help/journal pages")
+	if pause.visible:
+		pause.call("resume")
+	pause.notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	if not pause.visible:
+		failures.append("Android back should open pause in-game")
+	pause.notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	if pause.visible:
+		failures.append("Android back should close an open pause menu")
 	return failures
 
 

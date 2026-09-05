@@ -36,6 +36,10 @@ const NAME_TO_ID := {
 	"Galve": "galve",
 	"Gabriel": "gabriel",
 	"BurgosChild": "burgos_child",
+	"Child": "burgos_child",
+	"Innkeeper": "innkeeper",
+	"BurgalesA": "host",
+	"BurgalesB": "host",
 	"AsurGonzalez": "asur_gonzalez",
 	"DiegoTellez": "diego_tellez",
 }
@@ -82,6 +86,12 @@ static func resolve_who(host: Node) -> String:
 	var mapped := String(NAME_TO_ID.get(String(body.name), ""))
 	if not mapped.is_empty():
 		return mapped
+	if "role" in body:
+		var role := String(body.get("role"))
+		if role == "child":
+			return "burgos_child"
+		if role == "innkeeper":
+			return "innkeeper"
 	if "kind" in body and String(body.get("kind")) == "lanza":
 		return "lanza"
 	if "kind" in body and String(body.get("kind")) == "captain":
@@ -113,7 +123,7 @@ static func _is_person_capsule(mesh: Mesh) -> bool:
 	if not (mesh is CapsuleMesh):
 		return false
 	var cap := mesh as CapsuleMesh
-	return cap.height >= 1.2 and cap.height <= 2.2 and cap.radius <= 0.55
+	return cap.height >= 1.0 and cap.height <= 2.2 and cap.radius <= 0.55
 
 
 func _portrait_for(id: String) -> Dictionary:

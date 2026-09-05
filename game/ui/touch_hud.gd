@@ -29,6 +29,7 @@ const LABEL_KEYS := {
 	"Dodge": "hud.dodge",
 	"Interact": "hud.interact",
 	"Mesura": "hud.mesura",
+	"Pause": "ui.pause.title",
 }
 const LABEL_FALLBACK := {
 	"Slam": "Golpe",
@@ -37,6 +38,7 @@ const LABEL_FALLBACK := {
 	"Dodge": "Esquiva",
 	"Interact": "Hablar",
 	"Mesura": "Mesura",
+	"Pause": "Pausa",
 }
 
 ## True while the on-screen HUD is shown so thumbs do not drive mouse-aim / slam.
@@ -57,6 +59,7 @@ var _injected: Dictionary = {}
 func _ready() -> void:
 	_apply_visibility()
 	_wire_buttons()
+	_wire_pause()
 	_apply_labels()
 	var stick := _stick()
 	if stick:
@@ -233,6 +236,7 @@ func _layout_controls(safe: Rect2) -> void:
 	_place_button("Slam", origin + Vector2((_button_px + _gap_px) * 2.0, _button_px + _gap_px))
 	_place_button("Dodge", origin + Vector2(_button_px + _gap_px, (_button_px + _gap_px) * 2.0))
 	_place_button("Interact", origin + Vector2(_button_px + _gap_px, (_button_px + _gap_px) * 3.0))
+	_place_button("Pause", Vector2(safe.end.x - _inset_px - _button_px, safe.position.y + _inset_px))
 
 
 func _place_button(node_name: String, pos: Vector2) -> void:
@@ -290,6 +294,23 @@ func _loc_text(key: String, fallback: String) -> String:
 	if t.is_empty() or t == key:
 		return fallback
 	return t
+
+
+func _wire_pause() -> void:
+	var btn := _button("Pause")
+	if btn == null:
+		return
+	if not btn.pressed.is_connected(_on_pause_pressed):
+		btn.pressed.connect(_on_pause_pressed)
+
+
+func _on_pause_pressed() -> void:
+	var pause := get_node_or_null("/root/PauseMenu")
+	if pause != null and pause.has_method("open"):
+		pause.call("open")
+		return
+	_emit_action(&"pause", true, 1.0)
+	_emit_action(&"pause", false, 0.0)
 
 
 func _wire_buttons() -> void:

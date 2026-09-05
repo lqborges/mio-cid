@@ -40,6 +40,12 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn("grab_focus", pause)
         self.assertIn("_clear_action_queues", pause)
         self.assertIn("reduced_motion", pause)
+        self.assertIn("NOTIFICATION_WM_GO_BACK_REQUEST", pause)
+        self.assertIn("config/quit_on_go_back=false", project)
+        hud = _read("content/ui/touch_hud.tscn")
+        self.assertIn('name="Pause"', hud)
+        self.assertIn("Pausa", hud)
+        self.assertIn('_wire_pause()', _read("game/ui/touch_hud.gd"))
 
     def test_controller_uses_glyphs_and_target(self) -> None:
         source = _read("game/actors/player/cid_controller.gd")

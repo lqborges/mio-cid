@@ -78,6 +78,10 @@ func set_lod(level: StringName) -> void:
 	var humanoid: Node = get_node_or_null("Visual/Humanoid")
 	if humanoid:
 		humanoid.visible = show_any
+		if _mesh_skinned != null:
+			_mesh_skinned.visible = false
+		if _mesh_capsule != null:
+			_mesh_capsule.visible = false
 
 
 func desired_xz(from: Vector3, to: Vector3, speed: float, arrive: float, reverse: bool = false) -> Vector3:

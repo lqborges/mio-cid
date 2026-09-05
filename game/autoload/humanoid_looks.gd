@@ -102,7 +102,7 @@ func _should_attach(host: Node) -> bool:
 		var mesh := (child as MeshInstance3D).mesh
 		if mesh is CapsuleMesh:
 			var cap := mesh as CapsuleMesh
-			if cap.height >= 1.2 and cap.height <= 2.2 and cap.radius <= 0.55:
+			if cap.height >= 1.0 and cap.height <= 2.2 and cap.radius <= 0.55:
 				return true
 	return false
 

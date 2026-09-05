@@ -47,6 +47,55 @@ func _check_named_hosts() -> PackedStringArray:
 	failures.append_array(_expect_host("Jimena", ["Veil", "Robe"]))
 	failures.append_array(_expect_host("Yusuf", ["Turban", "Beard", "Robe"]))
 	failures.append_array(_expect_host("Jeronimo", ["Mitre", "Robe"]))
+	failures.append_array(_expect_short_child())
+	failures.append_array(_expect_lanza_lod_keeps_portrait())
+	return failures
+
+
+func _expect_short_child() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var host := StaticBody3D.new()
+	host.name = "Child"
+	host.set("role", "child")
+	var mesh := MeshInstance3D.new()
+	mesh.name = "MeshInstance3D"
+	var cap := CapsuleMesh.new()
+	cap.height = 1.15
+	cap.radius = 0.32
+	mesh.mesh = cap
+	host.add_child(mesh)
+	get_root().add_child(host)
+	_ensure_portraits(host)
+	var human: Node = host.get_node_or_null("Humanoid")
+	if human == null:
+		failures.append("Burgos child (1.15 m) must get a Humanoid portrait")
+	elif str(human.get("who_id")) != "burgos_child":
+		failures.append("Child who_id want burgos_child got %s" % human.get("who_id"))
+	if mesh.visible:
+		failures.append("Burgos child capsule should be hidden")
+	host.free()
+	return failures
+
+
+func _expect_lanza_lod_keeps_portrait() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/lanza/lanza.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("lanza.tscn failed to load")
+		return failures
+	var lanza: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(lanza)
+	_ensure_portraits(lanza)
+	if lanza.has_method("set_lod"):
+		lanza.call("set_lod", &"capsule")
+	var visual: Node = lanza.get_node_or_null("Visual")
+	var human: Node = visual.get_node_or_null("Humanoid") if visual else null
+	if human == null:
+		failures.append("Lanza Visual missing Humanoid portrait")
+	var capsule: MeshInstance3D = visual.get_node_or_null("MeshInstance3D") as MeshInstance3D if visual else null
+	if capsule and capsule.visible:
+		failures.append("Lanza LOD must not re-show the capsule under a portrait")
+	lanza.free()
 	return failures
 
 
