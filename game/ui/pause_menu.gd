@@ -1,6 +1,9 @@
 extends CanvasLayer
+# Autoload singleton. Do not add class_name.
+# Preload resources: class_name types are not in scope when autoloads parse.
 ## Escape overlay: resume / journal / help / settings / main menu / quit.
 
+const Glyphs := preload("res://game/systems/input/input_glyphs.gd")
 const MENU_SCENE := "res://game/ui/main_menu.tscn"
 const IRON := Color(0.18, 0.16, 0.13, 0.92)
 const PARCHMENT := Color(0.91, 0.85, 0.72)
@@ -55,7 +58,7 @@ func _notification(what: int) -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_echo():
 		return
-	InputGlyphs.note_event(event)
+	Glyphs.note_event(event)
 	var cancel := event.is_action_pressed("ui_cancel")
 	if cancel and Time.get_ticks_msec() < _ignore_cancel_until_msec:
 		get_viewport().set_input_as_handled()

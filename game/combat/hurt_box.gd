@@ -4,6 +4,8 @@ extends Area3D
 ## Valid target volume. Unkillable (Alfonso, Jimena, …) and spectator
 ## (Cid at a3_carrion) must not receive a killable HurtBox.
 
+const Feel := preload("res://game/combat/combat_feel.gd")
+
 const LAYER_PLAYER := 2
 const LAYER_HURTBOX_KILLABLE := 4
 const LAYER_UNKILLABLE := 32
@@ -72,7 +74,7 @@ func apply_hit(amount: float, damage_type: StringName, stagger: float, source: N
 	hp = maxf(hp - dealt, 0.0)
 	stagger_left = maxf(stagger_left, stagger)
 	damaged.emit(dealt, damage_type, stagger, source)
-	CombatFeel.note_hit(self, dealt, source)
+	Feel.note_hit(self, dealt, source)
 	if hp <= 0.0:
 		died.emit()
 	return true

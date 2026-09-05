@@ -120,6 +120,18 @@ class TestHonorMeters(unittest.TestCase):
         self.assertNotIn("camp_night(", plazo)
         self.assertNotIn("Treasury", plazo)
         self.assertIn("MAX_DAYS := 9", plazo)
+        self.assertIn("func _get_tooltip", meters)
+        self.assertIn("locale_changed", meters)
+        self.assertIn("hud.onores.tip", meters)
+        self.assertIn("func _get_tooltip", plazo)
+        self.assertIn("locale_changed", plazo)
+        self.assertIn("hud.plazo", plazo)
+        self.assertNotIn('"plazo"', plazo)
+        locales = _read("content/locales/strings.csv")
+        self.assertIn("hud.onores,Honores,Means", locales)
+        self.assertIn("hud.honor,Honor,Standing", locales)
+        self.assertIn("hud.honra,Honra,Name", locales)
+        self.assertIn("hud.plazo,Plazo,Term", locales)
 
     def test_godot_headless_honor_state_if_available(self) -> None:
         godot = None

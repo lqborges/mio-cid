@@ -45,9 +45,15 @@ horse.mount_hold,Mantened para montar,Hold to mount
 combat.blocked.mesura,Mesura sujeta el acero.,Mesura holds the blade.
 hud.mesura,Mesura,Mesura
 hud.ira,Ira,Ira
-hud.onores,Honores,Honores
-hud.honor,Honor,Honor
-hud.honra,Honra,Honra
+hud.onores,Honores,Means
+hud.honor,Honor,Standing
+hud.honra,Honra,Name
+hud.onores.tip,"Honores: feudos y derecho a mantener mesnada.","Honores: means and fiefs — the right to feed a warband."
+hud.honor.tip,"Honor: valía ante el rey.","Honor: standing with the king."
+hud.honra.tip,"Honra: el nombre que os guardan en las salas.","Honra: the name halls keep for you."
+hud.plazo,Plazo,Term
+hud.plazo.tip,"Días que restan del destierro de nueve jornadas.","Days left of the nine-day exile."
+hud.controls_hint,"WASD andar · E hablar","WASD walk · E talk"
 hud.slam,Golpe,Slam
 hud.leap,Salto,Leap
 hud.shout,Grito,Shout
@@ -84,11 +90,11 @@ ui.menu.new,Nueva partida,New game
 ui.menu.load,Cargar,Load
 ui.menu.quit,Salir,Quit
 tip.dismiss,Entendido,Understood
-tip.move.title,El solar,The solar
-tip.move.body,"WASD o tocad el suelo para andar. El ratón apunta.","WASD or tap the ground to walk. The mouse aims."
+tip.move.title,Andar,Walk
+tip.move.body,"WASD o clic en el suelo para andar. El ratón apunta.","WASD or click the ground to walk. The mouse aims."
 tip.move.verb,Mover,Move
-tip.interact.title,La mesnada,The warband
-tip.interact.body,"Acercaos a Álvar o a Martín. El anillo marca a quién habláis.","Go to Álvar or Martín. The ring marks who you will address."
+tip.interact.title,Hablar,Talk
+tip.interact.body,"Acercaos a Álvar o a Martín. Pulsad E para hablar.","Go to Álvar or Martín. Press E to talk."
 tip.dialogue.title,La palabra,The word
 tip.dialogue.body,"Clic o E cierra la línea. El mundo no anda mientras habláis.","Click or E dismisses the line. The world does not walk while you speak."
 tip.choice.title,La elección,The choice

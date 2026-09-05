@@ -1,8 +1,10 @@
 extends CanvasLayer
 # Autoload singleton. Do not add class_name.
+# Preload resources: class_name types are not in scope when autoloads parse.
 # Objectives, onboarding, and settings. Persists to user://, not campaign saves.
 
 const CATALOG_SCRIPT := preload("res://game/systems/objectives/objective_catalog.gd")
+const Glyphs := preload("res://game/systems/input/input_glyphs.gd")
 const TIPS_PATH := "res://data/onboarding/tips.json"
 const PLACES_PATH := "res://data/travel/places.json"
 const SETTINGS_PATH := "user://player_guide.json"
@@ -24,7 +26,7 @@ const DEFAULT_SETTINGS := {
 	"locale": "es",
 }
 
-var catalog: ObjectiveCatalog
+var catalog
 var tips: Array = []
 var places: Dictionary = {}
 var dismissed_tips: PackedStringArray = PackedStringArray()
@@ -33,6 +35,7 @@ var _active_tip: String = ""
 var _hud_panel: Control
 var _hud_title: Label
 var _hud_detail: Label
+var _hud_hint: Label
 var _hold_bar: ColorRect
 var _toast: Control
 var _toast_title: Label
@@ -73,7 +76,7 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	InputGlyphs.note_event(event)
+	Glyphs.note_event(event)
 	if event is InputEventScreenTouch or event is InputEventScreenDrag:
 		note_moved()
 
@@ -179,14 +182,14 @@ func subtitle_size() -> int:
 
 func help_lines() -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append(InputGlyphs.prompt("click_move", _loc("tip.move.verb", "Mover")))
-	lines.append(InputGlyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
-	lines.append(InputGlyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
-	lines.append(InputGlyphs.prompt("slam", _loc("hud.slam", "Golpe")))
-	lines.append(InputGlyphs.prompt("leap", _loc("hud.leap", "Salto")))
-	lines.append(InputGlyphs.prompt("dodge", _loc("hud.dodge", "Esquiva")))
-	lines.append(InputGlyphs.prompt("shout", _loc("hud.shout", "Grito")))
-	lines.append(InputGlyphs.prompt("pause", _loc("ui.pause.title", "Pausa")))
+	lines.append(Glyphs.prompt("click_move", _loc("tip.move.verb", "Mover")))
+	lines.append(Glyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
+	lines.append(Glyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
+	lines.append(Glyphs.prompt("slam", _loc("hud.slam", "Golpe")))
+	lines.append(Glyphs.prompt("leap", _loc("hud.leap", "Salto")))
+	lines.append(Glyphs.prompt("dodge", _loc("hud.dodge", "Esquiva")))
+	lines.append(Glyphs.prompt("shout", _loc("hud.shout", "Grito")))
+	lines.append(Glyphs.prompt("pause", _loc("ui.pause.title", "Pausa")))
 	return lines
 
 
@@ -229,7 +232,7 @@ func format_interact_prompt(verb_key: String, fallback: String) -> String:
 	var verb := _loc(verb_key, fallback)
 	if verb.begins_with("E — ") or verb.begins_with("E - "):
 		verb = verb.substr(4)
-	return InputGlyphs.prompt("interact", verb)
+	return Glyphs.prompt("interact", verb)
 
 
 func _on_beat_started(id: StringName) -> void:
@@ -362,13 +365,16 @@ func _refresh_hud() -> void:
 		return
 	if _is_main_menu():
 		_hud_panel.visible = false
+		_update_controls_hint()
 		return
 	if _travel_panel != null and _travel_panel.visible:
 		_hud_panel.visible = false
+		_update_controls_hint()
 		return
 	var obj := current_objective()
 	if obj.is_empty():
 		_hud_panel.visible = false
+		_update_controls_hint()
 		return
 	_hud_panel.visible = true
 	_hud_title.text = _loc(str(obj.get("title_key", "")), "")
@@ -384,6 +390,7 @@ func _refresh_hud() -> void:
 		bits.append(detail)
 	if Time.get_ticks_msec() >= _blocked_until_msec:
 		_hud_detail.text = " · ".join(bits)
+	_update_controls_hint()
 	_update_mount_hold()
 
 
@@ -470,6 +477,13 @@ func _build_hud() -> void:
 	_hud_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hud_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_hud_detail)
+	_hud_hint = Label.new()
+	_hud_hint.name = "ControlsHint"
+	_hud_hint.add_theme_color_override("font_color", Color(0.94, 0.88, 0.72))
+	_hud_hint.add_theme_font_size_override("font_size", 13)
+	_hud_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hud_hint.visible = false
+	col.add_child(_hud_hint)
 	panel.visible = false
 	_hold_bar = ColorRect.new()
 	_hold_bar.name = "MountHold"
@@ -482,6 +496,18 @@ func _build_hud() -> void:
 	_hold_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hold_bar.visible = false
 	panel.add_child(_hold_bar)
+
+
+func _update_controls_hint() -> void:
+	if _hud_hint == null or _hud_panel == null:
+		return
+	var show := _hud_panel.visible and _chapter_id() == "a1_vivar" and (not _moved or not _interacted)
+	_hud_hint.visible = show
+	if show:
+		_hud_hint.text = _loc("hud.controls_hint", "WASD andar · E hablar")
+		_hud_panel.offset_bottom = 94.0
+	else:
+		_hud_panel.offset_bottom = 72.0
 
 
 func _update_mount_hold() -> void:

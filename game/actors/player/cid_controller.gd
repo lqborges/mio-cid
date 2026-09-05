@@ -21,6 +21,7 @@ extends CharacterBody3D
 const CidCombatScript := preload("res://game/actors/player/cid_combat.gd")
 const HorseCompanionScript := preload("res://game/actors/player/horse_companion.gd")
 const TouchHudScript := preload("res://game/ui/touch_hud.gd")
+const Glyphs := preload("res://game/systems/input/input_glyphs.gd")
 const TOUCH_HUD_SCENE := "res://content/ui/touch_hud.tscn"
 
 @onready var visual: Node3D = $Visual
@@ -184,7 +185,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	InputGlyphs.note_event(event)
+	Glyphs.note_event(event)
 	if event.is_echo():
 		return
 	if chapter_asleep:

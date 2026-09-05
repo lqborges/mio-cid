@@ -27,7 +27,10 @@ class TestCombatFeel(unittest.TestCase):
         combat = _read("game/actors/player/cid_combat.gd")
         self.assertIn("windup_frac", combat)
         self.assertNotIn("windup_frac = 0.12", combat)
-        self.assertIn("CombatFeel.note_hit", _read("game/combat/hurt_box.gd"))
+        hurt = _read("game/combat/hurt_box.gd")
+        self.assertIn('preload("res://game/combat/combat_feel.gd")', hurt)
+        self.assertIn("Feel.note_hit", hurt)
+        self.assertNotIn("CombatFeel.", hurt)
 
     def test_feel_respects_reduced_motion(self) -> None:
         feel = _read("game/combat/combat_feel.gd")

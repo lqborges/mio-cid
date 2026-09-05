@@ -123,8 +123,17 @@ class TestA1VivarPrologue(unittest.TestCase):
         with (ROOT / "content/locales/strings.csv").open(encoding="utf-8", newline="") as handle:
             rows = {row["key"]: row for row in csv.DictReader(handle)}
         self.assertEqual(rows["hud.onores"]["es"], "Honores")
+        self.assertEqual(rows["hud.onores"]["en"], "Means")
         self.assertEqual(rows["hud.honor"]["es"], "Honor")
+        self.assertEqual(rows["hud.honor"]["en"], "Standing")
         self.assertEqual(rows["hud.honra"]["es"], "Honra")
+        self.assertEqual(rows["hud.honra"]["en"], "Name")
+        self.assertEqual(rows["hud.plazo"]["es"], "Plazo")
+        self.assertEqual(rows["hud.plazo"]["en"], "Term")
+        self.assertTrue(rows["hud.onores.tip"]["en"].strip())
+        self.assertTrue(rows["hud.plazo.tip"]["es"].strip())
+        self.assertIn("WASD", rows["hud.controls_hint"]["es"])
+        self.assertIn("E", rows["hud.controls_hint"]["en"])
         self.assertEqual(rows["hud.interact_hint"]["es"], "E — Hablar")
         self.assertEqual(rows["hud.leave_hint"]["es"], "E — Salir")
         self.assertEqual(rows["ui.pause.resume"]["es"], "Continuar")

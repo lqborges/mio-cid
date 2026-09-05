@@ -27,7 +27,7 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 1. Open `project.godot` in **Godot 4.7.2** (standard, not .NET).
 2. Physics engine must stay **Jolt Physics** (built-in; no `addons/jolt/`).
 3. Press Play. Main scene is `game/ui/main_menu.tscn`.
-4. **Nuevo juego** starts at Vivar.
+4. **Nuevo juego** starts at Vivar. WASD walks; **E** talks. Menu language also labels the honor meters and plazo bar.
 
 ## What is playable (in order)
 

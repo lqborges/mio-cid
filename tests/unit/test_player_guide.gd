@@ -42,6 +42,11 @@ func _test_guide_autoload() -> PackedStringArray:
 		failures.append("ObjectiveHud stays hidden while vivar_talk is current")
 	if guide.get_node_or_null("OnboardingToast") == null:
 		failures.append("OnboardingToast missing")
+	if guide.get("catalog") == null:
+		failures.append("PlayerGuide.catalog must load without class_name ObjectiveCatalog")
+	var hint: Label = guide.find_child("ControlsHint", true, false) as Label
+	if hint == null:
+		failures.append("ObjectiveHud ControlsHint missing")
 	if guide.has_method("replay_tips"):
 		guide.call("replay_tips")
 	if guide.has_method("announce_travel"):
@@ -125,12 +130,32 @@ func _test_locale_switch() -> PackedStringArray:
 		failures.append("English ui.pause.title want Pause got %s" % pause_en)
 	if loc.has_method("normalize_locale") and str(loc.call("normalize_locale", "en_US")) != "en":
 		failures.append("en_US should normalize to en")
+	var meters := HonorMeters.new()
+	get_root().add_child(meters)
+	var plazo := PlazoBar.new()
+	get_root().add_child(plazo)
+	var en_onores := str(meters.call("_meter_label", &"onores"))
+	if en_onores != "Means":
+		failures.append("English onores want Means got %s" % en_onores)
+	var en_tip := str(meters.call("_meter_tip", &"onores"))
+	if not en_tip.to_lower().contains("means"):
+		failures.append("English onores tooltip should gloss the meter")
+	if str(plazo.call("_plazo_label")) != "Term":
+		failures.append("English plazo want Term got %s" % plazo.call("_plazo_label"))
+	if str(loc.call("text", "hud.controls_hint")) != "WASD walk · E talk":
+		failures.append("English controls hint should name WASD and E")
 	guide.call("set_setting", "locale", "es")
 	if str(loc.get("locale")) != "es":
 		failures.append("setting locale=es did not restore Spanish")
 	var pause_es := str(loc.call("text", "ui.pause.title"))
 	if pause_es != "Pausa":
 		failures.append("Spanish ui.pause.title want Pausa got %s" % pause_es)
+	if str(meters.call("_meter_label", &"onores")) != "Honores":
+		failures.append("Spanish onores should stay Honores after locale restore")
+	if str(plazo.call("_plazo_label")) != "Plazo":
+		failures.append("Spanish plazo want Plazo got %s" % plazo.call("_plazo_label"))
+	meters.queue_free()
+	plazo.queue_free()
 	guide.call("set_setting", "locale", saved)
 	return failures
 
