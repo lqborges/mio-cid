@@ -184,7 +184,60 @@ func _begin_input_routing_checks() -> void:
 	_failures.append_array(_check_hud_input_does_not_eat_buttons())
 	_failures.append_array(_check_dialogue_does_not_queue_interact())
 	_failures.append_array(_check_false_interact_does_not_block_walk())
+	_failures.append_array(_check_interact_chip_follows_npc())
 	_begin_leap_tick()
+
+
+func _check_interact_chip_follows_npc() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://content/art/characters/cid/cid.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("interact chip: cid.tscn failed to load")
+		return failures
+	var cid := (packed as PackedScene).instantiate() as CharacterBody3D
+	get_root().add_child(cid)
+	var npc := StaticBody3D.new()
+	npc.name = "AlvarStandin"
+	npc.position = Vector3(2.0, 0.0, -1.5)
+	npc.add_to_group("interactable")
+	var script := GDScript.new()
+	script.source_code = (
+		"extends StaticBody3D\n"
+		+ "func interact() -> void:\n"
+		+ "\tpass\n"
+		+ "func interact_prompt_key() -> String:\n"
+		+ "\treturn \"hud.interact_verb\"\n"
+	)
+	script.reload()
+	npc.set_script(script)
+	get_root().add_child(npc)
+	if cid.has_method("_update_interact_prompt"):
+		cid.call("_update_interact_prompt")
+	var ring: Node3D = cid.get_node_or_null("SelectedTarget") as Node3D
+	if ring == null:
+		failures.append("gold ring SelectedTarget missing")
+	elif not ring.visible:
+		failures.append("gold ring should show under the selected NPC")
+	elif ring.global_position.distance_to(npc.global_position) > 0.8:
+		failures.append("gold ring must sit under the NPC, not the HUD")
+	var chip: Label3D = cid.find_child("InteractChip", true, false) as Label3D
+	if chip == null:
+		failures.append("InteractChip Label3D missing — E must ride the selected NPC")
+	elif not chip.visible:
+		failures.append("InteractChip should be visible while an NPC is selected")
+	elif chip.get_parent() != ring:
+		failures.append("InteractChip must be parented to the gold ring")
+	var hint: Label = cid.get("_prompt_label") as Label
+	if hint != null and hint.visible and hint.position.y > 600.0:
+		failures.append("E chip stayed on the HUD bottom edge at y=%s" % hint.position.y)
+	var layer: Node = get_root().get_node_or_null("InteractPrompt")
+	if layer != null and layer.get_parent() == cid:
+		failures.append("InteractPrompt CanvasLayer must not be a child of Cid")
+	npc.free()
+	cid.free()
+	if layer != null and is_instance_valid(layer):
+		layer.free()
+	return failures
 
 
 func _begin_leap_tick() -> void:

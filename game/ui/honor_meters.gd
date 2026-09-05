@@ -56,6 +56,15 @@ const IRON := Color(0.08, 0.06, 0.04, 0.96)
 const PARCHMENT := Color(0.97, 0.92, 0.80)
 const INK := Color(0.05, 0.04, 0.03, 0.92)
 const TRACK := Color(0.14, 0.12, 0.09)
+const GLOSS_INK := Color(0.86, 0.78, 0.58)
+const CAPTION_NODES := {
+	&"onores": ["LabelOnores", "GlossOnores"],
+	&"honor": ["LabelHonor", "GlossHonor"],
+	&"honra": ["LabelHonra", "GlossHonra"],
+}
+
+var _name_labels: Array[Label] = []
+var _gloss_labels: Array[Label] = []
 
 
 func _ready() -> void:
@@ -64,12 +73,14 @@ func _ready() -> void:
 	size = PANEL_SIZE
 	clip_contents = false
 	add_to_group("hud_click_sink")
+	_ensure_captions()
 	_bind_state()
 	if EventBus:
 		EventBus.honor_logged.connect(_on_honor_logged)
 	var loc := get_node_or_null("/root/Loc")
 	if loc != null and loc.has_signal("locale_changed") and not loc.locale_changed.is_connected(_on_locale_changed):
 		loc.locale_changed.connect(_on_locale_changed)
+	_refresh_captions()
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -102,7 +113,69 @@ func _on_meter_changed(_meter: StringName, _old: float, _new: float, _id: String
 
 
 func _on_locale_changed(_code: String) -> void:
+	_refresh_captions()
 	queue_redraw()
+
+
+func caption_texts() -> PackedStringArray:
+	_refresh_captions()
+	var out := PackedStringArray()
+	for lbl in _name_labels:
+		out.append(lbl.text)
+	return out
+
+
+func gloss_texts() -> PackedStringArray:
+	_refresh_captions()
+	var out := PackedStringArray()
+	for lbl in _gloss_labels:
+		out.append(lbl.text)
+	return out
+
+
+func _ensure_captions() -> void:
+	if _name_labels.size() == METERS.size():
+		return
+	_name_labels.clear()
+	_gloss_labels.clear()
+	var inner := PANEL_SIZE.x - COL_PAD * 2.0
+	var col_w := inner / 3.0
+	for i in METERS.size():
+		var meter: StringName = METERS[i]
+		var names: Array = CAPTION_NODES[meter]
+		var name_lbl := get_node_or_null(str(names[0])) as Label
+		if name_lbl == null:
+			name_lbl = _make_caption(str(names[0]), 12, PARCHMENT)
+			add_child(name_lbl)
+		var gloss_lbl := get_node_or_null(str(names[1])) as Label
+		if gloss_lbl == null:
+			gloss_lbl = _make_caption(str(names[1]), 11, GLOSS_INK)
+			add_child(gloss_lbl)
+		var origin_x := COL_PAD + col_w * float(i)
+		name_lbl.position = Vector2(origin_x, PANEL_SIZE.y - 38.0)
+		name_lbl.size = Vector2(col_w, 16.0)
+		gloss_lbl.position = Vector2(origin_x, PANEL_SIZE.y - 22.0)
+		gloss_lbl.size = Vector2(col_w, 16.0)
+		_name_labels.append(name_lbl)
+		_gloss_labels.append(gloss_lbl)
+
+
+func _make_caption(node_name: String, font_size: int, color: Color) -> Label:
+	var lbl := Label.new()
+	lbl.name = node_name
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	lbl.add_theme_color_override("font_color", color)
+	lbl.add_theme_font_size_override("font_size", font_size)
+	return lbl
+
+
+func _refresh_captions() -> void:
+	_ensure_captions()
+	for i in METERS.size():
+		_name_labels[i].text = _meter_label(METERS[i])
+		_gloss_labels[i].text = _meter_gloss(METERS[i])
 
 
 func _meter_at(at_position: Vector2) -> StringName:
@@ -160,29 +233,8 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	draw_rect(fill, color)
 	_draw_pattern(PATTERNS[meter], fill, Color(1.0, 1.0, 1.0, 0.22))
 	draw_rect(bar, PARCHMENT, false, 2.0)
-	var font := ThemeDB.fallback_font
-	var label := _meter_label(meter)
-	var gloss := _meter_gloss(meter)
 	var chip := Rect2(origin.x + 2.0, height - 40.0, col_w - 4.0, 36.0)
 	draw_rect(chip, INK)
-	draw_string(
-		font,
-		Vector2(origin.x, height - 26.0),
-		label,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		col_w,
-		12,
-		PARCHMENT,
-	)
-	draw_string(
-		font,
-		Vector2(origin.x, height - 12.0),
-		gloss,
-		HORIZONTAL_ALIGNMENT_CENTER,
-		col_w,
-		11,
-		Color(0.86, 0.78, 0.58),
-	)
 
 
 func _meter_value(meter: StringName) -> float:

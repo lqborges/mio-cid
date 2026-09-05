@@ -79,6 +79,8 @@ func _test_guide_autoload() -> PackedStringArray:
 		var help: PackedStringArray = guide.call("help_lines")
 		if help.is_empty() or not str(help[0]).begins_with("WASD"):
 			failures.append("Ayuda must list WASD before LMB click-move")
+		if str(help[0]) != "WASD — Andar":
+			failures.append("Ayuda first line want WASD — Andar, got %s" % help[0])
 		var joined := " ".join(help)
 		if not joined.contains("LMB") and not joined.contains("Clic"):
 			failures.append("Ayuda must still name click-to-move")
@@ -112,6 +114,19 @@ func _test_pause_pages() -> PackedStringArray:
 		failures.append("pause missing Quit")
 	if not pause.has_method("_open_help") or not pause.has_method("_open_journal"):
 		failures.append("pause missing help/journal pages")
+	if pause.has_method("_help_text"):
+		var help_body := str(pause.call("_help_text"))
+		if not help_body.begins_with("WASD"):
+			failures.append("Ayuda page must start with WASD, got %s" % help_body.split("\n")[0])
+		if not help_body.contains("LMB") and not help_body.contains("Clic"):
+			failures.append("Ayuda page must still name click-to-move")
+	if pause.has_method("_open_help"):
+		pause.call("_open_help")
+		var body: RichTextLabel = pause.get("_page_body") as RichTextLabel
+		if body == null or not str(body.text).begins_with("WASD"):
+			failures.append("open Ayuda must write WASD into the page body")
+		if pause.has_method("_hide_page"):
+			pause.call("_hide_page")
 	if pause.visible:
 		pause.call("resume")
 	pause.notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
@@ -155,6 +170,14 @@ func _test_locale_switch() -> PackedStringArray:
 		failures.append("English plazo want Term got %s" % plazo.call("_plazo_label"))
 	if str(loc.call("text", "hud.controls_hint")) != "WASD walk · E talk":
 		failures.append("English controls hint should name WASD and E")
+	if str(loc.call("text", "hud.wasd")) != "WASD — Walk":
+		failures.append("English hud.wasd want WASD — Walk")
+	if meters.has_method("gloss_texts"):
+		var en_gloss: PackedStringArray = meters.call("gloss_texts")
+		if en_gloss.is_empty() or en_gloss[1] != "king":
+			failures.append("English honor gloss want king, got %s" % (" / ".join(en_gloss)))
+	if plazo.has_method("caption_text") and not str(plazo.call("caption_text")).begins_with("Term"):
+		failures.append("English plazo caption want Term…, got %s" % plazo.call("caption_text"))
 	guide.call("set_setting", "locale", "es")
 	if str(loc.get("locale")) != "es":
 		failures.append("setting locale=es did not restore Spanish")
@@ -165,6 +188,12 @@ func _test_locale_switch() -> PackedStringArray:
 		failures.append("Spanish onores should stay Honores after locale restore")
 	if str(plazo.call("_plazo_label")) != "Plazo":
 		failures.append("Spanish plazo want Plazo got %s" % plazo.call("_plazo_label"))
+	if meters.has_method("gloss_texts"):
+		var es_gloss: PackedStringArray = meters.call("gloss_texts")
+		if es_gloss.size() < 3 or es_gloss[0] != "feudos" or es_gloss[1] != "rey" or es_gloss[2] != "nombre":
+			failures.append("Spanish glosses want feudos/rey/nombre, got %s" % " / ".join(es_gloss))
+	if plazo.has_method("caption_text") and not str(plazo.call("caption_text")).begins_with("Plazo"):
+		failures.append("Spanish plazo caption want Plazo…, got %s" % plazo.call("caption_text"))
 	meters.queue_free()
 	plazo.queue_free()
 	guide.call("set_setting", "locale", saved)

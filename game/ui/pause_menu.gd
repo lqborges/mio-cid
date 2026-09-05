@@ -90,6 +90,7 @@ func open() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_clear_world_input()
 	_set_talk_panels_visible(false)
+	_set_interact_prompt_visible(false)
 	_focus_resume()
 
 
@@ -100,6 +101,7 @@ func resume() -> void:
 	if tree:
 		tree.paused = false
 	_set_talk_panels_visible(true)
+	_set_interact_prompt_visible(true)
 
 
 func _on_menu() -> void:
@@ -332,10 +334,18 @@ func _journal_text() -> String:
 
 
 func _help_text() -> String:
+	var walk := _loc("hud.wasd", "WASD — Andar")
 	var guide := _guide()
 	var lines := PackedStringArray()
 	if guide != null and guide.has_method("help_lines"):
 		lines = guide.call("help_lines")
+	if lines.is_empty() or not str(lines[0]).begins_with("WASD"):
+		var rest := lines
+		lines = PackedStringArray()
+		lines.append(walk)
+		for line in rest:
+			if not str(line).begins_with("WASD"):
+				lines.append(str(line))
 	lines.append("")
 	lines.append(_loc("tip.mesura.body", ""))
 	return "\n".join(lines)
@@ -459,6 +469,22 @@ func _step(key: String, label: String, value: int) -> HBoxContainer:
 func _focus_resume() -> void:
 	if _resume:
 		_resume.grab_focus()
+
+
+func _set_interact_prompt_visible(show: bool) -> void:
+	var tree := get_tree()
+	if tree == null or tree.root == null:
+		return
+	var layer := tree.root.get_node_or_null("InteractPrompt")
+	if layer is CanvasLayer:
+		(layer as CanvasLayer).visible = show
+	for node in tree.get_nodes_in_group("player"):
+		if node.has_method("_set_prompt_visible"):
+			if show:
+				if node.has_method("_update_interact_prompt"):
+					node.call("_update_interact_prompt")
+			else:
+				node.call("_set_prompt_visible", false)
 
 
 func _set_talk_panels_visible(show: bool) -> void:
