@@ -26,6 +26,7 @@ var tips: Array = []
 var dismissed_tips: PackedStringArray = PackedStringArray()
 var settings: Dictionary = DEFAULT_SETTINGS.duplicate(true)
 var _active_tip: String = ""
+var _hud_panel: Control
 var _hud_title: Label
 var _hud_detail: Label
 var _hold_bar: ColorRect
@@ -287,20 +288,16 @@ func _hide_toast() -> void:
 
 
 func _refresh_hud() -> void:
-	if _hud_title == null:
+	if _hud_title == null or _hud_panel == null:
 		return
 	if _is_main_menu():
-		if _hud_title.get_parent():
-			_hud_title.get_parent().visible = false
+		_hud_panel.visible = false
 		return
 	var obj := current_objective()
-	var panel := _hud_title.get_parent()
 	if obj.is_empty():
-		if panel:
-			panel.visible = false
+		_hud_panel.visible = false
 		return
-	if panel:
-		panel.visible = true
+	_hud_panel.visible = true
 	_hud_title.text = _loc(str(obj.get("title_key", "")), "")
 	var bits: PackedStringArray = PackedStringArray()
 	var person := _loc(str(obj.get("person_key", "")), "")
@@ -363,6 +360,7 @@ func _chapter_id() -> String:
 
 func _build_hud() -> void:
 	var panel := Control.new()
+	_hud_panel = panel
 	panel.name = "ObjectiveHud"
 	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	panel.offset_left = 280.0
