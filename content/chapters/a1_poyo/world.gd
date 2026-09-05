@@ -3,6 +3,7 @@ extends Node3D
 
 const BEAT_ID := &"a1_poyo"
 const NAMED_FLAG := &"poyo_named"
+const HORSE_FLAG := "horse_companion"
 const TEVAR_ID := &"a1_tevar"
 const CARDENA_ID := &"a1_cardena"
 const RAID_ID := &"a1_poyo_raid"
@@ -14,6 +15,10 @@ var _cid_in_rest: bool = false
 
 func _ready() -> void:
 	_bind_chapter()
+	var runner := _runner()
+	if runner != null and runner.has_method("add_flag"):
+		if not runner.has_method("has_flag") or not bool(runner.has_flag(HORSE_FLAG)):
+			runner.add_flag(HORSE_FLAG)
 	_connect_zones()
 	apply_arrival()
 

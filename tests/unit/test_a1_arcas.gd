@@ -333,6 +333,8 @@ func _check_refuse_desertion() -> PackedStringArray:
 		failures.append("refuse must not stain arcas_cheat")
 	if _runner and "arcas_cheated" in _runner.flags:
 		failures.append("refuse must not set arcas_cheated")
+	if _runner == null or "arcas_refused" not in _runner.flags:
+		failures.append("refuse must persist arcas_refused")
 	if not is_equal_approx(_honor.state.honra, 43.0):
 		failures.append("refuse honra want 43 got %s" % _honor.state.honra)
 	if not is_equal_approx(_honor.state.onores, 0.0):

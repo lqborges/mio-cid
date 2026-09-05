@@ -212,6 +212,10 @@ class TestA1AlcocerDawnSortie(unittest.TestCase):
         self.assertIn("func start_sortie", source)
         self.assertIn("func run_sortie", source)
         self.assertIn("func complete_sortie", source)
+        self.assertIn("_show_booty_divide", source)
+        keep = source.split("func choose_keep", 1)[1].split("func choose_sell", 1)[0]
+        self.assertIn("choose_sell()", keep)
+        self.assertNotIn("_on_keep", keep)
         self.assertIn("alcocer_sortie_win", source)
         self.assertIn("alcocer_occupied", source)
         self.assertIn("alcocer_waited", source)

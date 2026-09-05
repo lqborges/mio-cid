@@ -165,7 +165,14 @@ func complete_sortie() -> void:
 	var honor := _honor()
 	if honor and honor.has_method("apply_id"):
 		honor.apply_id(WIN_EVENT)
-	_show_keep_or_sell()
+	# Keep is not a v1 branch here. Bind the holding so sell still works,
+	# but open the split instead of the Keep modal.
+	_load_holding()
+	var keep_ui := _keep_or_sell()
+	if keep_ui and keep_ui.has_method("bind_holding"):
+		keep_ui.bind_holding(holding)
+	_hide_keep_or_sell()
+	_show_booty_divide()
 
 
 func _hold_town() -> void:
@@ -183,11 +190,8 @@ func choose_keep() -> void:
 		return
 	if not _won:
 		complete_sortie()
-	var ui := _keep_or_sell()
-	if ui and ui.has_method("_on_keep"):
-		ui.call("_on_keep")
-		return
-	_on_keep_or_sell(&"keep", {})
+	# Keep is a dead control at Alcocer. Sell still opens the split.
+	choose_sell()
 
 
 func choose_sell() -> void:
@@ -196,7 +200,7 @@ func choose_sell() -> void:
 	if not _won:
 		complete_sortie()
 	var ui := _keep_or_sell()
-	if ui and ui.has_method("_on_sell"):
+	if ui and ui.has_method("_on_sell") and ui.get("holding") != null:
 		ui.call("_on_sell")
 		return
 	_on_keep_or_sell(&"sell", {})

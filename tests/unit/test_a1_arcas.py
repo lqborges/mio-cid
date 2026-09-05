@@ -101,7 +101,7 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertEqual(refuse["deltas"]["honra"], 3)
         self.assertNotIn("onores", refuse["deltas"])
         self.assertNotIn("stain_id", refuse)
-        self.assertFalse(refuse.get("flags_set"))
+        self.assertIn("arcas_refused", refuse.get("flags_set", []))
         self.assertIn("kept_word", refuse["tags"])
         self.assertIn("poverty", refuse["tags"])
         self.assertEqual(refuse.get("beat"), "a1_arcas")
@@ -144,6 +144,7 @@ class TestA1ArcasSandChest(unittest.TestCase):
         self.assertNotIn("_travel_to_cardena()", cheat)
         refuse = source.split("func choose_refuse", 1)[1].split("func cheated", 1)[0]
         self.assertIn("_confirm_choice", refuse)
+        self.assertIn('set_flag(&"arcas_refused")', refuse)
         self.assertNotIn("_finish_beat()", refuse)
         self.assertNotIn("_travel_to_cardena()", refuse)
         confirm = source.split("func _confirm_choice", 1)[1].split("func _whisper", 1)[0]

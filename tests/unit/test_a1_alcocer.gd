@@ -48,6 +48,7 @@ func _run() -> void:
 	failures.append_array(_check_occupy_does_not_win())
 	failures.append_array(_check_wait_uses_clock_not_plazo())
 	failures.append_array(_check_early_captain_deaths_still_win())
+	failures.append_array(_check_keep_still_allows_sell())
 	failures.append_array(_check_sortie_win_travels_to_embassy())
 	failures.append_array(_check_hub_lock_still_blocks_cardena())
 	_finish(failures)
@@ -438,6 +439,41 @@ func _check_early_captain_deaths_still_win() -> PackedStringArray:
 	return failures
 
 
+func _check_keep_still_allows_sell() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_prep_campaign()
+	var packed: Resource = load(WORLD)
+	if packed == null or not (packed is PackedScene):
+		failures.append("keep-sell: world.tscn failed to load")
+		return failures
+	var world: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(world)
+	world.run_sortie()
+	var guide: Node = get_root().get_node_or_null(NodePath("PlayerGuide"))
+	if guide != null and guide.has_method("current_objective"):
+		var obj: Variant = guide.call("current_objective")
+		if typeof(obj) != TYPE_DICTIONARY or str(obj.get("title_key", "")) != "obj.alcocer_divide.title":
+			failures.append("HUD after win must show divide, got %s" % str(obj))
+	if not world.has_method("choose_keep") or not world.has_method("choose_sell"):
+		failures.append("keep-sell: choose_keep/choose_sell missing")
+		world.free()
+		return failures
+	world.choose_keep()
+	if bool(world.get("_divided")):
+		failures.append("choose_keep must not confirm the split")
+	if not bool(world.get("_sold")):
+		failures.append("choose_keep must still allow sell")
+	_logged.clear()
+	world.choose_sell()
+	if not bool(world.get("_sold")):
+		failures.append("choose_sell after keep must still sell")
+	world.run_divide()
+	if not bool(world.get("_divided")):
+		failures.append("divide after keep must still confirm the split")
+	world.free()
+	return failures
+
+
 func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_prep_campaign()
@@ -472,6 +508,12 @@ func _check_sortie_win_travels_to_embassy() -> PackedStringArray:
 		failures.append("run_sortie must win the sortie")
 	if bool(world.get("_divided")):
 		failures.append("sortie must not skip the divide")
+	var keep_after: Node = world.find_child("KeepOrSell", true, false)
+	if keep_after and bool(keep_after.visible):
+		failures.append("KeepOrSell must stay hidden after the sortie; divide is the exit")
+	var divide_after: Node = world.find_child("BootyDivide", true, false)
+	if divide_after == null or not bool(divide_after.visible):
+		failures.append("BootyDivide must open after the sortie")
 	if _honor:
 		var event: HonorEvent = _honor.event_by_id(&"alcocer_sortie_win")
 		var want := onores_before
