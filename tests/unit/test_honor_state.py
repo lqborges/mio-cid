@@ -123,6 +123,8 @@ class TestHonorMeters(unittest.TestCase):
         self.assertIn("func _get_tooltip", meters)
         self.assertIn("locale_changed", meters)
         self.assertIn("hud.onores.tip", meters)
+        self.assertIn("hud.onores.gloss", meters)
+        self.assertIn("func _meter_gloss", meters)
         self.assertIn("func _get_tooltip", plazo)
         self.assertIn("locale_changed", plazo)
         self.assertIn("hud.plazo", plazo)

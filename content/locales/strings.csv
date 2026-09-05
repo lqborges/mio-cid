@@ -48,9 +48,13 @@ hud.ira,Ira,Ira
 hud.onores,Honores,Means
 hud.honor,Honor,Standing
 hud.honra,Honra,Name
+hud.onores.gloss,feudos,fiefs
+hud.honor.gloss,rey,king
+hud.honra.gloss,nombre,name
 hud.onores.tip,"Honores: feudos y derecho a mantener mesnada.","Honores: means and fiefs — the right to feed a warband."
 hud.honor.tip,"Honor: valía ante el rey.","Honor: standing with the king."
 hud.honra.tip,"Honra: el nombre que os guardan en las salas.","Honra: the name halls keep for you."
+hud.move_click,Clic al suelo,Click the ground
 hud.plazo,Plazo,Term
 hud.plazo.tip,"Días que restan del destierro de nueve jornadas.","Days left of the nine-day exile."
 hud.controls_hint,"WASD andar · E hablar","WASD walk · E talk"

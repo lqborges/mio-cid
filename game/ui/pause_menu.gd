@@ -89,6 +89,7 @@ func open() -> void:
 		tree.paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_clear_world_input()
+	_set_talk_panels_visible(false)
 	_focus_resume()
 
 
@@ -98,6 +99,7 @@ func resume() -> void:
 	var tree := get_tree()
 	if tree:
 		tree.paused = false
+	_set_talk_panels_visible(true)
 
 
 func _on_menu() -> void:
@@ -457,6 +459,16 @@ func _step(key: String, label: String, value: int) -> HBoxContainer:
 func _focus_resume() -> void:
 	if _resume:
 		_resume.grab_focus()
+
+
+func _set_talk_panels_visible(show: bool) -> void:
+	var tree := get_tree()
+	if tree == null:
+		return
+	for node in tree.get_nodes_in_group("talk_balloon"):
+		var panel: Node = node.get_node_or_null("Panel")
+		if panel is CanvasItem:
+			(panel as CanvasItem).visible = show
 
 
 func _clear_world_input() -> void:

@@ -27,6 +27,8 @@ func _test_guide_autoload() -> PackedStringArray:
 		runner.current_id = &"a1_vivar"
 		if "flags" in runner:
 			runner.flags = PackedStringArray()
+	if guide.has_method("set_setting"):
+		guide.call("set_setting", "locale", "es")
 	if not guide.has_method("current_objective"):
 		failures.append("PlayerGuide.current_objective missing")
 		return failures
@@ -73,6 +75,13 @@ func _test_guide_autoload() -> PackedStringArray:
 				failures.append("travel card must survive the first tick after announce")
 		if guide.has_method("dismiss_travel"):
 			guide.call("dismiss_travel")
+	if guide.has_method("help_lines"):
+		var help: PackedStringArray = guide.call("help_lines")
+		if help.is_empty() or not str(help[0]).begins_with("WASD"):
+			failures.append("Ayuda must list WASD before LMB click-move")
+		var joined := " ".join(help)
+		if not joined.contains("LMB") and not joined.contains("Clic"):
+			failures.append("Ayuda must still name click-to-move")
 	if guide.has_method("format_interact_prompt"):
 		InputGlyphs.set_device(InputGlyphs.DEVICE_KEYBOARD)
 		var prompt := str(guide.call("format_interact_prompt", "hud.interact_verb", "Hablar"))

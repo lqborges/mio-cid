@@ -9,10 +9,20 @@ const LABEL_KEYS := {
 	&"honor": "hud.honor",
 	&"honra": "hud.honra",
 }
+const GLOSS_KEYS := {
+	&"onores": "hud.onores.gloss",
+	&"honor": "hud.honor.gloss",
+	&"honra": "hud.honra.gloss",
+}
 const TIP_KEYS := {
 	&"onores": "hud.onores.tip",
 	&"honor": "hud.honor.tip",
 	&"honra": "hud.honra.tip",
+}
+const GLOSS_FALLBACK := {
+	&"onores": "feudos",
+	&"honor": "rey",
+	&"honra": "nombre",
 }
 const LABEL_FALLBACK := {
 	&"onores": "Honores",
@@ -114,9 +124,10 @@ func _get_tooltip(at_position: Vector2) -> String:
 	if meter == &"":
 		return ""
 	var label := _meter_label(meter)
+	var gloss := _meter_gloss(meter)
 	var tip := _meter_tip(meter)
 	var value := _meter_value(meter)
-	return "%s  %d\n%s" % [label, int(round(value)), tip]
+	return "%s (%s)  %d\n%s" % [label, gloss, int(round(value)), tip]
 
 
 func _draw() -> void:
@@ -141,7 +152,7 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	var color: Color = COLORS[meter]
 	var icon_c := origin + Vector2(col_w * 0.5, 22.0)
 	_draw_shape(SHAPES[meter], icon_c, color)
-	var bar := Rect2(origin.x + col_w * 0.24, 40.0, col_w * 0.52, height - 78.0)
+	var bar := Rect2(origin.x + col_w * 0.24, 40.0, col_w * 0.52, height - 88.0)
 	draw_rect(bar, TRACK)
 	var ratio := clampf(value / 100.0, 0.0, 1.0)
 	var fill_h := bar.size.y * ratio
@@ -150,21 +161,27 @@ func _draw_column(index: int, col_w: float, height: float, value: float, meter: 
 	_draw_pattern(PATTERNS[meter], fill, Color(1.0, 1.0, 1.0, 0.22))
 	draw_rect(bar, PARCHMENT, false, 2.0)
 	var font := ThemeDB.fallback_font
-	var font_size := 13
 	var label := _meter_label(meter)
-	var text_w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	if text_w > col_w - 4.0:
-		font_size = 11
-	var chip := Rect2(origin.x + 2.0, height - 26.0, col_w - 4.0, 18.0)
+	var gloss := _meter_gloss(meter)
+	var chip := Rect2(origin.x + 2.0, height - 40.0, col_w - 4.0, 36.0)
 	draw_rect(chip, INK)
 	draw_string(
 		font,
-		Vector2(origin.x, height - 12.0),
+		Vector2(origin.x, height - 26.0),
 		label,
 		HORIZONTAL_ALIGNMENT_CENTER,
 		col_w,
-		font_size,
+		12,
 		PARCHMENT,
+	)
+	draw_string(
+		font,
+		Vector2(origin.x, height - 12.0),
+		gloss,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		col_w,
+		11,
+		Color(0.86, 0.78, 0.58),
 	)
 
 
@@ -182,6 +199,12 @@ func _meter_value(meter: StringName) -> float:
 func _meter_label(meter: StringName) -> String:
 	var key := str(LABEL_KEYS.get(meter, ""))
 	var fallback := str(LABEL_FALLBACK.get(meter, String(meter)))
+	return _loc(key, fallback)
+
+
+func _meter_gloss(meter: StringName) -> String:
+	var key := str(GLOSS_KEYS.get(meter, ""))
+	var fallback := str(GLOSS_FALLBACK.get(meter, ""))
 	return _loc(key, fallback)
 
 

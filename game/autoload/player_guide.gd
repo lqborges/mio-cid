@@ -153,6 +153,10 @@ func replay_tips() -> void:
 	_interacted = false
 	_mesura_held = false
 	_save_settings()
+	# Ayuda already lists the bindings. Do not stack a toast on Pause / dialogue.
+	if _overlay_busy():
+		_hide_toast()
+		return
 	_consider_tips()
 
 
@@ -182,7 +186,8 @@ func subtitle_size() -> int:
 
 func help_lines() -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append(Glyphs.prompt("click_move", _loc("tip.move.verb", "Mover")))
+	lines.append("WASD — %s" % _loc("tip.move.verb", "Mover"))
+	lines.append(Glyphs.prompt("click_move", _loc("hud.move_click", "Clic al suelo")))
 	lines.append(Glyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
 	lines.append(Glyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
 	lines.append(Glyphs.prompt("slam", _loc("hud.slam", "Golpe")))
@@ -252,6 +257,10 @@ func _poll_onboarding() -> void:
 	if _is_main_menu():
 		_hide_toast()
 		return
+	if _overlay_busy():
+		_hide_toast()
+	elif not _active_tip.is_empty() and _toast != null and not _toast.visible:
+		_reshow_active_tip()
 	if _stick_moving():
 		note_moved()
 		_complete_tip_if("moved")
@@ -276,6 +285,9 @@ func _consider_tips() -> void:
 		_hide_toast()
 		return
 	if travel_visible():
+		return
+	if _overlay_busy():
+		_hide_toast()
 		return
 	if not _active_tip.is_empty():
 		return
@@ -333,8 +345,34 @@ func _show_tip(row: Dictionary) -> void:
 		_toast_title.text = _loc(str(row.get("title_key", "")), _active_tip)
 	if _toast_body:
 		_toast_body.text = _loc(str(row.get("body_key", "")), "")
+	if _overlay_busy():
+		_hide_toast()
+		return
 	if _toast:
 		_toast.visible = true
+
+
+func _reshow_active_tip() -> void:
+	if _active_tip.is_empty() or _overlay_busy():
+		return
+	for item in tips:
+		if not item is Dictionary:
+			continue
+		var row: Dictionary = item
+		if str(row.get("id", "")) == _active_tip:
+			_show_tip(row)
+			return
+
+
+func _overlay_busy() -> bool:
+	if _pause_open():
+		return true
+	return _group_visible("talk_balloon") or _group_visible("modal_choice")
+
+
+func _pause_open() -> bool:
+	var pause := _autoload("PauseMenu")
+	return pause != null and bool(pause.visible)
 
 
 func _hide_toast() -> void:
@@ -526,11 +564,11 @@ func _update_mount_hold() -> void:
 func _build_toast() -> void:
 	_toast = Control.new()
 	_toast.name = "OnboardingToast"
-	_toast.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_toast.offset_left = -260.0
 	_toast.offset_right = 260.0
-	_toast.offset_top = -210.0
-	_toast.offset_bottom = -96.0
+	_toast.offset_top = 88.0
+	_toast.offset_bottom = 200.0
 	_toast.mouse_filter = Control.MOUSE_FILTER_STOP
 	_toast.add_to_group("hud_click_sink")
 	_toast.visible = false

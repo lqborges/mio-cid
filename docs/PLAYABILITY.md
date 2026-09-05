@@ -51,6 +51,7 @@ File reproduced defects as separate issues with captures. Do not treat this chec
 | Travel arrival card + Burgos stepped objectives / child-first river | Done (this PR) |
 | Autoload preload for ObjectiveCatalog / InputGlyphs / CombatFeel (empty / stale `.godot` class cache) | Done (this PR) |
 | HUD locale + meter/plazo tooltips + WASD/E courtyard hint | Done (this PR) |
+| Honor/Honra glosses, world-anchored E prompt, Ayuda WASD+LMB, toast/dialogue unstack | Done (this PR) |
 | Style sheet + license manifest + regional CSG kits | Done (this PR) |
 | Foreground occluder fade (locked camera) | Done |
 | Combat windup/active/recovery + hit flash + Mesura block copy | Done |
