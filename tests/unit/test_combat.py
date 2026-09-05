@@ -68,7 +68,7 @@ class TestCombatV1(unittest.TestCase):
 
     def test_kit_slots_and_sfx_guard(self) -> None:
         source = _read("game/actors/player/cid_combat.gd")
-        for method in ("func slam(", "func leap(", "func shout(", "func weapon_swap("):
+        for method in ("func slam(", "func leap(", "func shout(", "func weapon_swap(", "func _cancel_attack_phases("):
             self.assertIn(method, source)
         self.assertIn('get_node_or_null("AudioService")', source)
         self.assertIn('has_method("play_sfx_id")', source)

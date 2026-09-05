@@ -57,6 +57,8 @@ var _injected: Dictionary = {}
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("touch_hud")
 	_apply_visibility()
 	_wire_buttons()
 	_wire_pause()
@@ -312,6 +314,7 @@ func _wire_pause() -> void:
 
 
 func _on_pause_pressed() -> void:
+	release_pointer()
 	var pause := get_node_or_null("/root/PauseMenu")
 	if pause != null and pause.has_method("open"):
 		pause.call("open")
@@ -460,6 +463,10 @@ func _reset_stick() -> void:
 			knob.position = (stick.size - knob.size) * 0.5
 	for action in MOVE_ACTIONS:
 		_inject_axis(action, 0.0)
+
+
+func release_pointer() -> void:
+	_release_injected()
 
 
 func _release_injected() -> void:

@@ -134,6 +134,7 @@ func _check_hud() -> PackedStringArray:
 		arena.free()
 
 	failures.append_array(_check_pointer_blocked_vs_lmb_slam(node, hud_script))
+	failures.append_array(_check_pause_releases_held_stick(node))
 	node.free()
 	return failures
 
@@ -183,6 +184,28 @@ func _check_pointer_blocked_vs_lmb_slam(hud: Node, hud_script: Script) -> Packed
 	if hud_script and bool(hud_script.get("pointer_blocked")):
 		failures.append("force_visible(false) left pointer_blocked after tree add")
 	cid.free()
+	return failures
+
+
+func _check_pause_releases_held_stick(hud: Node) -> PackedStringArray:
+	var failures: PackedStringArray = []
+	if not hud.has_method("release_pointer"):
+		failures.append("TouchHud missing release_pointer")
+		return failures
+	Input.action_release("move_right")
+	hud.call("_inject_axis", "move_right", 1.0)
+	hud.set("_stick_pointer", 0)
+	if not Input.is_action_pressed("move_right"):
+		failures.append("stick inject failed to press move_right")
+	hud.call("release_pointer")
+	if Input.is_action_pressed("move_right"):
+		failures.append("pause must release the held virtual stick")
+	if int(hud.get("_stick_pointer")) >= 0:
+		failures.append("pause must clear stick_pointer, got %s" % hud.get("_stick_pointer"))
+	# Finger-up-while-paused then Resume: injected action must stay released.
+	if Input.is_action_pressed("move_right"):
+		failures.append("resume after two-finger pause must not keep move_right pressed")
+	Input.action_release("move_right")
 	return failures
 
 

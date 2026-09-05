@@ -38,25 +38,51 @@ static func _flash_host(hurt: Node, table: Dictionary) -> void:
 	var host := hurt.get_parent()
 	if host == null:
 		host = hurt
-	var mesh := host.get_node_or_null("Visual/MeshInstance3D") as MeshInstance3D
-	if mesh == null and host is MeshInstance3D:
-		mesh = host as MeshInstance3D
-	if mesh == null:
+	var meshes := _visible_look_meshes(host)
+	if meshes.is_empty():
 		return
-	var mat := mesh.get_active_material(0)
-	if not (mat is StandardMaterial3D):
-		return
-	var local := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 	var flash := _color(table.get("hit_flash", [0.95, 0.88, 0.70]))
-	local.albedo_color = flash
-	mesh.set_surface_override_material(0, local)
+	var flashed: Array[MeshInstance3D] = []
+	for mesh in meshes:
+		var mat := mesh.get_active_material(0)
+		if not (mat is StandardMaterial3D):
+			continue
+		var local := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+		local.albedo_color = flash
+		mesh.set_surface_override_material(0, local)
+		flashed.append(mesh)
+	if flashed.is_empty():
+		return
 	var tree := host.get_tree() if host.is_inside_tree() else null
 	if tree:
 		tree.create_timer(float(table.get("hit_flash_sec", 0.08))).timeout.connect(
 			func() -> void:
-				if is_instance_valid(mesh):
-					mesh.set_surface_override_material(0, null)
+				for mesh in flashed:
+					if is_instance_valid(mesh):
+						mesh.set_surface_override_material(0, null)
 		)
+
+
+static func _visible_look_meshes(host: Node) -> Array[MeshInstance3D]:
+	var out: Array[MeshInstance3D] = []
+	var human := host.get_node_or_null("Visual/Humanoid")
+	if human:
+		_collect_visible_meshes(human, out)
+	if not out.is_empty():
+		return out
+	var cap := host.get_node_or_null("Visual/MeshInstance3D") as MeshInstance3D
+	if cap != null and cap.visible:
+		out.append(cap)
+	elif host is MeshInstance3D:
+		out.append(host as MeshInstance3D)
+	return out
+
+
+static func _collect_visible_meshes(node: Node, out: Array[MeshInstance3D]) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).visible:
+		out.append(node as MeshInstance3D)
+	for child in node.get_children():
+		_collect_visible_meshes(child, out)
 
 
 static func _nudge_camera(source: Node, table: Dictionary) -> void:

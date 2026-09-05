@@ -20,6 +20,7 @@ func _initialize() -> void:
 	failures.append_array(_test_you_fell_death())
 	failures.append_array(_test_cid_scene_sword_and_boxes())
 	failures.append_array(_test_arena_eight_dummies())
+	failures.append_array(_test_attack_switch_cancels_pending())
 	_finish(failures)
 
 
@@ -230,6 +231,48 @@ func _test_arena_eight_dummies() -> PackedStringArray:
 			if child.get_node_or_null("HurtBox") == null:
 				failures.append("%s missing HurtBox" % child.name)
 	arena.free()
+	return failures
+
+
+func _test_attack_switch_cancels_pending() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var combat: CidCombat = COMBAT.new()
+	var hit: HitBox = HIT.new()
+	var ring: HitBox = HIT.new()
+	combat.hit_box = hit
+	combat.shout_ring = ring
+	combat.slam()
+	combat.shout()
+	combat._tick_attack(0.06)
+	if hit.monitoring:
+		failures.append("shout after slam must not rearm the slash volume")
+	if str(combat.get("_pending_id")) == "slash":
+		failures.append("shout must clear the pending slash phase")
+	if combat.last_move != &"shout":
+		failures.append("shout must remain the current move after cancel")
+	if not ring.monitoring:
+		failures.append("shout volume should be live after the switch")
+	combat.lower_weapon()
+	combat.stamina = combat.max_stamina
+	combat.slam()
+	combat._tick_attack(0.06)
+	if not hit.monitoring:
+		failures.append("slash should arm after windup before leap")
+	combat.leap()
+	if hit.monitoring:
+		failures.append("leap must disarm the live slash volume during windup")
+	if combat.last_move != &"leap":
+		failures.append("leap must replace slash as the current move")
+	combat.stamina = combat.max_stamina
+	combat.slam()
+	if combat.last_move != &"slash" or combat.combo_step != 1:
+		failures.append("combo slam after cancel must still start at slash")
+	combat.slam()
+	if combat.last_move != &"thrust" or combat.combo_step != 2:
+		failures.append("second slam must still combo into thrust")
+	hit.free()
+	ring.free()
+	combat.free()
 	return failures
 
 

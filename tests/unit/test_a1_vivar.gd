@@ -41,6 +41,7 @@ func _run() -> void:
 		await process_frame
 		await process_frame
 	failures.append_array(_check_goto_is_idempotent())
+	failures.append_array(_check_new_game_overwrite_consent())
 	_finish(failures)
 
 
@@ -367,6 +368,53 @@ func _check_goto_is_idempotent() -> PackedStringArray:
 		failures.append("goto must remember the pending Burgos scene")
 	if _runner.has_method("_clear_pending_scene"):
 		_runner.call("_clear_pending_scene", String(_runner.get("_pending_scene")))
+	return failures
+
+
+func _check_new_game_overwrite_consent() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://game/ui/main_menu.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("main_menu.tscn failed to load")
+		return failures
+	var menu: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(menu)
+	menu.set("debug_full_slots", true)
+	menu.set("debug_skip_enter", true)
+	menu.set("debug_started_slot", 0)
+	if not menu.has_method("_on_new_game") or not menu.has_method("_cancel_overwrite"):
+		failures.append("main menu missing overwrite consent methods")
+		menu.free()
+		return failures
+	menu.call("_on_new_game")
+	if int(menu.get("debug_started_slot")) != 0:
+		failures.append("full slots must not start a new game on the first click")
+	var slots: Control = menu.get_node_or_null("Center/Slots") as Control
+	if slots == null or not slots.visible:
+		failures.append("full slots must show slot buttons for overwrite")
+	var status: Label = menu.get_node_or_null("Center/Status") as Label
+	if status == null or status.text.is_empty():
+		failures.append("full slots must explain that overwrite needs a slot")
+	var new_game := menu.get_node_or_null("Center/NewGame") as Button
+	if new_game and new_game.text not in ["Cancelar", "Cancel"]:
+		failures.append("overwrite pick should relabel New Game as cancel, got %s" % new_game.text)
+	menu.call("_cancel_overwrite")
+	if int(menu.get("debug_started_slot")) != 0:
+		failures.append("cancel must not start a new game")
+	if slots and slots.visible:
+		failures.append("cancel must hide the overwrite slots")
+	if status and not status.text.is_empty():
+		failures.append("cancel must clear overwrite status")
+	menu.call("_on_new_game")
+	if menu.has_method("_on_slot"):
+		menu.call("_on_slot", 3)
+	if int(menu.get("debug_started_slot")) != 0:
+		failures.append("first slot tap must only select, not overwrite")
+	if menu.has_method("_on_slot"):
+		menu.call("_on_slot", 3)
+	if int(menu.get("debug_started_slot")) != 3:
+		failures.append("second tap on the same slot must confirm overwrite of slot 3, got %s" % menu.get("debug_started_slot"))
+	menu.free()
 	return failures
 
 

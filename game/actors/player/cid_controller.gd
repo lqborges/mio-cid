@@ -342,6 +342,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if _leap_airborne and is_on_floor() and velocity.y <= 0.0:
 		_leap_airborne = false
+	_lock_isometric_camera()
 	_update_interact_prompt()
 
 
