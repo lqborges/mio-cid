@@ -58,6 +58,8 @@ class TestPoyoCampHub(unittest.TestCase):
         self.assertNotIn("GPUParticles3D", scene)
         self.assertIn("Mesnada", scene)
         self.assertIn("mesnada_ai.gd", scene)
+        self.assertIn("horse.tscn", scene)
+        self.assertIn("[node name=\"Horse\"", scene)
         self.assertIn("PoyoHill", scene)
         self.assertIn("NavigationRegion3D", scene)
         self.assertNotIn("size = Vector3(8, 2.4, 8)", scene)
@@ -80,6 +82,7 @@ class TestPoyoCampHub(unittest.TestCase):
         world = _read("content/chapters/a1_poyo/world.gd")
         self.assertNotIn("func _enter_tree", world)
         self.assertNotIn("clock.segment = 1", world)
+        self.assertIn("horse_companion", world)
         self.assertIn("goto", world)
         self.assertIn("current_scene != self", world)
 

@@ -84,6 +84,8 @@ func complete_roads() -> void:
 	if _roads_cut or _taken:
 		return
 	_roads_cut = true
+	if ChapterRunner and ChapterRunner.has_method("add_flag"):
+		ChapterRunner.add_flag("murviedro_roads_cut")
 	_whisper(ROADS_KEY)
 	_set_zone_monitoring("RoadCutZone", false)
 	_set_zone_monitoring("FieldZone", true)

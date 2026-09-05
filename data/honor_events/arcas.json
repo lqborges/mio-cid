@@ -14,6 +14,7 @@
       "id": "arcas_refuse",
       "deltas": { "honra": 3 },
       "tags": ["kept_word", "poverty"],
+      "flags_set": ["arcas_refused"],
       "beat": "a1_arcas"
     }
   ]

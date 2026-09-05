@@ -13,6 +13,7 @@ const COPY := {
 	&"plazo_expired": "the name is empty",
 	&"avengalvon_dead": "the name is empty",
 	&"steel_in_cortes": "the name is empty",
+	&"ride_host": "the name is empty",
 }
 
 @onready var _line: Label = $Center/Line

@@ -180,6 +180,12 @@ jobs:
       - name: Run Python horse companion tests
         run: python3 tests/unit/test_horse_companion.py
 
+      - name: Run Python campaign spine tests
+        run: python3 tests/unit/test_campaign_spine.py
+
+      - name: Run Python objective catalog tests
+        run: python3 tests/unit/test_objective_catalog.py
+
       - name: Import project
         if: steps.godot.outputs.found == 'true'
         run: |

@@ -3,10 +3,12 @@ extends Node3D
 
 const BEAT_ID := &"a2_jeronimo"
 const DEST := &"a2_embassy2"
+const YUSUF_ID := &"a2_yusuf"
 const HUB_LOCK := &"hub_lock_cardena"
 const HORSE_FLAG := "horse_companion"
 const NAMED_FLAG := &"babieca_named"
 const APPOINT_FLAG := &"jeronimo_appointed"
+const EMBASSY2_DONE := &"embassy2_done"
 const HORSE_ID := &"babieca"
 const HORSE_KEY := "a2_jeronimo.horse_name"
 const JERONIMO_ID := &"jeronimo"
@@ -16,7 +18,9 @@ const APPOINT_KEY := "a2_jeronimo.appoint"
 const CAGE_KEY := "a2_jeronimo.cage_locked"
 const PLACE_KEY := "a2_jeronimo.place_name"
 const EXIT_KEY := "a2_jeronimo.to_embassy"
+const YUSUF_KEY := "a2_jeronimo.to_yusuf"
 const DEST_SCENE := "res://content/chapters/a2_embassy2/world.tscn"
+const YUSUF_SCENE := "res://content/chapters/a2_yusuf/world.tscn"
 const DIALOGUE_PATH := "res://content/chapters/a2_jeronimo/jeronimo.dialogue"
 const BALLOON_PATH := "res://game/ui/talk_balloon.tscn"
 const DATA_PATH := "res://data/honor_events/jeronimo.json"
@@ -62,8 +66,8 @@ func start_cue(cue: String) -> void:
 		start_appoint()
 	elif cue == "cage":
 		try_open_cage()
-	elif cue == "leave" or cue == "embassy":
-		travel_to_embassy2()
+	elif cue == "leave" or cue == "embassy" or cue == "yusuf":
+		travel_next()
 
 
 func start_appoint(_cue: String = "appoint") -> void:
@@ -131,15 +135,36 @@ func is_lion_escaped() -> bool:
 	return false
 
 
+func travel_next() -> bool:
+	# After the second gift the family is home; the same gate opens the huerta.
+	if _has_flag(EMBASSY2_DONE):
+		return travel_to_yusuf()
+	return travel_to_embassy2()
+
+
 func travel_to_embassy2() -> bool:
+	if _has_flag(EMBASSY2_DONE):
+		return travel_to_yusuf()
 	if not _appointed and not _has_flag(APPOINT_FLAG):
 		_whisper("a2_jeronimo.appoint_first")
 		return false
-	# Keep exploring the hub until embassy 2 ships (PR-26).
 	if not ResourceLoader.exists(DEST_SCENE):
 		_whisper(EXIT_KEY)
 		return false
 	return _travel(DEST)
+
+
+func travel_to_yusuf() -> bool:
+	if not _appointed and not _has_flag(APPOINT_FLAG):
+		_whisper("a2_jeronimo.appoint_first")
+		return false
+	if not _has_flag(EMBASSY2_DONE):
+		_whisper(EXIT_KEY)
+		return false
+	if not ResourceLoader.exists(YUSUF_SCENE):
+		_whisper(YUSUF_KEY)
+		return false
+	return _travel(YUSUF_ID)
 
 
 func join_family() -> void:
@@ -227,7 +252,17 @@ func _spawn_family_capsule(
 func can_leave_to_embassy2() -> bool:
 	if not _appointed and not _has_flag(APPOINT_FLAG):
 		return false
+	if _has_flag(EMBASSY2_DONE):
+		return false
 	return _can_travel(DEST)
+
+
+func can_leave_to_yusuf() -> bool:
+	if not _appointed and not _has_flag(APPOINT_FLAG):
+		return false
+	if not _has_flag(EMBASSY2_DONE):
+		return false
+	return _can_travel(YUSUF_ID)
 
 
 func place_name_text() -> String:
@@ -264,8 +299,11 @@ func _label_npc() -> void:
 func _label_exit() -> void:
 	var label: Label3D = get_node_or_null("EmbassyExit/Name") as Label3D
 	if label:
-		label.text = _loc(EXIT_KEY)
+		label.text = _loc(YUSUF_KEY if _has_flag(EMBASSY2_DONE) else EXIT_KEY)
 		label.visible = true
+	var exit_label: Label3D = get_node_or_null("ToEmbassy") as Label3D
+	if exit_label:
+		exit_label.text = _loc(YUSUF_KEY if _has_flag(EMBASSY2_DONE) else EXIT_KEY)
 
 
 func _recruit_jeronimo() -> void:
@@ -322,7 +360,7 @@ func _on_embassy_entered(body: Node) -> void:
 	if body == null:
 		return
 	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
-		travel_to_embassy2()
+		travel_next()
 
 
 func _bind_mesnada() -> void:

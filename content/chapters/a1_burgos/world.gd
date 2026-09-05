@@ -13,6 +13,7 @@ const DRAW_STEEL_EVENT := &"burgos_draw_steel"
 const CAMP_RIVER_EVENT := &"burgos_camp_river"
 const V20_KEY := "poem.v20"
 const HEAR_CHILD_KEY := "a1_burgos.hear_child_first"
+const ASK_INN_KEY := "obj.burgos_inn.detail"
 
 var _talking: bool = false
 var _steel_drawn: bool = false
@@ -125,12 +126,15 @@ func camp_on_river() -> void:
 
 
 func _try_camp_on_river() -> void:
-	# Walk-through is the exit. The child verse must land first so Burgos
-	# is not a three-meter skip into Arcas.
-	if _has_flag(CHILD_HEARD):
+	# Walk-through is the exit. Child verse and inn refusal must land first
+	# so Burgos is not a three-meter skip into Arcas.
+	if _has_flag(CHILD_HEARD) and _has_flag(INN_ASKED):
 		camp_on_river()
 		return
-	_hint_hear_child()
+	if not _has_flag(CHILD_HEARD):
+		_hint_hear_child()
+		return
+	_hint_ask_inn()
 
 
 func _physics_process(_delta: float) -> void:
@@ -233,12 +237,20 @@ func _try_balloon(resource: Resource, cue: String) -> bool:
 
 
 func _hint_hear_child() -> void:
+	_whisper_lock(HEAR_CHILD_KEY)
+
+
+func _hint_ask_inn() -> void:
+	_whisper_lock(ASK_INN_KEY)
+
+
+func _whisper_lock(key: String) -> void:
 	var whisper: Node = find_child("HallWhisper", true, false)
 	if whisper and whisper.has_method("whisper_key"):
-		whisper.call("whisper_key", HEAR_CHILD_KEY)
+		whisper.call("whisper_key", key)
 	var guide := get_node_or_null("/root/PlayerGuide")
 	if guide != null and guide.has_method("note_blocked"):
-		guide.call("note_blocked", HEAR_CHILD_KEY)
+		guide.call("note_blocked", key)
 
 
 func _has_flag(flag_id: StringName) -> bool:

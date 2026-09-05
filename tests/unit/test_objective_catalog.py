@@ -31,6 +31,14 @@ class TestObjectiveCatalog(unittest.TestCase):
         self.assertIn("burgos_inn_asked", by_id["burgos_camp"]["when_all_flags"])
         self.assertEqual(by_id["arcas_choose"]["lock_reason_key"], "lock.arcas_choose")
         self.assertEqual(by_id["castejon_take"]["place_key"], "location.castejon")
+        self.assertIn("alcocer_occupied", by_id["alcocer_occupy"]["when_none_flags"])
+        self.assertIn("jeronimo_appointed", by_id["jeronimo"]["when_none_flags"])
+        self.assertIn("embassy2_done", by_id["jeronimo_yusuf"]["when_all_flags"])
+        self.assertIn("avengalvon_recruited", by_id["embassy2_recruit"]["when_none_flags"])
+        self.assertIn("garcia_done", by_id["toledo_garcia"]["when_none_flags"])
+        self.assertIn("ride_host", by_id["querella"]["when_none_flags"])
+        self.assertIn("ride_host", by_id["querella_host"]["when_all_flags"])
+        self.assertIn("murviedro_roads_cut", by_id["murviedro_roads"]["when_none_flags"])
         locks = {row["id"]: row for row in data["locks"]}
         self.assertEqual(locks["cardena_closed"]["to"], "a1_cardena")
         self.assertIn("hub_lock_cardena", locks["cardena_closed"]["when_all_flags"])
@@ -64,6 +72,15 @@ class TestObjectiveCatalog(unittest.TestCase):
             "obj.arcas_choose.title",
             "obj.cardena_farewell.title",
             "obj.castejon_take.title",
+            "obj.alcocer_occupy.title",
+            "obj.jeronimo_yusuf.title",
+            "obj.embassy2_recruit.title",
+            "obj.toledo_garcia.title",
+            "obj.querella_host.title",
+            "lock.ride_host",
+            "fail.ride_host",
+            "a2_jeronimo.to_yusuf",
+            "a3_carrion.shout_prompt",
             "lock.cardena_closed",
             "tip.mesura.body",
             "ui.pause.journal",

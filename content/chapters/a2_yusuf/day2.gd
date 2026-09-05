@@ -226,9 +226,12 @@ func _connect_charge_zone() -> void:
 func _on_charge_entered(body: Node) -> void:
 	if body == null:
 		return
-	if body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir"):
-		start_charge()
-		complete_resolve()
+	if not (body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir")):
+		return
+	start_charge()
+	if _couches < 1:
+		return
+	complete_resolve()
 
 
 func _connect_yusuf() -> void:

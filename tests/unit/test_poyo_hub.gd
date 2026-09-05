@@ -59,6 +59,8 @@ func _test_scene_loads() -> PackedStringArray:
 		failures.append("poyo missing Mesnada")
 	if world.get_node_or_null("Cid") == null:
 		failures.append("poyo missing Cid")
+	if world.get_node_or_null("Horse") == null:
+		failures.append("poyo missing Horse")
 	if world.get_node_or_null("PoyoHill") == null:
 		failures.append("poyo missing the namesake hill")
 	if world.get_node_or_null("NavigationRegion3D") == null:

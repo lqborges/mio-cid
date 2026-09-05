@@ -130,6 +130,8 @@ func complete_occupy() -> void:
 	_raid_started = true
 	_occupied = true
 	_hold_town()
+	if ChapterRunner and ChapterRunner.has_method("add_flag"):
+		ChapterRunner.add_flag("alcocer_occupied")
 	_whisper(OCCUPY_KEY)
 	_set_zone_monitoring("OccupyZone", false)
 	_set_zone_monitoring("WaitZone", true)
@@ -141,6 +143,8 @@ func complete_wait() -> void:
 	if not _occupied:
 		complete_occupy()
 	_waited = true
+	if ChapterRunner and ChapterRunner.has_method("add_flag"):
+		ChapterRunner.add_flag("alcocer_waited")
 	_whisper(WAIT_KEY)
 	if CampaignClock and CampaignClock.has_method("rest_camp"):
 		CampaignClock.rest_camp()
@@ -155,11 +159,20 @@ func complete_sortie() -> void:
 		complete_wait()
 	_sortie_started = true
 	_won = true
+	if ChapterRunner and ChapterRunner.has_method("add_flag"):
+		ChapterRunner.add_flag("alcocer_sortie_won")
 	_whisper(WIN_KEY)
 	var honor := _honor()
 	if honor and honor.has_method("apply_id"):
 		honor.apply_id(WIN_EVENT)
-	_show_keep_or_sell()
+	# Keep is not a v1 branch here. Bind the holding so sell still works,
+	# but open the split instead of the Keep modal.
+	_load_holding()
+	var keep_ui := _keep_or_sell()
+	if keep_ui and keep_ui.has_method("bind_holding"):
+		keep_ui.bind_holding(holding)
+	_hide_keep_or_sell()
+	_show_booty_divide()
 
 
 func _hold_town() -> void:
@@ -177,11 +190,8 @@ func choose_keep() -> void:
 		return
 	if not _won:
 		complete_sortie()
-	var ui := _keep_or_sell()
-	if ui and ui.has_method("_on_keep"):
-		ui.call("_on_keep")
-		return
-	_on_keep_or_sell(&"keep", {})
+	# Keep is a dead control at Alcocer. Sell still opens the split.
+	choose_sell()
 
 
 func choose_sell() -> void:
@@ -190,7 +200,7 @@ func choose_sell() -> void:
 	if not _won:
 		complete_sortie()
 	var ui := _keep_or_sell()
-	if ui and ui.has_method("_on_sell"):
+	if ui and ui.has_method("_on_sell") and ui.get("holding") != null:
 		ui.call("_on_sell")
 		return
 	_on_keep_or_sell(&"sell", {})

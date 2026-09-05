@@ -1,10 +1,11 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://content/chapters/a1_poyo/world.gd" id="1_world"]
 [ext_resource type="PackedScene" path="res://content/art/characters/cid/cid.tscn" id="2_cid"]
 [ext_resource type="Script" path="res://game/actors/mesnada/mesnada_ai.gd" id="3_ai"]
 [ext_resource type="PackedScene" path="res://content/art/characters/captain/captain.tscn" id="4_captain"]
 [ext_resource type="PackedScene" path="res://game/ui/hall_whisper.tscn" id="5_whisper"]
+[ext_resource type="PackedScene" path="res://content/art/characters/horse/horse.tscn" id="6_horse"]
 
 [sub_resource type="Environment" id="Environment_poyo"]
 background_mode = 1
@@ -138,6 +139,9 @@ font_size = 36
 
 [node name="Cid" parent="." instance=ExtResource("2_cid")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+
+[node name="Horse" parent="." instance=ExtResource("6_horse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.05, 0.6)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." groups=["mesnada_nav"]]
 navigation_mesh = SubResource("NavigationMesh_poyo")

@@ -133,14 +133,29 @@ func _first_empty_slot() -> int:
 
 
 func _enter_game() -> void:
+	# New Game resets current_id to Vivar. Load keeps the saved beat.
+	var dest := _resume_chapter()
 	if ChapterRunner and ChapterRunner.has_method("goto"):
-		ChapterRunner.goto(&"a1_vivar")
+		ChapterRunner.goto(dest)
 		return
-	if ResourceLoader.exists(VIVAR_SCENE):
-		get_tree().change_scene_to_file(VIVAR_SCENE)
+	var path := ""
+	if ChapterRunner and ChapterRunner.has_method("_scene_path"):
+		path = str(ChapterRunner._scene_path(dest))
+	if path.is_empty() or not ResourceLoader.exists(path):
+		path = VIVAR_SCENE
+	if ResourceLoader.exists(path):
+		get_tree().change_scene_to_file(path)
 		return
 	if _status:
 		_status.text = "partida nueva"
+
+
+func _resume_chapter() -> StringName:
+	if ChapterRunner and "current_id" in ChapterRunner:
+		var saved := StringName(String(ChapterRunner.current_id))
+		if not String(saved).is_empty():
+			return saved
+	return &"a1_vivar"
 
 
 func _rebuild_slots() -> void:

@@ -115,6 +115,7 @@ lock.generic,El camino aún no abre.,The road is not open yet.
 lock.arcas_choose,Debéis elegir: las arcas o el ayuno.,You must choose: the chests or hunger.
 lock.cardena_closed,El adiós está hecho. No hay vuelta a Cardeña.,The farewell is done. There is no return to Cardeña.
 lock.castejon_keep,Vender. Quedarse es la ira de Alfonso.,Sell. To stay is Alfonso's wrath.
+lock.ride_host,La hueste cierra Toledo. Recargad.,The host closes Toledo. Reload.
 loc.vivar,Vivar,Vivar
 loc.vivar_gate,La puerta del solar,The solar gate
 loc.burgos,Burgos,Burgos
@@ -150,30 +151,53 @@ obj.navapalos_sleep.title,El sueño de Gabriel,Gabriel's dream
 obj.navapalos_sleep.detail,Dormid. El plazo se cumple.,Sleep. The plazo is done.
 obj.castejon_take.title,Tomad Castejón al alba,Take Castejón at dawn
 obj.castejon_take.detail,Saquead y vended. Quedarse es morir.,Loot and sell. To stay is to die.
+obj.alcocer_occupy.title,Ocupad Alcocer,Occupy Alcocer
+obj.alcocer_occupy.detail,Entrad en la villa. Tomadla.,Enter the town. Take it.
+obj.alcocer_wait.title,Esperad en Alcocer,Wait in Alcocer
+obj.alcocer_wait.detail,Quedaos. El host llega al alba.,Stay. The host comes at dawn.
 obj.alcocer_sortie.title,La salida de Alcocer,The Alcocer sortie
-obj.alcocer_sortie.detail,Ocupad esperad y salid al alba.,Occupy wait and sortie at dawn.
+obj.alcocer_sortie.detail,Salid al alba contra Fáriz y Galve.,Sortie at dawn against Fáriz and Galve.
+obj.alcocer_divide.title,Partid el botín,Divide the booty
+obj.alcocer_divide.detail,Vended y partid. El quinto es de Alfonso.,Sell and divide. The fifth is Alfonso's.
+obj.alcocer_divide.done,Alcocer se vendió. El quinto quedó.,Alcocer was sold. The fifth remained.
 obj.embassy1.title,El primer presente,The first gift
 obj.embassy1.detail,Álvar lleva el presente al rey.,Álvar takes the gift to the king.
 obj.poyo.title,El Poyo del Cid,El Poyo del Cid
 obj.poyo.detail,El campamento tiene nombre. Tévar espera.,The camp has a name. Tévar waits.
 obj.tevar.title,La mesa de Tévar,The table at Tévar
 obj.tevar.detail,Venced. Hacedle comer. Quedaos con Colada.,Win. Make him eat. Keep Colada.
-obj.murviedro.title,Cortad Valencia,Cut Valencia off
+obj.murviedro_roads.title,Cortad los caminos,Cut the roads
+obj.murviedro_roads.detail,Cerrad Valencia por Murviedro.,Close Valencia at Murviedro.
+obj.murviedro.title,Tomad el campo,Take the field
 obj.murviedro.detail,Tomad el campo de Murviedro.,Take the field at Murviedro.
 obj.siege.title,El cerco de Valencia,The siege of Valencia
 obj.siege.detail,Nueve meses. No asaltéis el muro.,Nine months. Do not storm the wall.
 obj.jeronimo.title,El obispado,The bishopric
 obj.jeronimo.detail,Nombrad a Jerónimo. El león sigue cerrado.,Appoint Jerónimo. The lion stays locked.
+obj.jeronimo_embassy.title,El segundo presente,The second gift
+obj.jeronimo_embassy.detail,Salid hacia Medinaceli. Alfonso espera el presente.,Ride to Medinaceli. Alfonso waits for the gift.
+obj.jeronimo_yusuf.title,Salid a la huerta,Ride to the huerta
+obj.jeronimo_yusuf.detail,Yusuf espera en el campo. La familia ya está en casa.,Yusuf waits in the field. The family is already home.
+obj.embassy2_recruit.title,Reclutad a Avengalvón,Recruit Avengalvón
+obj.embassy2_recruit.detail,Sin él no hay escolta por Medinaceli.,Without him there is no Medinaceli escort.
+obj.embassy2_escort.title,La escolta de Medinaceli,The Medinaceli escort
+obj.embassy2_escort.detail,Guardad a Jimena y a las hijas.,Keep Jimena and the daughters.
 obj.embassy2.title,El segundo presente,The second gift
-obj.embassy2.detail,Reclutad a Avengalvón. La familia vuelve.,Recruit Avengalvón. The family returns.
+obj.embassy2.detail,Álvar lleva el presente. La familia vuelve.,Álvar takes the gift. The family returns.
 obj.yusuf.title,Yusuf en la huerta,Yusuf in the huerta
 obj.yusuf.detail,El campo el primer día. Una carga el segundo.,The field on day one. One charge on day two.
+obj.yusuf_day2.title,La carga del segundo día,The second-day charge
+obj.yusuf_day2.detail,Una sola carga. Luego se resuelve.,One charge. Then it resolves.
 obj.embassy3.title,El tercer presente,The third gift
 obj.embassy3.detail,El perdón se acerca.,Pardon draws near.
 obj.repay.title,Devolver a Raquel y Vidas,Repay Raquel and Vidas
 obj.repay.detail,La mancha se lava con marcos.,The stain is washed with marks.
 obj.tagus.title,El perdón del Tajo,The Tagus pardon
-obj.tagus.detail,Alfonso perdona. Las bodas se aceptan.,Alfonso pardons. The marriages are accepted.
+obj.tagus.detail,Tres días de corte. Primero el perdón.,Three days of court. Pardon first.
+obj.tagus_day2.title,El segundo día,The second day
+obj.tagus_day2.detail,Descansad. El tercer día pide las bodas.,Rest. The third day asks the marriages.
+obj.tagus_marry.title,Las bodas se aceptan,The marriages are accepted
+obj.tagus_marry.detail,No hay rehúso. El sí es la corte.,There is no refuse. Yes is the court.
 obj.bodas.title,Las bodas,The weddings
 obj.bodas.detail,Los infantes están en Valencia.,The Infantes are in Valencia.
 obj.leon.title,El león,The lion
@@ -186,12 +210,16 @@ obj.corpes.title,La noticia de Corpes,News from Corpes
 obj.corpes.detail,Oíd a Félez. El hecho no se salta.,Hear Félez. The fact cannot be skipped.
 obj.querella.title,La querella,The complaint
 obj.querella.detail,Una sola pregunta. La mesura abre Toledo.,One ask. Mesura opens Toledo.
+obj.querella_host.title,La hueste no es ley,The host is not law
+obj.querella_host.detail,Alfonso no oirá esto en Toledo. Recargad.,Alfonso will not hear this in Toledo. Reload.
+obj.toledo_garcia.title,García habla primero,García speaks first
+obj.toledo_garcia.detail,Oíd al juez. Luego las tres demandas.,Hear the judge. Then the three asks.
 obj.toledo.title,Las Cortes de Toledo,The Cortes of Toledo
-obj.toledo.detail,La palabra no el acero.,Speech not steel.
+obj.toledo.detail,Espadas dote y riepto. La palabra no el acero.,Swords dowry and riepto. Speech not steel.
 obj.wait.title,Tres semanas,Three weeks
 obj.wait.detail,Jimena descansa. Las lides esperan.,Jimena rests. The lists wait.
 obj.carrion.title,Las lides de Carrión,The lists of Carrión
-obj.carrion.detail,Mirad. Un grito por lid. No desenvainéis.,Watch. One shout per duel. Do not draw.
+obj.carrion.detail,Acercaos a las lides. Un grito por lid. No desenvainéis.,Approach the lists. One shout per duel. Do not draw.
 obj.pentecost.title,Pentecostés,Pentecost
 obj.pentecost.detail,El cantar se cierra.,The song closes.
 fail.you_fell,Caísteis. El nombre espera el último guardado.,You fell. The name waits at the last save.
@@ -287,6 +315,7 @@ a2_jeronimo.gift,Marcos para el obispado. Es administración.,Marks for the bish
 a2_jeronimo.cage_locked,La jaula está cerrada. El león no ha salido.,The cage is locked. The lion has not come out.
 a2_jeronimo.appoint_first,Primero el obispado.,The bishopric first.
 a2_jeronimo.to_embassy,Hacia Alfonso,Toward Alfonso
+a2_jeronimo.to_yusuf,Hacia la huerta,Toward the huerta
 char.avengalvon,Avengalvón,Avengalvón
 location.medinaceli,Medinaceli,Medinaceli
 a2_embassy2.prompt,Álvar llevará el segundo presente a Alfonso. Jimena y las hijas vienen por Medinaceli.,Álvar will take the second gift to Alfonso. Jimena and the daughters come via Medinaceli.
@@ -447,11 +476,16 @@ a3_toledo.colada_martin,Colada va a Martín Antolínez.,Colada goes to Martín A
 a3_toledo.princes,Navarra pide a Elvira. Aragón pide a Sol.,Navarre asks for Elvira. Aragon asks for Sol.
 a3_toledo.wait,Valencia aún no abre. Tres semanas.,Valencia is not open yet. Three weeks.
 fail.steel_in_cortes,En esta corte no se desenvaina. Recargad.,Steel is not drawn in this hall. Reload.
+fail.ride_host,La hueste no es ley. Alfonso no oirá esto. Recargad.,A host is not law. Alfonso will not hear this. Reload.
 fail.name_empty,El nombre está vacío. Recargad.,The name is empty. Reload.
 a3_valencia_wait.table,Tres semanas. Jimena descansa. Los campeones cabalgan.,Three weeks. Jimena rests. The champions ride.
 a3_valencia_wait.rested,Pasaron veintiún días. La lid espera en Carrión.,Twenty-one days passed. The lists wait in Carrión.
 a3_valencia_wait.carrion_wait,Carrión aún no abre. Esperad.,Carrión is not open yet. Wait.
 a3_carrion.table,Las lides. Yo miro. No desenvaino.,The lists. I watch. I do not draw.
+a3_carrion.shout_prompt,Un grito por lid. ¿Cómo miráis?,One shout per duel. How do you watch?
+a3_carrion.shout_silence,Callar,Stay silent
+a3_carrion.shout_once,Un grito,One shout
+a3_carrion.shout_too_much,Gritar de más,Shout too much
 a3_carrion.win_all,Los tres vencen. El nombre vuelve.,All three win. The name returns.
 a3_carrion.lose_any,Hay mancha. Aún hay Pentecostés.,There is a stain. Pentecost still comes.
 a3_carrion.pentecost_wait,Pentecostés aún no abre.,Pentecost is not open yet.

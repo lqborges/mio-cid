@@ -495,6 +495,10 @@ func _check_day2_scene(world: Node) -> PackedStringArray:
 			box = shape_node.shape as BoxShape3D
 		if box == null or box.size.x < 48.0:
 			failures.append("ChargeZone must span the fight corridor, size %s" % (box.size if box else "missing"))
+		if box and box.size.z > 4.01:
+			failures.append("ChargeZone depth must sit on Yusuf, size.z %s" % box.size.z)
+		if charge.global_position.z > -2.0:
+			failures.append("ChargeZone must sit on Yusuf, z %s" % charge.global_position.z)
 	if world.has_method("is_scripted_day2") and not bool(world.is_scripted_day2()):
 		failures.append("day2 must report is_scripted_day2")
 	if bool(world.get("_resolved")):

@@ -31,6 +31,7 @@ func _run() -> void:
 		failures.append_array(_check_talk_npcs_not_camp_click())
 		failures.append_array(_check_named_prompts())
 		failures.append_array(_check_river_waits_for_child())
+		failures.append_array(_check_river_waits_for_inn())
 		failures.append_array(_check_river_camp_reachable())
 		failures.append_array(_check_camp_does_not_restack_goto())
 		_world.free()
@@ -268,6 +269,37 @@ func _check_river_waits_for_child() -> PackedStringArray:
 	return failures
 
 
+func _check_river_waits_for_inn() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	_world.set("_camped", false)
+	_strip_flag("burgos_inn_asked")
+	var cid: Node3D = _world.get_node_or_null("Cid") as Node3D
+	if cid == null:
+		failures.append("Cid missing for river-before-inn")
+		return failures
+	if _world.has_method("_set_flag"):
+		_world.call("_set_flag", &"burgos_child_heard")
+	var queued := 0
+	if _runner:
+		queued = int(_runner.get("queued_scene_changes"))
+	cid.global_position = Vector3(0.0, 0.05, 9.6)
+	if _world.has_method("_physics_process"):
+		_world._physics_process(0.016)
+	if bool(_world.get("_camped")):
+		failures.append("river camp must wait until the inn is asked")
+	if _runner and int(_runner.get("queued_scene_changes")) != queued:
+		failures.append("child-only river walk must not queue Arcas")
+	var whisper: Node = _world.find_child("HallWhisper", true, false)
+	var shown := ""
+	if whisper:
+		var label: Node = whisper.get_node_or_null("Line")
+		if label and "text" in label:
+			shown = str(label.get("text"))
+	if shown.find("posadero") < 0 and shown.find("río") < 0 and shown.find("innkeeper") < 0:
+		failures.append("child-only river walk must whisper ask-the-inn, got %s" % shown)
+	return failures
+
+
 func _check_river_camp_reachable() -> PackedStringArray:
 	var failures: PackedStringArray = []
 	_world.set("_camped", false)
@@ -277,6 +309,7 @@ func _check_river_camp_reachable() -> PackedStringArray:
 		return failures
 	if _world.has_method("_set_flag"):
 		_world.call("_set_flag", &"burgos_child_heard")
+		_world.call("_set_flag", &"burgos_inn_asked")
 	cid.global_position = Vector3(0.0, 0.05, 1.5)
 	if cid.global_position.z >= 4.0:
 		failures.append("square spawn z want < 4, got %s" % cid.global_position.z)
@@ -284,7 +317,7 @@ func _check_river_camp_reachable() -> PackedStringArray:
 	if _world.has_method("_physics_process"):
 		_world._physics_process(0.016)
 	if not bool(_world.get("_camped")):
-		failures.append("Cid at the river tents must camp_on_river after hearing the child")
+		failures.append("Cid at the river tents must camp after child and inn")
 	return failures
 
 

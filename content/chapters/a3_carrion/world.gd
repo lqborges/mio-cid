@@ -21,6 +21,7 @@ var _results: Array = []
 var _resolved: bool = false
 var _left: bool = false
 var _failed: bool = false
+var _shout_open: bool = false
 
 
 func _ready() -> void:
@@ -39,6 +40,7 @@ func _ready() -> void:
 	_hold_mesnada()
 	_make_cid_spectator()
 	_connect_zones()
+	_hide_shout()
 	_show_place_name()
 	_name_horse()
 	_label_people()
@@ -57,12 +59,42 @@ func start_cue(cue: String) -> void:
 			advance_duel()
 		"resolve", "lists":
 			resolve_lists()
+		"ask_shout", "shout":
+			present_shout()
 
 
 func set_shout(shout_id: StringName) -> void:
 	if _resolved or _duel_index < 0 or _duel_index > 2:
 		return
 	_shouts[_duel_index] = shout_id
+
+
+func present_shout() -> void:
+	if _resolved:
+		return
+	_shout_open = true
+	_set_flag(&"lists_watching")
+	var ui := _shout_choice()
+	if ui and ui.has_method("present"):
+		ui.call("present", _duel_index)
+	_whisper("a3_carrion.shout_prompt")
+
+
+func choose_shout(shout_id: StringName) -> void:
+	if _resolved:
+		return
+	set_shout(shout_id)
+	_hide_shout()
+	if _duel_index >= 2:
+		resolve_lists()
+		return
+	advance_duel()
+	present_shout()
+
+
+func shout_visible() -> bool:
+	var ui := _shout_choice()
+	return _shout_open and ui != null and bool(ui.visible)
 
 
 func advance_duel() -> void:
@@ -191,11 +223,26 @@ func _connect_zone(node_name: String, cb: Callable) -> void:
 
 
 func _on_list_entered(body: Node) -> void:
-	if body == null or _resolved:
+	if body == null or _resolved or _shout_open:
 		return
 	if not (body.is_in_group("player") or body.is_in_group("horse_companion") or body.has_method("facing_dir")):
 		return
-	resolve_lists()
+	present_shout()
+
+
+func _hide_shout() -> void:
+	_shout_open = false
+	var ui := _shout_choice()
+	if ui == null:
+		return
+	if ui.has_method("dismiss"):
+		ui.call("dismiss")
+	else:
+		ui.visible = false
+
+
+func _shout_choice() -> Node:
+	return find_child("ShoutChoice", true, false)
 
 
 func _hold_mesnada() -> void:

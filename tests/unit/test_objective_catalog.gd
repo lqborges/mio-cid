@@ -6,6 +6,7 @@ func _initialize() -> void:
 	var failures: PackedStringArray = []
 	failures.append_array(_test_opening_objectives())
 	failures.append_array(_test_locks_and_journal())
+	failures.append_array(_test_campaign_steps())
 	_finish(failures)
 
 
@@ -60,6 +61,32 @@ func _test_locks_and_journal() -> PackedStringArray:
 		failures.append("journal must recap Vivar after leaving it")
 	if "arcas_choose" in ids:
 		failures.append("journal must not spoil Arcas before the chapter")
+	return failures
+
+
+func _test_campaign_steps() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var catalog: ObjectiveCatalog = ObjectiveCatalog.from_file()
+	var alcocer_start: Dictionary = catalog.current("a1_alcocer", PackedStringArray())
+	if str(alcocer_start.get("id", "")) != "alcocer_occupy":
+		failures.append("Alcocer start must ask to occupy, got %s" % str(alcocer_start.get("id", "")))
+	var after_wait := PackedStringArray(["alcocer_occupied", "alcocer_waited"])
+	var sortie: Dictionary = catalog.current("a1_alcocer", after_wait)
+	if str(sortie.get("id", "")) != "alcocer_sortie":
+		failures.append("after the wait Alcocer must ask for the sortie, got %s" % str(sortie.get("id", "")))
+	var hub_open: Dictionary = catalog.current("a2_jeronimo", PackedStringArray(["jeronimo_appointed"]))
+	if str(hub_open.get("id", "")) != "jeronimo_embassy":
+		failures.append("appointed hub must point at embassy 2, got %s" % str(hub_open.get("id", "")))
+	var hub_home := PackedStringArray(["jeronimo_appointed", "embassy2_done"])
+	var yusuf: Dictionary = catalog.current("a2_jeronimo", hub_home)
+	if str(yusuf.get("id", "")) != "jeronimo_yusuf":
+		failures.append("after embassy 2 the hub must point at Yusuf, got %s" % str(yusuf.get("id", "")))
+	var escort: Dictionary = catalog.current("a2_embassy2", PackedStringArray(["avengalvon_recruited"]))
+	if str(escort.get("id", "")) != "embassy2_escort":
+		failures.append("recruited embassy 2 must ask for the escort, got %s" % str(escort.get("id", "")))
+	var garcia: Dictionary = catalog.current("a3_toledo", PackedStringArray())
+	if str(garcia.get("id", "")) != "toledo_garcia":
+		failures.append("Toledo start must ask for García first, got %s" % str(garcia.get("id", "")))
 	return failures
 
 

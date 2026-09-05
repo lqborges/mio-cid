@@ -77,6 +77,8 @@ func choose_refuse() -> void:
 	_hide_choice()
 	_ensure_roster()
 	_apply_honor(REFUSE_EVENT)
+	if ChapterRunner and ChapterRunner.has_method("set_flag"):
+		ChapterRunner.set_flag(&"arcas_refused")
 	_watch_desertion()
 	if CampaignClock and CampaignClock.has_method("run_refuse_48h"):
 		CampaignClock.run_refuse_48h()
