@@ -59,7 +59,8 @@ jobs:
           gh release download "${GODOT_VERSION}-stable" \
             --repo godotengine/godot \
             --pattern "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" \
-            --dir "${GODOT_CACHE_DIR}"
+            --dir "${GODOT_CACHE_DIR}" \
+            --clobber
           bytes="$(wc -c < "${archive}")"
           echo "archive bytes=${bytes}"
           if [ "${bytes}" -lt 10000000 ]; then

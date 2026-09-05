@@ -47,7 +47,8 @@ jobs:
           gh release download "${GODOT_VERSION}-stable" \
             --repo godotengine/godot \
             --pattern "Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" \
-            --dir "${GODOT_CACHE_DIR}"
+            --dir "${GODOT_CACHE_DIR}" \
+            --clobber
           unzip -qo "${archive}" -d "${GODOT_CACHE_DIR}"
           bin=""
           while IFS= read -r candidate; do
