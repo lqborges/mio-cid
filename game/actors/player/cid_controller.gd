@@ -39,6 +39,7 @@ var _dodge_cd: float = 0.0
 var _slam_cd: float = 0.0
 var _leap_cd: float = 0.0
 var _shout_cd: float = 0.0
+var _slam_buffer: float = 0.0
 var _queued_dodge: bool = false
 var _queued_slam: bool = false
 var _queued_leap: bool = false
@@ -52,6 +53,9 @@ var _click_move_from_hud: bool = false
 var _prompt_layer: CanvasLayer = null
 var _prompt_label: Label = null
 var _target_ring: MeshInstance3D = null
+var _occluders: Array[GeometryInstance3D] = []
+var _nudge: Vector3 = Vector3.ZERO
+var _nudge_left: float = 0.0
 var _horse: HorseCompanionScript = null
 ## Chapter sleep (lion hall). Walk_speed 0 is not enough: dodge uses dodge_speed.
 var chapter_asleep: bool = false
@@ -230,6 +234,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_mark_handled()
 	elif event.is_action_pressed("slam"):
 		_queued_slam = true
+		_slam_buffer = _input_buffer_sec()
 		_mark_handled()
 	elif event.is_action_pressed("leap"):
 		_queued_leap = true
@@ -252,6 +257,7 @@ func _physics_process(delta: float) -> void:
 	# Yaw on the body would orbit the child camera — keep rotation on Visual only.
 	rotation = Vector3.ZERO
 	_tick_cooldowns(delta)
+	_tick_nudge(delta)
 	if chapter_asleep:
 		# _orient_visual look_at stands the capsule; dodge/leap ignore walk_speed.
 		_clear_action_queues()
@@ -343,6 +349,8 @@ func _consume_queues(wish: Vector3) -> void:
 		_queued_slam = false
 		_queued_leap = false
 	if _is_waiting():
+		if _queued_slam or _queued_leap or _queued_shout:
+			_note_blocked("combat.blocked.mesura")
 		_queued_slam = false
 		_queued_leap = false
 		_queued_shout = false
@@ -358,6 +366,9 @@ func _consume_queues(wish: Vector3) -> void:
 			combat.slam()
 			_slam_cd = slam_cooldown
 			_leap_airborne = false
+			_queued_slam = false
+		elif _queued_slam and _slam_buffer <= 0.0:
+			_queued_slam = false
 		if _queued_leap and _leap_cd <= 0.0:
 			combat.leap()
 			_leap_cd = leap_cooldown
@@ -369,7 +380,6 @@ func _consume_queues(wish: Vector3) -> void:
 			combat.weapon_swap()
 		if _queued_dump and mesura != null and mesura.has_method("try_dump"):
 			mesura.try_dump()
-		_queued_slam = false
 		_queued_leap = false
 		_queued_shout = false
 		_queued_swap = false
@@ -596,6 +606,89 @@ func _lock_isometric_camera() -> void:
 	var look := camera_rig.global_position + Vector3(0.0, camera_look_y, 0.0)
 	if not camera.global_position.is_equal_approx(look):
 		camera.look_at(look)
+	if _nudge_left > 0.0 and not _nudge.is_zero_approx():
+		camera.position += _nudge
+	_fade_occluders()
+
+
+func apply_camera_nudge(offset: Vector3, seconds: float) -> void:
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("shake_enabled") and not bool(guide.call("shake_enabled")):
+		return
+	_nudge = offset
+	_nudge_left = maxf(seconds, 0.0)
+
+
+func _tick_nudge(delta: float) -> void:
+	if _nudge_left <= 0.0:
+		_nudge = Vector3.ZERO
+		return
+	_nudge_left = maxf(_nudge_left - delta, 0.0)
+	if _nudge_left <= 0.0:
+		_nudge = Vector3.ZERO
+
+
+func _fade_occluders() -> void:
+	_restore_occluders()
+	if camera == null or not is_inside_tree():
+		return
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return
+	var from := camera.global_position
+	var to := global_position + Vector3(0.0, 1.2, 0.0)
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [get_rid()]
+	query.collide_with_areas = false
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var collider: Variant = hit.get("collider")
+	if not (collider is Node):
+		return
+	var geom := _geometry_of(collider as Node)
+	if geom == null:
+		return
+	_occluders.append(geom)
+	var mat := geom.material_override
+	if mat == null:
+		mat = StandardMaterial3D.new()
+		if geom is CSGShape3D and (geom as CSGShape3D).material is StandardMaterial3D:
+			mat = ((geom as CSGShape3D).material as StandardMaterial3D).duplicate()
+		geom.material_override = mat
+		geom.set_meta("kit_fade_owned", true)
+	if mat is StandardMaterial3D:
+		var faded := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+		faded.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		var color := faded.albedo_color
+		color.a = 0.28
+		faded.albedo_color = color
+		geom.material_override = faded
+		geom.set_meta("kit_fade_prev", mat)
+
+
+func _restore_occluders() -> void:
+	for geom in _occluders:
+		if geom == null or not is_instance_valid(geom):
+			continue
+		if geom.has_meta("kit_fade_prev"):
+			geom.material_override = geom.get_meta("kit_fade_prev")
+			geom.remove_meta("kit_fade_prev")
+		elif geom.has_meta("kit_fade_owned"):
+			geom.material_override = null
+			geom.remove_meta("kit_fade_owned")
+	_occluders.clear()
+
+
+func _geometry_of(node: Node) -> GeometryInstance3D:
+	var probe: Node = node
+	while probe:
+		if probe is GeometryInstance3D and not (probe is MeshInstance3D and probe.get_parent() == visual):
+			if probe.is_ancestor_of(self) or probe == self:
+				return null
+			return probe as GeometryInstance3D
+		probe = probe.get_parent()
+	return null
 
 
 func _apply_gravity(delta: float) -> void:
@@ -612,6 +705,19 @@ func _tick_cooldowns(delta: float) -> void:
 	_slam_cd = maxf(_slam_cd - delta, 0.0)
 	_leap_cd = maxf(_leap_cd - delta, 0.0)
 	_shout_cd = maxf(_shout_cd - delta, 0.0)
+	_slam_buffer = maxf(_slam_buffer - delta, 0.0)
+
+
+func _input_buffer_sec() -> float:
+	if combat != null and "tunables" in combat:
+		return float(combat.tunables.get("input_buffer_sec", 0.12))
+	return 0.12
+
+
+func _note_blocked(key: String) -> void:
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("note_blocked"):
+		guide.call("note_blocked", key)
 
 
 func _try_interact() -> void:

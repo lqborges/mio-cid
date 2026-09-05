@@ -4,7 +4,7 @@
 
 **Tip:** Vivar through Tagus, marriages, lion, Búcar / Tizona, Corpes, querella, Cortes de Toledo, three-week wait, spectator lists, Pentecost credits.
 
-In-game: the top bar is the current objective. Pause → **Dietario** / **Ayuda** / **Ajustes**. Ayuda replays the opening tips (move, talk, dismiss, choice, held Mesura). See [docs/PLAYABILITY.md](docs/PLAYABILITY.md) and issue #12. The external walkthrough stays issue #11.
+In-game: the top bar is the current objective. Pause → **Dietario** / **Ayuda** / **Ajustes**. Ayuda replays the opening tips (move, talk, dismiss, choice, held Mesura). Chapters use regional CSG kits ([docs/STYLE_SHEET.md](docs/STYLE_SHEET.md)). Hold-interact fills a mount bar; Mesura names why attacks are blocked. See [docs/PLAYABILITY.md](docs/PLAYABILITY.md) and issue #12. The external walkthrough stays issue #11.
 
 ## How to run
 

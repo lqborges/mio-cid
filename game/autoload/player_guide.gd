@@ -27,6 +27,7 @@ var settings: Dictionary = DEFAULT_SETTINGS.duplicate(true)
 var _active_tip: String = ""
 var _hud_title: Label
 var _hud_detail: Label
+var _hold_bar: ColorRect
 var _toast: Control
 var _toast_title: Label
 var _toast_body: Label
@@ -36,6 +37,7 @@ var _interacted: bool = false
 var _mesura_held: bool = false
 var _dialogue_was_open: bool = false
 var _choice_was_open: bool = false
+var _blocked_until_msec: int = 0
 
 
 func _ready() -> void:
@@ -103,6 +105,17 @@ func note_interacted() -> void:
 func note_mesura() -> void:
 	_mesura_held = true
 	_complete_tip_if("mesura_held")
+
+
+func note_blocked(key: String) -> void:
+	if _is_main_menu():
+		return
+	var now := Time.get_ticks_msec()
+	if now < _blocked_until_msec:
+		return
+	_blocked_until_msec = now + 1600
+	if _hud_detail:
+		_hud_detail.text = _loc(key, "Mesura holds the blade.")
 
 
 func dismiss_active_tip() -> void:
@@ -295,7 +308,9 @@ func _refresh_hud() -> void:
 		bits.append(place)
 	if not detail.is_empty() and detail != str(obj.get("detail_key", "")):
 		bits.append(detail)
-	_hud_detail.text = " · ".join(bits)
+	if Time.get_ticks_msec() >= _blocked_until_msec:
+		_hud_detail.text = " · ".join(bits)
+	_update_mount_hold()
 
 
 func _guide_flags() -> PackedStringArray:
@@ -381,6 +396,30 @@ func _build_hud() -> void:
 	_hud_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	col.add_child(_hud_detail)
 	panel.visible = false
+	_hold_bar = ColorRect.new()
+	_hold_bar.name = "MountHold"
+	_hold_bar.color = PARCHMENT
+	_hold_bar.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_hold_bar.offset_left = 16.0
+	_hold_bar.offset_right = 16.0
+	_hold_bar.offset_top = -6.0
+	_hold_bar.offset_bottom = -2.0
+	_hold_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hold_bar.visible = false
+	panel.add_child(_hold_bar)
+
+
+func _update_mount_hold() -> void:
+	if _hold_bar == null:
+		return
+	var tree := get_tree()
+	var horse: Node = tree.get_first_node_in_group("horse_companion") if tree else null
+	var progress := 0.0
+	if horse != null and horse.has_method("mount_progress"):
+		progress = float(horse.call("mount_progress"))
+	_hold_bar.visible = progress > 0.02
+	if _hold_bar.visible:
+		_hold_bar.offset_right = 16.0 + 200.0 * progress
 
 
 func _build_toast() -> void:

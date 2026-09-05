@@ -4,6 +4,7 @@ extends CharacterBody3D
 ## Greybox fodder for the arena fps check. Capsule only; no particles, no shadows.
 
 const TUNABLES_PATH := "res://data/combat/tunables.json"
+const ROLES_PATH := "res://data/combat/roles.json"
 
 @export var unkillable: bool = false
 @export var character_id: StringName = &""
@@ -76,6 +77,7 @@ func _apply_character() -> void:
 	unkillable = member.unkillable
 	if member.role == &"taifa_captain":
 		add_to_group("taifa_captain")
+	_apply_role(String(member.role))
 	if unkillable or hurt_box == null:
 		return
 	var hp := float(member.combat)
@@ -84,6 +86,32 @@ func _apply_character() -> void:
 		return
 	hurt_box.max_hp = hp
 	hurt_box.hp = hp
+
+
+func _apply_role(role_id: String) -> void:
+	var mapped := role_id
+	if mapped == "taifa_captain":
+		mapped = "captain"
+	if mapped.is_empty() or not FileAccess.file_exists(ROLES_PATH):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ROLES_PATH))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return
+	var row: Variant = (parsed as Dictionary).get(mapped, {})
+	if typeof(row) != TYPE_DICTIONARY:
+		return
+	var data: Dictionary = row
+	var scale_v := float(data.get("scale", 1.0))
+	if scale_v != 1.0:
+		scale = Vector3.ONE * scale_v
+	var cloth: Variant = data.get("cloth", [])
+	if cloth is Array and (cloth as Array).size() >= 3:
+		var a: Array = cloth
+		var color := Color(float(a[0]), float(a[1]), float(a[2]))
+		set_meta("live_albedo", color)
+		var humanoid := get_node_or_null("Visual/Humanoid")
+		if humanoid and humanoid.has_method("tint_cloth"):
+			humanoid.call("tint_cloth", color)
 
 
 func _physics_process(delta: float) -> void:

@@ -200,6 +200,16 @@ jobs:
         run: |
           "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_player_guide.gd
 
+      - name: Run chapter kit headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_chapter_kit.gd
+
+      - name: Run combat feel headless test
+        if: steps.godot.outputs.found == 'true'
+        run: |
+          "${{ steps.godot.outputs.godot_bin }}" --headless --path . --audio-driver Dummy -s res://tests/unit/test_combat_feel.gd
+
       - name: Run HonorState headless test
         if: steps.godot.outputs.found == 'true'
         run: |

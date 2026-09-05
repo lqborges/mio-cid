@@ -72,6 +72,7 @@ func apply_hit(amount: float, damage_type: StringName, stagger: float, source: N
 	hp = maxf(hp - dealt, 0.0)
 	stagger_left = maxf(stagger_left, stagger)
 	damaged.emit(dealt, damage_type, stagger, source)
+	CombatFeel.note_hit(self, dealt, source)
 	if hp <= 0.0:
 		died.emit()
 	return true

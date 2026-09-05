@@ -6,5 +6,13 @@
   "combo_window": 0.9,
   "dummy_hp": 38,
   "ignite_damage_mult": 1.2,
-  "default_difficulty": "mesura"
+  "default_difficulty": "mesura",
+  "windup_frac": 0.12,
+  "active_frac": 0.46,
+  "recovery_frac": 0.42,
+  "input_buffer_sec": 0.12,
+  "hit_flash_sec": 0.08,
+  "hit_flash": [0.95, 0.88, 0.70],
+  "camera_nudge_deg": 0.35,
+  "camera_nudge_sec": 0.08
 }

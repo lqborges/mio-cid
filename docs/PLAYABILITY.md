@@ -42,24 +42,28 @@ Record SHA, engine, renderer, device, resolution, input method, quality, peak me
 
 File reproduced defects as separate issues with captures. Do not treat this checklist as playtest evidence.
 
-## This PR implements (P0 docs + P1 guide)
+## Implemented vs deferred
 
 | Item | Status |
 | --- | --- |
-| DESIGN/README/PLAYABLE hardware + camera reconciliation | Done in this PR |
-| Objective HUD + journal from `data/objectives/catalog.json` | Done |
-| Contextual onboarding + Help replay | Done |
-| Input-aware interact glyphs + selected-target ring | Done |
-| Pause journal / help / settings (volumes, reduced motion, subtitle size) | Done |
-| Fail-copy reasons + reload last chapter autosave | Done |
-| P0 screenshots / device captures | **Unverified** — no gameplay runtime was captured here |
-| P2 art kits / P3 combat juice / P4 rollout | Not this PR |
+| DESIGN/README/PLAYABLE hardware + camera reconciliation | Done (#13) |
+| Objective HUD + journal + onboarding + pause Help/Settings | Done (#13) |
+| Style sheet + license manifest + regional CSG kits | Done (this PR) |
+| Foreground occluder fade (locked camera) | Done |
+| Combat windup/active/recovery + hit flash + Mesura block copy | Done |
+| Horse hold-progress bar | Done |
+| P0 screenshots / device captures | **Deferred** — no named min-spec capture yet |
+| Production skinned kits / Mixamo-free hero mesh | **Deferred** — dedicated art PRs |
+| Formative 4-of-5 player test | **Deferred** — see `tests/playtest/opening_slice.md` |
+| Min-spec / Android profiler gates | **Deferred** — unavailable hardware is a blocked gate |
 
 ## How to verify in-engine
 
 ```bash
 godot --headless --path . -s res://tests/unit/test_objective_catalog.gd
 godot --headless --path . -s res://tests/unit/test_player_guide.gd
+godot --headless --path . -s res://tests/unit/test_chapter_kit.gd
+godot --headless --path . -s res://tests/unit/test_combat_feel.gd
 godot --headless --path . -s res://tests/unit/test_a1_vivar.gd
 ```
 

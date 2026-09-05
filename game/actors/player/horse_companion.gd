@@ -244,6 +244,13 @@ func try_gallop(delta: float) -> bool:
 	return spend_stamina(cost)
 
 
+func mount_progress() -> float:
+	var need := float(tunables.get("mount_hold_sec", 0.0))
+	if need <= 0.0:
+		return 0.0
+	return clampf(_mount_hold / need, 0.0, 1.0)
+
+
 func interact_prompt_key() -> String:
 	if _mounted:
 		return str(tunables.get("dismount_prompt_key", "horse.dismount"))
