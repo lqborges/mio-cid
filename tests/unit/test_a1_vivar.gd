@@ -106,9 +106,22 @@ func _check_hud_labels_and_click_sink() -> PackedStringArray:
 			failures.append("onores label want Honores, got %s" % onores)
 		if onores == "onores" or onores.begins_with("onores"):
 			failures.append("onores label is still clipped/uncapitalized")
+	if hud.has_method("gloss_texts"):
+		var gloss: PackedStringArray = hud.call("gloss_texts")
+		if gloss.size() < 3 or gloss[0] != "feudos" or gloss[1] != "rey" or gloss[2] != "nombre":
+			failures.append("HonorMeters glosses want feudos/rey/nombre, got %s" % " / ".join(gloss))
+	if hud.get_node_or_null("GlossOnores") == null:
+		failures.append("HonorMeters missing GlossOnores node")
 	var bar: Node = _world.find_child("PlazoBar", true, false)
 	if bar is Control and (bar as Control).mouse_filter != Control.MOUSE_FILTER_STOP:
 		failures.append("PlazoBar must STOP mouse so HUD is a click sink")
+	if bar != null:
+		if bar.get_node_or_null("Caption") == null:
+			failures.append("PlazoBar missing Caption node")
+		if bar.has_method("caption_text"):
+			var caption := str(bar.call("caption_text"))
+			if not caption.begins_with("Plazo"):
+				failures.append("PlazoBar caption want Plazo…, got %s" % caption)
 	return failures
 
 
@@ -164,6 +177,10 @@ func _check_pause_menu() -> PackedStringArray:
 	if not pause.has_method("open") or not pause.has_method("resume"):
 		failures.append("PauseMenu missing open/resume")
 		return failures
+	if pause.has_method("_help_text"):
+		var help_body := str(pause.call("_help_text"))
+		if not help_body.begins_with("WASD"):
+			failures.append("Ayuda must start with WASD, got %s" % help_body.split("\n")[0])
 	pause.call("open")
 	if not bool(pause.visible):
 		failures.append("Escape pause menu did not open")

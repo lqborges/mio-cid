@@ -15,6 +15,7 @@ func _initialize() -> void:
 	failures.append_array(_test_uncurable_combat_honra_refused())
 	failures.append_array(_test_reset_keeps_resource())
 	failures.append_array(_test_no_unfed_streak_on_honor_state())
+	failures.append_array(_test_meter_gloss_labels())
 	_finish(failures)
 
 
@@ -245,6 +246,39 @@ func _test_reset_keeps_resource() -> PackedStringArray:
 		failures.append("reset_state honra want 40 got %s" % HonorService.state.honra)
 	if HonorService.state.has_stain(&"arcas_cheat") or HonorService.state.has_stain(&"uncurable_by_combat"):
 		failures.append("reset_state must clear stains")
+	return failures
+
+
+func _test_meter_gloss_labels() -> PackedStringArray:
+	var failures: PackedStringArray = []
+	var packed: Resource = load("res://game/ui/honor_meters.tscn")
+	if packed == null or not (packed is PackedScene):
+		failures.append("honor_meters.tscn failed to load")
+		return failures
+	var meters: Node = (packed as PackedScene).instantiate()
+	get_root().add_child(meters)
+	if meters.has_method("gloss_texts"):
+		var gloss: PackedStringArray = meters.call("gloss_texts")
+		if gloss.size() != 3:
+			failures.append("HonorMeters.gloss_texts want 3 rows, got %d" % gloss.size())
+		elif gloss[0] != "feudos" or gloss[1] != "rey" or gloss[2] != "nombre":
+			failures.append("HonorMeters glosses want feudos/rey/nombre, got %s" % " / ".join(gloss))
+	else:
+		failures.append("HonorMeters.gloss_texts missing")
+	if meters.get_node_or_null("GlossHonor") == null:
+		failures.append("HonorMeters scene missing GlossHonor node")
+	var plazo_packed: Resource = load("res://game/ui/plazo_bar.tscn")
+	if plazo_packed is PackedScene:
+		var plazo: Node = (plazo_packed as PackedScene).instantiate()
+		get_root().add_child(plazo)
+		if plazo.has_method("caption_text"):
+			var caption := str(plazo.call("caption_text"))
+			if not caption.begins_with("Plazo"):
+				failures.append("PlazoBar caption want Plazo…, got %s" % caption)
+		if plazo.get_node_or_null("Caption") == null:
+			failures.append("PlazoBar scene missing Caption node")
+		plazo.queue_free()
+	meters.queue_free()
 	return failures
 
 

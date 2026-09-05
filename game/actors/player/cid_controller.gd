@@ -52,8 +52,10 @@ var _leap_airborne: bool = false
 var _block_click_move: bool = false
 var _click_move_from_hud: bool = false
 var _prompt_layer: CanvasLayer = null
+var _prompt_host: Control = null
 var _prompt_label: Label = null
 var _prompt_chip: ColorRect = null
+var _prompt_world: Label3D = null
 var _target_ring: MeshInstance3D = null
 var _occluders: Array[GeometryInstance3D] = []
 var _nudge: Vector3 = Vector3.ZERO
@@ -76,11 +78,12 @@ func _ready() -> void:
 	_lock_isometric_camera()
 	_horse = _find_horse()
 	_ensure_touch_hud()
-	_ensure_interact_prompt()
 	_ensure_target_ring()
+	_ensure_interact_prompt()
 	var looks := get_tree().root.get_node_or_null("HumanoidLooks") if is_inside_tree() else null
 	if looks and looks.has_method("ensure"):
 		looks.call("ensure", self)
+	tree_exiting.connect(_on_tree_exiting)
 
 
 func facing_dir() -> Vector3:
@@ -806,29 +809,28 @@ func _focus_interactable() -> Node:
 
 
 func _update_interact_prompt() -> void:
-	if _prompt_label == null:
-		return
 	if _modal_ui_open() or chapter_asleep or chapter_locked:
-		_prompt_label.visible = false
+		_set_prompt_visible(false)
 		_set_target_ring(null)
 		return
 	var target := _focus_interactable()
-	_prompt_label.visible = target != null
 	_set_target_ring(target)
-	if target:
-		var key := "hud.interact_verb"
-		if target.has_method("interact_prompt_key"):
-			var custom := str(target.call("interact_prompt_key"))
-			if not custom.is_empty():
-				key = custom
-		var fallback := _loc_text("hud.interact_verb", "Hablar")
-		var guide := get_node_or_null("/root/PlayerGuide")
-		if guide != null and guide.has_method("format_interact_prompt"):
-			_prompt_label.text = str(guide.call("format_interact_prompt", key, fallback))
-		else:
-			_prompt_label.text = _loc_text(key, "E — Hablar")
-		_place_prompt_over(target as Node3D)
-	_sync_prompt_chip()
+	if target == null:
+		_set_prompt_visible(false)
+		return
+	var key := "hud.interact_verb"
+	if target.has_method("interact_prompt_key"):
+		var custom := str(target.call("interact_prompt_key"))
+		if not custom.is_empty():
+			key = custom
+	var fallback := _loc_text("hud.interact_verb", "Hablar")
+	var text := _loc_text(key, "E — Hablar")
+	var guide := get_node_or_null("/root/PlayerGuide")
+	if guide != null and guide.has_method("format_interact_prompt"):
+		text = str(guide.call("format_interact_prompt", key, fallback))
+	_set_prompt_text(text)
+	_set_prompt_visible(true)
+	_place_prompt_over(target as Node3D)
 
 
 func _ensure_target_ring() -> void:
@@ -850,6 +852,7 @@ func _ensure_target_ring() -> void:
 	_target_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_target_ring.visible = false
 	add_child(_target_ring)
+	_ensure_world_prompt()
 
 
 func _set_target_ring(target: Node) -> void:
@@ -873,41 +876,127 @@ func _note_guide_interact() -> void:
 func _ensure_interact_prompt() -> void:
 	if _prompt_label != null or not is_inside_tree():
 		return
-	_prompt_layer = CanvasLayer.new()
-	_prompt_layer.name = "InteractPrompt"
-	_prompt_layer.layer = 25
-	_prompt_chip = ColorRect.new()
-	_prompt_chip.name = "Chip"
-	_prompt_chip.color = Color(0.08, 0.06, 0.04, 0.92)
-	_prompt_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_prompt_chip.visible = false
-	_prompt_layer.add_child(_prompt_chip)
-	_prompt_label = Label.new()
-	_prompt_label.name = "Hint"
-	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_prompt_label.add_theme_color_override("font_color", Color(0.97, 0.92, 0.80))
-	_prompt_label.add_theme_font_size_override("font_size", 20)
-	_prompt_label.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	_prompt_label.position = Vector2(0.0, 0.0)
-	_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_prompt_label.visible = false
-	_prompt_layer.add_child(_prompt_label)
-	add_child(_prompt_layer)
+	_ensure_target_ring()
+	_ensure_world_prompt()
+	# Screen-space chip lives on the scene root. A CanvasLayer child of Cid
+	# inherited the player's 3D transform and kept E pinned to the HUD edge.
+	var host: Node = get_tree().root
+	_prompt_layer = host.get_node_or_null("InteractPrompt") as CanvasLayer
+	if _prompt_layer == null:
+		_prompt_layer = CanvasLayer.new()
+		_prompt_layer.name = "InteractPrompt"
+		_prompt_layer.layer = 25
+		host.add_child(_prompt_layer)
+	_prompt_host = _prompt_layer.get_node_or_null("Root") as Control
+	if _prompt_host == null:
+		_prompt_host = Control.new()
+		_prompt_host.name = "Root"
+		_prompt_host.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_prompt_layer.add_child(_prompt_host)
+		_prompt_host.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_prompt_chip = _prompt_host.get_node_or_null("Chip") as ColorRect
+	if _prompt_chip == null:
+		_prompt_chip = ColorRect.new()
+		_prompt_chip.name = "Chip"
+		_prompt_chip.color = Color(0.08, 0.06, 0.04, 0.92)
+		_prompt_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_prompt_host.add_child(_prompt_chip)
+	_prompt_label = _prompt_host.get_node_or_null("Hint") as Label
+	if _prompt_label == null:
+		_prompt_label = Label.new()
+		_prompt_label.name = "Hint"
+		_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		_prompt_label.add_theme_color_override("font_color", Color(0.97, 0.92, 0.80))
+		_prompt_label.add_theme_font_size_override("font_size", 20)
+		_prompt_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_prompt_host.add_child(_prompt_label)
+	_prompt_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_prompt_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_prompt_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_prompt_chip.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_prompt_chip.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_prompt_chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_set_prompt_visible(false)
+
+
+func _ensure_world_prompt() -> void:
+	if _prompt_world != null or _target_ring == null:
+		return
+	_prompt_world = Label3D.new()
+	_prompt_world.name = "InteractChip"
+	_prompt_world.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_prompt_world.pixel_size = 0.005
+	_prompt_world.font_size = 32
+	_prompt_world.outline_size = 8
+	_prompt_world.modulate = Color(0.97, 0.92, 0.80)
+	_prompt_world.outline_modulate = Color(0.08, 0.06, 0.04, 0.95)
+	_prompt_world.position = Vector3(0.0, 2.55, 0.0)
+	_prompt_world.visible = false
+	_target_ring.add_child(_prompt_world)
+
+
+func _on_tree_exiting() -> void:
+	if _prompt_layer == null or not is_instance_valid(_prompt_layer):
+		return
+	var tree := get_tree()
+	if tree:
+		for node in tree.get_nodes_in_group("player"):
+			if node != self:
+				return
+	_prompt_layer.queue_free()
+	_prompt_layer = null
+
+
+func interact_prompt_text() -> String:
+	if _prompt_world != null and not _prompt_world.text.is_empty():
+		return _prompt_world.text
+	if _prompt_label != null:
+		return _prompt_label.text
+	return ""
+
+
+func _set_prompt_text(text: String) -> void:
+	if _prompt_label:
+		_prompt_label.text = text
+	if _prompt_world:
+		_prompt_world.text = text
+
+
+func _set_prompt_visible(show: bool) -> void:
+	if _prompt_label:
+		_prompt_label.visible = show
+	if _prompt_chip:
+		_prompt_chip.visible = show
+	if _prompt_world:
+		_prompt_world.visible = show
 
 
 func _place_prompt_over(target: Node3D) -> void:
-	if _prompt_label == null:
+	if target == null:
 		return
+	# World chip rides the gold ring (already on the selected person).
+	if _prompt_world:
+		_prompt_world.visible = true
 	var cam := camera
-	if cam == null or not is_instance_valid(cam):
+	if cam == null or not is_instance_valid(cam) or _prompt_label == null:
 		return
-	var head := target.global_position + Vector3(0.0, 2.4, 0.0)
+	var head := target.global_position + Vector3(0.0, 2.55, 0.0)
 	var screen := cam.unproject_position(head)
+	if cam.is_position_behind(head):
+		_prompt_label.visible = false
+		if _prompt_chip:
+			_prompt_chip.visible = false
+		return
+	_prompt_label.reset_size()
 	var text_size := _prompt_label.get_minimum_size()
 	if text_size.x < 8.0:
 		text_size = Vector2(168.0, 28.0)
-	_prompt_label.position = screen + Vector2(-text_size.x * 0.5, -40.0)
+	_prompt_label.size = text_size
+	var top_left := screen + Vector2(-text_size.x * 0.5, -36.0)
+	_prompt_label.global_position = top_left
+	_prompt_label.position = top_left
+	_sync_prompt_chip()
 
 
 func _sync_prompt_chip() -> void:
@@ -916,11 +1005,12 @@ func _sync_prompt_chip() -> void:
 	_prompt_chip.visible = _prompt_label.visible
 	if not _prompt_chip.visible:
 		return
-	var text_size := _prompt_label.get_minimum_size()
+	var text_size := _prompt_label.size
 	if text_size.x < 8.0:
 		text_size = Vector2(168.0, 28.0)
-	_prompt_chip.position = _prompt_label.position + Vector2(-10.0, -4.0)
 	_prompt_chip.size = text_size + Vector2(20.0, 10.0)
+	_prompt_chip.global_position = _prompt_label.global_position + Vector2(-10.0, -4.0)
+	_prompt_chip.position = _prompt_label.position + Vector2(-10.0, -4.0)
 
 
 func _loc_text(key: String, fallback: String) -> String:

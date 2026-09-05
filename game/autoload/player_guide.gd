@@ -186,7 +186,7 @@ func subtitle_size() -> int:
 
 func help_lines() -> PackedStringArray:
 	var lines := PackedStringArray()
-	lines.append("WASD — %s" % _loc("tip.move.verb", "Mover"))
+	lines.append(_loc("hud.wasd", "WASD — Andar"))
 	lines.append(Glyphs.prompt("click_move", _loc("hud.move_click", "Clic al suelo")))
 	lines.append(Glyphs.prompt("interact", _loc("hud.interact_verb", "Hablar")))
 	lines.append(Glyphs.prompt("mesura", _loc("hud.mesura", "Mesura")))
