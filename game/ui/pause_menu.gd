@@ -1,6 +1,6 @@
 extends CanvasLayer
 # Autoload singleton. Do not add class_name.
-# Preload resources: class_name types are not in scope when autoloads parse.
+# Preload scripts: bare class_name globals miss until .godot/global_script_class_cache.cfg exists.
 ## Escape overlay: resume / journal / help / settings / main menu / quit.
 
 const Glyphs := preload("res://game/systems/input/input_glyphs.gd")

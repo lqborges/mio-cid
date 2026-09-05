@@ -8,9 +8,17 @@ Not Puy du Fou. Not the 1961 film. See [AGENTS.md](AGENTS.md) for engine pins an
 
 1. Install **Godot 4.7.2** (standard build, not .NET) from the [4.7.2-stable archive](https://godotengine.org/download/archive/4.7.2-stable/).
 2. Open the Godot Project Manager → **Import**.
-3. Select this repository’s `project.godot` (repo root).
+3. Select this repository’s `project.godot` (repo root). First open after a clone (or a stale `.godot`) must finish import so `global_script_class_cache.cfg` lists `class_name` scripts.
 4. Confirm **Project Settings → Physics → 3D → Physics Engine** is `Jolt Physics`.
 5. Default renderer is **GL Compatibility** so Intel HD 4000 boots. On Iris Xe or a discrete GPU you can pass `--rendering-method forward_plus`.
+
+Headless equivalent of that first import:
+
+```bash
+godot --headless --path . --import
+```
+
+Use the same command if Nuevo juego loads the courtyard but WASD / interact / pause do nothing and the Output dock names `ObjectiveCatalog`, `InputGlyphs`, or `CombatFeel`. Those `.gd` files are not missing; the cache is stale.
 
 Do not install the `godot-jolt` addon. Jolt is built into 4.7.2. The greybox arena is `content/chapters/_dev/arena.tscn` (high 3/4 isometric, not over-the-shoulder). Playability HUD, journal, and Help live in `PlayerGuide`; regional CSG kits and the style sheet live in [docs/STYLE_SHEET.md](docs/STYLE_SHEET.md) and [docs/PLAYABILITY.md](docs/PLAYABILITY.md).
 

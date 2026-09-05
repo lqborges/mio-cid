@@ -29,6 +29,14 @@ GL Compatibility is the shipped renderer (Intel HD 4000 / Envy 720p). On a discr
 3. Press Play. Main scene is `game/ui/main_menu.tscn`.
 4. **Nuevo juego** starts at Vivar. WASD walks; **E** talks. Menu language also labels the honor meters and plazo bar.
 
+If the Output dock reports parse errors for `ObjectiveCatalog`, `InputGlyphs`, or `CombatFeel` after a pull, the scripts are present — regenerate the gitignored class cache:
+
+```bash
+godot --headless --path . --import
+```
+
+That rewrites `.godot/global_script_class_cache.cfg`. Autoloads also preload those three scripts so an empty `.godot` is less likely to drop WASD / E / pause.
+
 ## What is playable (in order)
 
 | Beat | What you get |

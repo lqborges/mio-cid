@@ -77,6 +77,9 @@ class TestPlayerGuide(unittest.TestCase):
         self.assertIn("Press E to talk", locales)
         self.assertIn('name="Language"', _read("game/ui/main_menu.tscn"))
         self.assertIn("Nueva partida", _read("game/ui/main_menu.tscn"))
+        playable = _read("PLAYABLE.md")
+        self.assertIn("godot --headless --path . --import", playable)
+        self.assertIn("global_script_class_cache.cfg", playable)
 
     def test_controller_uses_glyphs_and_target(self) -> None:
         source = _read("game/actors/player/cid_controller.gd")
